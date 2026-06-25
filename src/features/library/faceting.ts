@@ -1,10 +1,11 @@
 import type { LibraryItem } from './use-library';
 
-export type FacetKey = 'status' | 'genre' | 'author' | 'publisher' | 'language' | 'decade';
+export type FacetKey = 'status' | 'shelf' | 'genre' | 'author' | 'publisher' | 'language' | 'decade';
 export type SortKey = 'added' | 'title' | 'author' | 'year' | 'rating';
 
 export const FACET_KEYS: FacetKey[] = [
   'status',
+  'shelf',
   'genre',
   'author',
   'publisher',
@@ -19,7 +20,7 @@ export interface Filters {
 
 export const EMPTY_FILTERS: Filters = {
   search: '',
-  facets: { status: [], genre: [], author: [], publisher: [], language: [], decade: [] },
+  facets: { status: [], shelf: [], genre: [], author: [], publisher: [], language: [], decade: [] },
 };
 
 export function activeFilterCount(filters: Filters): number {
@@ -41,6 +42,8 @@ export function facetValues(item: LibraryItem, key: FacetKey): string[] {
   switch (key) {
     case 'status':
       return [item.status];
+    case 'shelf':
+      return item.shelfNames;
     case 'genre':
       return item.book?.genres ?? [];
     case 'author':

@@ -20,12 +20,22 @@ export interface LibraryItem {
   rating: number | null;
   added_at: string;
   book: LibraryBook | null;
+  shelfNames: string[];
 }
 
 const SELECT =
-  'id, status, rating, added_at, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres)';
+  'id, status, rating, added_at, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name))';
 
-/** The current user's library: items newest-first, joined with book metadata. */
+interface RawRow {
+  id: string;
+  status: ReadingStatus;
+  rating: number | null;
+  added_at: string;
+  book: LibraryBook | null;
+  item_shelves: { shelves: { name: string | null } | null }[] | null;
+}
+
+/** The current user's library: items newest-first, joined with book metadata + shelves. */
 export function useLibrary(userId: string | undefined) {
   return useQuery({
     queryKey: ['library', userId],
@@ -36,7 +46,16 @@ export function useLibrary(userId: string | undefined) {
         .select(SELECT)
         .order('added_at', { ascending: false });
       if (error) throw error;
-      return (data ?? []) as unknown as LibraryItem[];
+      return ((data ?? []) as unknown as RawRow[]).map((row) => ({
+        id: row.id,
+        status: row.status,
+        rating: row.rating,
+        added_at: row.added_at,
+        book: row.book,
+        shelfNames: (row.item_shelves ?? [])
+          .map((s) => s.shelves?.name)
+          .filter((n): n is string => !!n),
+      }));
     },
   });
 }

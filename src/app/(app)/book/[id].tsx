@@ -8,6 +8,7 @@ import { BookCover } from '@/components/BookCover';
 import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
 import { useUpdateItem } from '@/features/library/use-update-item';
+import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
 
@@ -232,6 +233,9 @@ export default function BookDetailScreen() {
             />
           </YStack>
 
+          {/* shelves */}
+          <ShelvesSection itemId={id} userId={session?.user.id} shelfIds={item.shelfIds} />
+
           {/* description */}
           {book?.description ? (
             <YStack gap="$2">
@@ -325,6 +329,102 @@ function EditableText({
           keyboardType={numeric ? (Platform.OS === 'web' ? 'default' : 'decimal-pad') : 'default'}
         />
       )}
+    </YStack>
+  );
+}
+
+function ShelvesSection({
+  itemId,
+  userId,
+  shelfIds,
+}: {
+  itemId: string;
+  userId: string | undefined;
+  shelfIds: string[];
+}) {
+  const { data: shelves } = useShelves(userId);
+  const { createShelf, addToShelf, removeFromShelf } = useShelfActions(userId);
+  const [newName, setNewName] = useState('');
+  const set = new Set(shelfIds);
+
+  const toggle = (shelfId: string) => {
+    if (set.has(shelfId)) removeFromShelf.mutate({ itemId, shelfId });
+    else addToShelf.mutate({ itemId, shelfId });
+  };
+
+  const onCreate = async () => {
+    const name = newName.trim();
+    if (!name) return;
+    setNewName('');
+    try {
+      const shelf = await createShelf.mutateAsync(name);
+      addToShelf.mutate({ itemId, shelfId: shelf.id });
+    } catch {
+      // ignore (e.g. transient error)
+    }
+  };
+
+  return (
+    <YStack gap="$2">
+      <Label>Étagères</Label>
+      {shelves && shelves.length > 0 ? (
+        <XStack gap="$2" flexWrap="wrap">
+          {shelves.map((shelf) => {
+            const active = set.has(shelf.id);
+            return (
+              <Button
+                key={shelf.id}
+                onPress={() => toggle(shelf.id)}
+                height={34}
+                paddingHorizontal="$3"
+                borderRadius={999}
+                borderWidth={1}
+                borderColor={active ? '$accent' : '$borderColor'}
+                backgroundColor={active ? '$accent' : 'transparent'}
+                color={active ? palette.paper : '$colorSoft'}
+                fontFamily="$body"
+                fontSize={13}
+                fontWeight="500"
+              >
+                {shelf.name}
+              </Button>
+            );
+          })}
+        </XStack>
+      ) : null}
+      <XStack gap="$2">
+        <Input
+          flex={1}
+          value={newName}
+          onChangeText={setNewName}
+          onSubmitEditing={onCreate}
+          placeholder="Nouvelle étagère…"
+          placeholderTextColor="$concreteLight"
+          backgroundColor="$background"
+          borderColor="$borderColor"
+          borderWidth={1}
+          borderRadius={2}
+          height={42}
+          paddingHorizontal="$3"
+          fontFamily="$body"
+          fontSize={14}
+          color="$color"
+        />
+        <Button
+          onPress={onCreate}
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          color="$color"
+          borderRadius={2}
+          height={42}
+          paddingHorizontal="$4"
+          fontFamily="$body"
+          fontWeight="600"
+        >
+          Créer
+        </Button>
+      </XStack>
     </YStack>
   );
 }

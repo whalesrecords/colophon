@@ -10,6 +10,7 @@ import { palette } from '@/theme/tokens';
 
 const FACET_LABELS: Record<FacetKey, string> = {
   status: 'Statut',
+  shelf: 'Étagère',
   genre: 'Genre',
   author: 'Auteur',
   publisher: 'Éditeur',
