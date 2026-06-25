@@ -2,6 +2,7 @@
   "name": "colophon",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.34.3",
   "dependencies": {
     "@expo-google-fonts/schibsted-grotesk": "^0.4.2",
     "@expo-google-fonts/spectral": "^0.4.1",
