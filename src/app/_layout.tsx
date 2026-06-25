@@ -47,6 +47,8 @@ function RootNavigator() {
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
+      {/* Public read-only shared library/shelf — accessible without auth. */}
+      <Stack.Screen name="s/[token]" />
     </Stack>
   );
 }

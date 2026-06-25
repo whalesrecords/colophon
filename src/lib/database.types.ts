@@ -189,6 +189,41 @@ export type Database = {
           },
         ];
       };
+      shares: {
+        Row: {
+          created_at: string;
+          id: string;
+          scope: string;
+          shelf_id: string | null;
+          token: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          scope: string;
+          shelf_id?: string | null;
+          token?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          scope?: string;
+          shelf_id?: string | null;
+          token?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'shares_shelf_id_fkey';
+            columns: ['shelf_id'];
+            isOneToOne: false;
+            referencedRelation: 'shelves';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       shelves: {
         Row: {
           id: string;

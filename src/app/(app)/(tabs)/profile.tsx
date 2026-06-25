@@ -1,10 +1,12 @@
-import { ScrollView } from 'react-native';
+import { useState } from 'react';
+import { Platform, ScrollView, Share as RNShare } from 'react-native';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
+import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
-import { type ReadingStatus, statusColors } from '@/theme/tokens';
+import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
 
 const STATUS_LABELS: Record<ReadingStatus, string> = {
   to_read: 'À lire',
@@ -73,8 +75,10 @@ export default function ProfileScreen() {
           <Stats stats={stats} />
         )}
 
+        <ShareSection userId={session?.user.id} />
+
         <Button
-          marginTop="$8"
+          marginTop="$6"
           onPress={signOut}
           backgroundColor="$backgroundStrong"
           borderColor="$borderColor"
@@ -149,6 +153,89 @@ function Stats({ stats }: { stats: LibraryStats }) {
 
       <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
         Définissez un objectif de lecture annuel et suivez votre temps de lecture — bientôt.
+      </Text>
+    </YStack>
+  );
+}
+
+function ShareSection({ userId }: { userId: string | undefined }) {
+  const createShare = useCreateShare(userId);
+  const [url, setUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const onCreate = async () => {
+    try {
+      const share = await createShare.mutateAsync({ scope: 'library' });
+      setUrl(shareUrl(share.token));
+      setCopied(false);
+    } catch {
+      // ignore
+    }
+  };
+
+  const onShare = async () => {
+    if (!url) return;
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+      } catch {
+        // ignore
+      }
+    } else {
+      RNShare.share({ message: url }).catch(() => undefined);
+    }
+  };
+
+  return (
+    <YStack gap="$2" marginTop="$6">
+      <Label>Partage</Label>
+      {url ? (
+        <YStack gap="$2">
+          <Text
+            fontFamily="$body"
+            fontSize={13}
+            color="$accent"
+            numberOfLines={2}
+            backgroundColor="$backgroundStrong"
+            borderColor="$borderColor"
+            borderWidth={1}
+            borderRadius={2}
+            padding="$3"
+          >
+            {url}
+          </Text>
+          <Button
+            onPress={onShare}
+            backgroundColor="$accent"
+            color={palette.paper}
+            borderRadius={2}
+            height={46}
+            fontFamily="$body"
+            fontWeight="600"
+          >
+            {copied ? 'Lien copié ✓' : Platform.OS === 'web' ? 'Copier le lien' : 'Partager le lien'}
+          </Button>
+        </YStack>
+      ) : (
+        <Button
+          onPress={onCreate}
+          disabled={createShare.isPending}
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          color="$color"
+          borderRadius={2}
+          height={48}
+          fontFamily="$body"
+          fontWeight="600"
+        >
+          Créer un lien public de ma bibliothèque
+        </Button>
+      )}
+      <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+        Lecture seule. Toute personne disposant du lien voit vos livres (sans vos notes ni vos
+        achats).
       </Text>
     </YStack>
   );
