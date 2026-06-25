@@ -181,3 +181,71 @@ export function useCircleMessages(circleId: string | undefined) {
 
   return query;
 }
+
+export interface CircleEvent {
+  id: string;
+  circle_id: string;
+  created_by: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  starts_at: string;
+  created_at: string;
+}
+
+export function useCircleEvents(circleId: string | undefined) {
+  return useQuery({
+    queryKey: ['circle-events', circleId],
+    enabled: !!circleId,
+    queryFn: async (): Promise<CircleEvent[]> => {
+      const { data, error } = await supabase
+        .from('circle_events')
+        .select('*')
+        .eq('circle_id', circleId as string)
+        .order('starts_at', { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useEventActions(circleId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ['circle-events', circleId] });
+
+  const createEvent = useMutation({
+    mutationFn: async (input: {
+      title: string;
+      startsAt: string;
+      location?: string;
+      description?: string;
+    }): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      const title = input.title.trim();
+      if (!title) throw new Error('Donnez un titre au rendez-vous.');
+      const when = new Date(input.startsAt);
+      if (Number.isNaN(when.getTime())) throw new Error('Date ou heure invalide.');
+      const { error } = await supabase.from('circle_events').insert({
+        circle_id: circleId,
+        created_by: userId,
+        title,
+        starts_at: when.toISOString(),
+        location: input.location?.trim() || null,
+        description: input.description?.trim() || null,
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  const deleteEvent = useMutation({
+    mutationFn: async (eventId: string): Promise<void> => {
+      const { error } = await supabase.from('circle_events').delete().eq('id', eventId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  return { createEvent, deleteEvent };
+}

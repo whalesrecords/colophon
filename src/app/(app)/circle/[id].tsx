@@ -1,15 +1,25 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share as RNShare,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { useAuth } from '@/features/auth/auth-context';
 import {
+  type CircleEvent,
   type Message,
   useCircle,
+  useCircleEvents,
   useCircleMembers,
   useCircleMessages,
+  useEventActions,
   useLeaveCircle,
   useSendMessage,
 } from '@/features/circles/use-circles';
@@ -27,9 +37,31 @@ export default function CircleScreen() {
   const send = useSendMessage(id, userId);
   const leave = useLeaveCircle(userId);
   const [text, setText] = useState('');
+  const [section, setSection] = useState<'chat' | 'agenda'>('chat');
   const scrollRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
   const padH = Math.max(16, (width - 800) / 2);
+
+  const onInvite = async () => {
+    if (!circle) return;
+    const message = `Rejoins mon cercle de lecture « ${circle.name} » sur Colophon. Code d'invitation : ${circle.invite_code}`;
+    if (Platform.OS === 'web') {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(message);
+        } catch {
+          // ignore
+        }
+      }
+      if (typeof window !== 'undefined') {
+        window.location.href = `mailto:?subject=${encodeURIComponent(
+          `Rejoins « ${circle.name} » sur Colophon`,
+        )}&body=${encodeURIComponent(message)}`;
+      }
+    } else {
+      RNShare.share({ message }).catch(() => undefined);
+    }
+  };
 
   const memberCount = members?.length ?? 0;
   const nameByUser = new Map((members ?? []).map((m) => [m.user_id, m.display_name ?? 'Membre']));
@@ -84,6 +116,18 @@ export default function CircleScreen() {
           </Text>
         </YStack>
         <Button
+          onPress={onInvite}
+          chromeless
+          height={32}
+          paddingHorizontal="$2"
+          color="$accent"
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+        >
+          Inviter
+        </Button>
+        <Button
           onPress={onLeave}
           chromeless
           height={32}
@@ -95,6 +139,25 @@ export default function CircleScreen() {
           Quitter
         </Button>
       </XStack>
+
+      <XStack
+        paddingHorizontal="$3"
+        paddingVertical="$2"
+        gap="$2"
+        borderBottomColor="$borderColor"
+        borderBottomWidth={1}
+      >
+        <SegTab label="Discussion" active={section === 'chat'} onPress={() => setSection('chat')} />
+        <SegTab
+          label="Rendez-vous"
+          active={section === 'agenda'}
+          onPress={() => setSection('agenda')}
+        />
+      </XStack>
+
+      {section === 'agenda' ? (
+        <AgendaSection circleId={id} userId={userId} />
+      ) : (
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -174,7 +237,187 @@ export default function CircleScreen() {
           </Button>
         </XStack>
       </KeyboardAvoidingView>
+      )}
     </YStack>
+  );
+}
+
+function SegTab({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Button
+      onPress={onPress}
+      flex={1}
+      height={34}
+      borderRadius={2}
+      borderWidth={1}
+      borderColor={active ? '$accent' : '$borderColor'}
+      backgroundColor={active ? '$accent' : 'transparent'}
+      color={active ? palette.paper : '$colorMuted'}
+      fontFamily="$body"
+      fontSize={14}
+      fontWeight="600"
+    >
+      {label}
+    </Button>
+  );
+}
+
+function fmtEvent(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} à ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function AgendaSection({ circleId, userId }: { circleId: string; userId: string | undefined }) {
+  const { data: events } = useCircleEvents(circleId);
+  const { createEvent, deleteEvent } = useEventActions(circleId, userId);
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [location, setLocation] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const onCreate = async () => {
+    setError(null);
+    try {
+      await createEvent.mutateAsync({
+        title,
+        startsAt: `${date.trim()}T${time.trim() || '00:00'}`,
+        location,
+      });
+      setTitle('');
+      setDate('');
+      setTime('');
+      setLocation('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur');
+    }
+  };
+
+  const now = Date.now();
+  const upcoming = (events ?? []).filter((e) => new Date(e.starts_at).getTime() >= now);
+  const past = (events ?? []).filter((e) => new Date(e.starts_at).getTime() < now).reverse();
+
+  const field = {
+    backgroundColor: '$background' as const,
+    borderColor: '$borderColor' as const,
+    borderWidth: 1,
+    borderRadius: 2,
+    height: 42,
+    paddingHorizontal: '$3' as const,
+    fontFamily: '$body' as const,
+    fontSize: 14,
+    color: '$color' as const,
+    placeholderTextColor: '$concreteLight' as const,
+  };
+
+  return (
+    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 20 }}>
+      <YStack gap="$2" backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} borderRadius={2} padding="$3">
+        <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
+          Nouveau rendez-vous
+        </Text>
+        <Input {...field} value={title} onChangeText={setTitle} placeholder="Titre (ex. Réunion mensuelle)" />
+        <XStack gap="$2">
+          <Input {...field} flex={1} value={date} onChangeText={setDate} autoCapitalize="none" placeholder="Date AAAA-MM-JJ" />
+          <Input {...field} width={110} value={time} onChangeText={setTime} autoCapitalize="none" placeholder="HH:MM" />
+        </XStack>
+        <Input {...field} value={location} onChangeText={setLocation} placeholder="Lieu (optionnel)" />
+        <Button
+          onPress={onCreate}
+          disabled={createEvent.isPending}
+          backgroundColor="$accent"
+          color={palette.paper}
+          borderRadius={2}
+          height={44}
+          fontFamily="$body"
+          fontWeight="600"
+        >
+          Créer le rendez-vous
+        </Button>
+        {error ? (
+          <Text fontFamily="$body" fontSize={13} color="$signal">
+            {error}
+          </Text>
+        ) : null}
+      </YStack>
+
+      {upcoming.length > 0 ? (
+        <YStack gap="$2">
+          <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
+            À venir
+          </Text>
+          {upcoming.map((e) => (
+            <EventRow key={e.id} event={e} mine={e.created_by === userId} onDelete={() => deleteEvent.mutate(e.id)} />
+          ))}
+        </YStack>
+      ) : (
+        <Text fontFamily="$body" fontSize={14} color="$colorMuted">
+          Aucun rendez-vous à venir. Proposez-en un au cercle.
+        </Text>
+      )}
+
+      {past.length > 0 ? (
+        <YStack gap="$2" opacity={0.6}>
+          <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
+            Passés
+          </Text>
+          {past.map((e) => (
+            <EventRow key={e.id} event={e} mine={e.created_by === userId} onDelete={() => deleteEvent.mutate(e.id)} />
+          ))}
+        </YStack>
+      ) : null}
+    </ScrollView>
+  );
+}
+
+function EventRow({
+  event,
+  mine,
+  onDelete,
+}: {
+  event: CircleEvent;
+  mine: boolean;
+  onDelete: () => void;
+}) {
+  return (
+    <XStack
+      gap="$2"
+      alignItems="center"
+      padding="$3"
+      backgroundColor="$backgroundStrong"
+      borderColor="$borderColor"
+      borderWidth={1}
+      borderRadius={2}
+    >
+      <YStack flex={1} gap={2}>
+        <Text fontFamily="$heading" fontSize={16} color="$color" numberOfLines={1}>
+          {event.title}
+        </Text>
+        <Text fontFamily="$body" fontSize={13} color="$accent" fontWeight="600">
+          {fmtEvent(event.starts_at)}
+        </Text>
+        {event.location ? (
+          <Text fontFamily="$body" fontSize={13} color="$colorMuted" numberOfLines={1}>
+            {event.location}
+          </Text>
+        ) : null}
+      </YStack>
+      {mine ? (
+        <Button
+          onPress={onDelete}
+          chromeless
+          height={28}
+          paddingHorizontal="$2"
+          color="$colorMuted"
+          fontFamily="$body"
+          fontSize={16}
+        >
+          ✕
+        </Button>
+      ) : null}
+    </XStack>
   );
 }
 

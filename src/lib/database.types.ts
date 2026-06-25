@@ -101,6 +101,47 @@ export type Database = {
           },
         ]
       }
+      circle_events: {
+        Row: {
+          circle_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          location: string | null
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          circle_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          starts_at: string
+          title: string
+        }
+        Update: {
+          circle_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_events_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       circle_members: {
         Row: {
           circle_id: string
