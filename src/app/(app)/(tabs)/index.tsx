@@ -279,6 +279,25 @@ function DuplicateBadge({ copies }: { copies: number }) {
   );
 }
 
+function LentBadge() {
+  return (
+    <XStack
+      position="absolute"
+      top={6}
+      right={6}
+      backgroundColor={palette.ochre}
+      borderRadius={999}
+      paddingHorizontal={7}
+      height={19}
+      alignItems="center"
+    >
+      <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
+        Prêté
+      </Text>
+    </XStack>
+  );
+}
+
 function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number; copies: number }) {
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
@@ -296,6 +315,7 @@ function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number
           onPress={() => router.push(`/book/${item.id}`)}
         />
         <DuplicateBadge copies={copies} />
+        {item.lentTo ? <LentBadge /> : null}
       </YStack>
       <YStack gap={2}>
         <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
@@ -352,6 +372,19 @@ function LibraryRow({ item, copies }: { item: LibraryItem; copies: number }) {
           >
             <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
               {`× ${copies}`}
+            </Text>
+          </XStack>
+        ) : null}
+        {item.lentTo ? (
+          <XStack
+            backgroundColor={palette.ochre}
+            borderRadius={999}
+            paddingHorizontal={7}
+            height={19}
+            alignItems="center"
+          >
+            <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
+              Prêté
             </Text>
           </XStack>
         ) : null}

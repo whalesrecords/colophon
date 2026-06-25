@@ -44,6 +44,7 @@ export const palette = {
 
   // Signal (rare — statuses / alerts)
   terracotta: '#B65D3C',
+  ochre: '#B0853A', // lending / on-loan accent
   sage: '#7E8A6F', // trend up / positive
   scanBeam: '#6E86C8', // scanner beam glow
 } as const;

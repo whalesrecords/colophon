@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { LoanSection } from '@/components/book/LoanSection';
 import { ReadingSection } from '@/components/book/ReadingSection';
 import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
@@ -277,6 +278,9 @@ export default function BookDetailScreen() {
               onSave={(v) => update.mutate({ purchase_store: v || null })}
             />
           </YStack>
+
+          {/* loan */}
+          <LoanSection itemId={id} userId={session?.user.id} />
 
           {/* shelves */}
           <ShelvesSection itemId={id} userId={session?.user.id} shelfIds={item.shelfIds} />

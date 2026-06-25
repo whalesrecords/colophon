@@ -9,6 +9,7 @@ function item(id: string, isbn13: string | null, title = 'T'): LibraryItem {
     added_at: '2026-01-01',
     shelfNames: [],
     tagNames: [],
+    lentTo: null,
     book: isbn13
       ? {
           isbn13,

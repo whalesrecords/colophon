@@ -14,6 +14,7 @@ function makeItem(
     added_at: '2026-01-01',
     shelfNames: [],
     tagNames,
+    lentTo: null,
     book: {
       isbn13: id,
       title: null,

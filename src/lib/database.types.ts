@@ -270,6 +270,47 @@ export type Database = {
           },
         ]
       }
+      loans: {
+        Row: {
+          borrower: string
+          created_at: string
+          due_on: string | null
+          id: string
+          item_id: string
+          lent_on: string
+          notes: string | null
+          returned_on: string | null
+        }
+        Insert: {
+          borrower: string
+          created_at?: string
+          due_on?: string | null
+          id?: string
+          item_id: string
+          lent_on?: string
+          notes?: string | null
+          returned_on?: string | null
+        }
+        Update: {
+          borrower?: string
+          created_at?: string
+          due_on?: string | null
+          id?: string
+          item_id?: string
+          lent_on?: string
+          notes?: string | null
+          returned_on?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loans_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string

@@ -84,6 +84,7 @@ export default function ProfileScreen() {
         )}
 
         {items.length > 0 ? <ClassificationSection items={items} /> : null}
+        {items.length > 0 ? <LoansSection items={items} /> : null}
         {items.length > 0 ? <DuplicatesSection items={items} /> : null}
 
         <ShareSection userId={session?.user.id} />
@@ -285,6 +286,55 @@ function ClassificationSection({ items }: { items: LibraryItem[] }) {
           />
         </YStack>
       ))}
+    </YStack>
+  );
+}
+
+function LoansSection({ items }: { items: LibraryItem[] }) {
+  const router = useRouter();
+  const lent = useMemo(() => items.filter((i) => i.lentTo), [items]);
+  if (lent.length === 0) return null;
+  return (
+    <YStack gap="$3" marginTop="$7">
+      <Label>Prêtés</Label>
+      <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+        {`${lent.length} livre${lent.length > 1 ? 's' : ''} actuellement prêté${lent.length > 1 ? 's' : ''}`}
+      </Text>
+      <YStack gap="$2">
+        {lent.map((i) => (
+          <Pressable key={i.id} onPress={() => router.push(`/book/${i.id}`)}>
+            <XStack
+              alignItems="center"
+              gap="$2"
+              padding="$3"
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={2}
+            >
+              <YStack flex={1} gap={2}>
+                <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
+                  {i.book?.title ?? 'Sans titre'}
+                </Text>
+                <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                  {`Prêté à ${i.lentTo}`}
+                </Text>
+              </YStack>
+              <XStack
+                backgroundColor={palette.ochre}
+                borderRadius={999}
+                paddingHorizontal={8}
+                height={20}
+                alignItems="center"
+              >
+                <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                  Prêté
+                </Text>
+              </XStack>
+            </XStack>
+          </Pressable>
+        ))}
+      </YStack>
     </YStack>
   );
 }

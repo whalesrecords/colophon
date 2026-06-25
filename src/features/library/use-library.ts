@@ -22,10 +22,11 @@ export interface LibraryItem {
   book: LibraryBook | null;
   shelfNames: string[];
   tagNames: string[];
+  lentTo: string | null;
 }
 
 const SELECT =
-  'id, status, rating, added_at, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name))';
+  'id, status, rating, added_at, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
 
 interface RawRow {
   id: string;
@@ -35,6 +36,7 @@ interface RawRow {
   book: LibraryBook | null;
   item_shelves: { shelves: { name: string | null } | null }[] | null;
   item_tags: { tags: { name: string | null } | null }[] | null;
+  loans: { borrower: string; returned_on: string | null }[] | null;
 }
 
 /** The current user's library: items newest-first, joined with book metadata + shelves. */
@@ -60,6 +62,7 @@ export function useLibrary(userId: string | undefined) {
         tagNames: (row.item_tags ?? [])
           .map((t) => t.tags?.name)
           .filter((n): n is string => !!n),
+        lentTo: (row.loans ?? []).find((l) => !l.returned_on)?.borrower ?? null,
       }));
     },
   });
