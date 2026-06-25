@@ -5,6 +5,7 @@ function makeItem(
   id: string,
   status: LibraryItem['status'],
   book: Partial<NonNullable<LibraryItem['book']>>,
+  tagNames: string[] = [],
 ): LibraryItem {
   return {
     id,
@@ -12,6 +13,7 @@ function makeItem(
     rating: null,
     added_at: '2026-01-01',
     shelfNames: [],
+    tagNames,
     book: {
       isbn13: id,
       title: null,
@@ -27,14 +29,19 @@ function makeItem(
 }
 
 const items: LibraryItem[] = [
-  makeItem('a', 'read', {
-    title: "L'Étranger",
-    authors: ['Albert Camus'],
-    publisher: 'Gallimard',
-    language: 'fr',
-    published_date: '1942',
-    genres: ['Fiction', 'Roman'],
-  }),
+  makeItem(
+    'a',
+    'read',
+    {
+      title: "L'Étranger",
+      authors: ['Albert Camus'],
+      publisher: 'Gallimard',
+      language: 'fr',
+      published_date: '1942',
+      genres: ['Fiction', 'Roman'],
+    },
+    ['favoris', 'à offrir'],
+  ),
   makeItem('b', 'to_read', {
     title: 'Les Villes invisibles',
     authors: ['Italo Calvino'],
@@ -43,14 +50,19 @@ const items: LibraryItem[] = [
     published_date: '1972',
     genres: ['Fiction'],
   }),
-  makeItem('c', 'read', {
-    title: "L'Usage du monde",
-    authors: ['Nicolas Bouvier'],
-    publisher: 'Gallimard',
-    language: 'fr',
-    published_date: '1963',
-    genres: ['Essai'],
-  }),
+  makeItem(
+    'c',
+    'read',
+    {
+      title: "L'Usage du monde",
+      authors: ['Nicolas Bouvier'],
+      publisher: 'Gallimard',
+      language: 'fr',
+      published_date: '1963',
+      genres: ['Essai'],
+    },
+    ['favoris'],
+  ),
 ];
 
 function withFacet(key: keyof Filters['facets'], values: string[]): Filters {
@@ -60,6 +72,11 @@ function withFacet(key: keyof Filters['facets'], values: string[]): Filters {
 describe('applyFilters', () => {
   it('filters by a facet (OR within facet)', () => {
     expect(applyFilters(items, withFacet('genre', ['Fiction'])).map((i) => i.id)).toEqual(['a', 'b']);
+  });
+
+  it('filters by a custom tag', () => {
+    expect(applyFilters(items, withFacet('tag', ['favoris'])).map((i) => i.id)).toEqual(['a', 'c']);
+    expect(applyFilters(items, withFacet('tag', ['à offrir'])).map((i) => i.id)).toEqual(['a']);
   });
 
   it('combines facets with AND', () => {

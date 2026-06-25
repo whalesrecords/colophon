@@ -10,6 +10,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
 import { useUpdateItem } from '@/features/library/use-update-item';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
+import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
 
@@ -240,6 +241,9 @@ export default function BookDetailScreen() {
           {/* shelves */}
           <ShelvesSection itemId={id} userId={session?.user.id} shelfIds={item.shelfIds} />
 
+          {/* tags */}
+          <TagsSection itemId={id} userId={session?.user.id} tagIds={item.tagIds} />
+
           {/* description */}
           {book?.description ? (
             <YStack gap="$2">
@@ -399,6 +403,103 @@ function ShelvesSection({
           onChangeText={setNewName}
           onSubmitEditing={onCreate}
           placeholder="Nouvelle étagère…"
+          placeholderTextColor="$concreteLight"
+          backgroundColor="$background"
+          borderColor="$borderColor"
+          borderWidth={1}
+          borderRadius={2}
+          height={42}
+          paddingHorizontal="$3"
+          fontFamily="$body"
+          fontSize={14}
+          color="$color"
+        />
+        <Button
+          onPress={onCreate}
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          color="$color"
+          borderRadius={2}
+          height={42}
+          paddingHorizontal="$4"
+          fontFamily="$body"
+          fontWeight="600"
+        >
+          Créer
+        </Button>
+      </XStack>
+    </YStack>
+  );
+}
+
+function TagsSection({
+  itemId,
+  userId,
+  tagIds,
+}: {
+  itemId: string;
+  userId: string | undefined;
+  tagIds: string[];
+}) {
+  const { data: tags } = useTags(userId);
+  const { createTag, addTag, removeTag } = useTagActions(userId);
+  const [newName, setNewName] = useState('');
+  const set = new Set(tagIds);
+
+  const toggle = (tagId: string) => {
+    if (set.has(tagId)) removeTag.mutate({ itemId, tagId });
+    else addTag.mutate({ itemId, tagId });
+  };
+
+  const onCreate = async () => {
+    const name = newName.trim().replace(/^#+/, '').trim();
+    if (!name) return;
+    setNewName('');
+    try {
+      const tag = await createTag.mutateAsync(name);
+      addTag.mutate({ itemId, tagId: tag.id });
+    } catch {
+      // ignore (e.g. duplicate name)
+    }
+  };
+
+  return (
+    <YStack gap="$2">
+      <Label>Tags</Label>
+      {tags && tags.length > 0 ? (
+        <XStack gap="$2" flexWrap="wrap">
+          {tags.map((tag) => {
+            const active = set.has(tag.id);
+            return (
+              <Button
+                key={tag.id}
+                onPress={() => toggle(tag.id)}
+                height={34}
+                paddingHorizontal="$3"
+                borderRadius={999}
+                borderWidth={1}
+                borderColor={active ? '$accent' : '$borderColor'}
+                backgroundColor={active ? '$accent' : 'transparent'}
+                color={active ? palette.paper : '$colorSoft'}
+                fontFamily="$body"
+                fontSize={13}
+                fontWeight="500"
+              >
+                {`#${tag.name}`}
+              </Button>
+            );
+          })}
+        </XStack>
+      ) : null}
+      <XStack gap="$2">
+        <Input
+          flex={1}
+          value={newName}
+          onChangeText={setNewName}
+          onSubmitEditing={onCreate}
+          autoCapitalize="none"
+          placeholder="Nouveau tag…"
           placeholderTextColor="$concreteLight"
           backgroundColor="$background"
           borderColor="$borderColor"

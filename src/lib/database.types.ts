@@ -184,6 +184,36 @@ export type Database = {
           },
         ]
       }
+      item_tags: {
+        Row: {
+          item_id: string
+          tag_id: string
+        }
+        Insert: {
+          item_id: string
+          tag_id: string
+        }
+        Update: {
+          item_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_tags_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           added_at: string
@@ -369,15 +399,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      community_trends: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      community_trends: { Args: Record<PropertyKey, never>; Returns: Json }
       create_circle: {
         Args: { p_name: string }
         Returns: {

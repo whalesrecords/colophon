@@ -11,6 +11,7 @@ import { palette } from '@/theme/tokens';
 const FACET_LABELS: Record<FacetKey, string> = {
   status: 'Statut',
   shelf: 'Étagère',
+  tag: 'Tag',
   genre: 'Genre',
   author: 'Auteur',
   publisher: 'Éditeur',
@@ -34,6 +35,7 @@ const LANG_VALUE: Record<string, string> = {
 export function displayValue(key: FacetKey, value: string): string {
   if (key === 'status') return STATUS_VALUE[value] ?? value;
   if (key === 'language') return LANG_VALUE[value] ?? value;
+  if (key === 'tag') return `#${value}`;
   return value;
 }
 
