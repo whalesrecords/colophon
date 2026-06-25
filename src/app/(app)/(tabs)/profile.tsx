@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { Alert, Platform, ScrollView, Share as RNShare } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView, Share as RNShare } from 'react-native';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
+import { displayValue } from '@/components/library/FilterPanel';
 import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
+import { duplicateGroups } from '@/features/library/duplicates';
+import { computeFacets, EMPTY_FILTERS, type FacetKey } from '@/features/library/faceting';
+import { type LibraryItem, useLibrary } from '@/features/library/use-library';
 import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
@@ -57,6 +62,8 @@ function StatBig({ value, label }: { value: string; label: string }) {
 export default function ProfileScreen() {
   const { session, signOut } = useAuth();
   const { data: stats, isLoading } = useStats(session?.user.id);
+  const { data: libraryItems } = useLibrary(session?.user.id);
+  const items = libraryItems ?? [];
 
   return (
     <Screen>
@@ -75,6 +82,9 @@ export default function ProfileScreen() {
         ) : (
           <Stats stats={stats} />
         )}
+
+        {items.length > 0 ? <ClassificationSection items={items} /> : null}
+        {items.length > 0 ? <DuplicatesSection items={items} /> : null}
 
         <ShareSection userId={session?.user.id} />
 
@@ -220,6 +230,113 @@ function Stats({ stats }: { stats: LibraryStats }) {
       <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
         Définissez un objectif de lecture annuel et suivez votre temps de lecture — bientôt.
       </Text>
+    </YStack>
+  );
+}
+
+const CLASS_FACETS: { key: FacetKey; label: string }[] = [
+  { key: 'genre', label: 'Genres' },
+  { key: 'shelf', label: 'Étagères' },
+  { key: 'tag', label: 'Tags' },
+  { key: 'decade', label: 'Décennies' },
+  { key: 'language', label: 'Langues' },
+];
+
+function BarList({ entries }: { entries: { label: string; count: number }[] }) {
+  const max = Math.max(1, ...entries.map((e) => e.count));
+  return (
+    <YStack gap="$2">
+      {entries.map((e) => (
+        <YStack key={e.label} gap={4}>
+          <XStack justifyContent="space-between" alignItems="baseline">
+            <Text fontFamily="$body" fontSize={13} color="$color" numberOfLines={1} flex={1}>
+              {e.label}
+            </Text>
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginLeft="$2">
+              {e.count}
+            </Text>
+          </XStack>
+          <YStack height={3} borderRadius={999} backgroundColor="$track" overflow="hidden">
+            <YStack height={3} width={`${(e.count / max) * 100}%`} backgroundColor="$accent" />
+          </YStack>
+        </YStack>
+      ))}
+    </YStack>
+  );
+}
+
+/** Classify the library by facet (genres, shelves, tags, decades…) on the dashboard. */
+function ClassificationSection({ items }: { items: LibraryItem[] }) {
+  const facets = useMemo(() => computeFacets(items, EMPTY_FILTERS), [items]);
+  const shown = CLASS_FACETS.filter((f) => facets[f.key].length > 0);
+  if (shown.length === 0) return null;
+  return (
+    <YStack gap="$5" marginTop="$7">
+      <Label>Classement</Label>
+      {shown.map((f) => (
+        <YStack key={f.key} gap="$2">
+          <Text fontFamily="$heading" fontSize={16} fontStyle="italic" color="$colorSoft">
+            {f.label}
+          </Text>
+          <BarList
+            entries={facets[f.key]
+              .slice(0, 6)
+              .map((v) => ({ label: displayValue(f.key, v.value), count: v.count }))}
+          />
+        </YStack>
+      ))}
+    </YStack>
+  );
+}
+
+function DuplicatesSection({ items }: { items: LibraryItem[] }) {
+  const router = useRouter();
+  const groups = useMemo(() => duplicateGroups(items), [items]);
+  if (groups.length === 0) return null;
+  const total = groups.reduce((n, g) => n + (g.count - 1), 0);
+  return (
+    <YStack gap="$3" marginTop="$7">
+      <Label>Doublons</Label>
+      <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+        {`${groups.length} titre${groups.length > 1 ? 's' : ''} en plusieurs exemplaires · ${total} de trop`}
+      </Text>
+      <YStack gap="$2">
+        {groups.map((g) => (
+          <Pressable key={g.isbn13} onPress={() => router.push(`/book/${g.ids[0]}`)}>
+            <XStack
+              alignItems="center"
+              gap="$2"
+              padding="$3"
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={2}
+            >
+              <YStack flex={1} gap={2}>
+                <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
+                  {g.title}
+                </Text>
+                {g.author ? (
+                  <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                    {g.author}
+                  </Text>
+                ) : null}
+              </YStack>
+              <XStack
+                backgroundColor={palette.terracotta}
+                borderRadius={999}
+                paddingHorizontal={8}
+                height={20}
+                alignItems="center"
+              >
+                <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                  {`× ${g.count}`}
+                </Text>
+              </XStack>
+            </XStack>
+          </Pressable>
+        ))}
+      </YStack>
     </YStack>
   );
 }

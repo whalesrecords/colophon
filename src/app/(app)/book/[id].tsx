@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
@@ -8,6 +8,7 @@ import { BookCover } from '@/components/BookCover';
 import { ReadingSection } from '@/components/book/ReadingSection';
 import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
+import { useCopyCount, useDeleteItem } from '@/features/library/use-delete-item';
 import { useUpdateItem } from '@/features/library/use-update-item';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
@@ -44,6 +45,28 @@ export default function BookDetailScreen() {
   const { session } = useAuth();
   const { data: item, isLoading, error } = useBookDetail(id);
   const update = useUpdateItem(id, session?.user.id);
+  const deleteItem = useDeleteItem(session?.user.id);
+  const { data: copyCount } = useCopyCount(item?.book?.isbn13 ?? undefined);
+
+  const confirmDelete = () => {
+    const run = async () => {
+      try {
+        await deleteItem.mutateAsync(id);
+        router.back();
+      } catch {
+        // ignore
+      }
+    };
+    const message = 'Retirer ce livre de votre bibliothèque ? Vos notes et sessions de lecture associées seront supprimées.';
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm(message)) void run();
+    } else {
+      Alert.alert('Supprimer le livre', message, [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => void run() },
+      ]);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -122,6 +145,22 @@ export default function BookDetailScreen() {
               </Text>
             ) : null}
           </YStack>
+
+          {/* duplicate notice */}
+          {copyCount && copyCount > 1 ? (
+            <XStack
+              alignItems="center"
+              padding="$3"
+              borderRadius={2}
+              borderWidth={1}
+              borderColor={palette.terracotta}
+              backgroundColor="$backgroundStrong"
+            >
+              <Text fontFamily="$body" fontSize={13} color="$color">
+                {`Doublon — vous possédez ${copyCount} exemplaires de ce livre.`}
+              </Text>
+            </XStack>
+          ) : null}
 
           {/* status */}
           <YStack gap="$2">
@@ -253,6 +292,24 @@ export default function BookDetailScreen() {
               </Text>
             </YStack>
           ) : null}
+
+          {/* delete */}
+          <Button
+            onPress={confirmDelete}
+            disabled={deleteItem.isPending}
+            marginTop="$2"
+            backgroundColor="transparent"
+            borderColor="$signal"
+            borderWidth={1}
+            color="$signal"
+            borderRadius={2}
+            height={46}
+            fontFamily="$body"
+            fontWeight="600"
+            pressStyle={{ opacity: 0.85 }}
+          >
+            {deleteItem.isPending ? 'Suppression…' : 'Supprimer ce livre'}
+          </Button>
         </YStack>
       </ScrollView>
 

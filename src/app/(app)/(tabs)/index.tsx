@@ -17,6 +17,7 @@ import {
   type SortKey,
   sortItems,
 } from '@/features/library/faceting';
+import { copiesByIsbn } from '@/features/library/duplicates';
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette, statusColors } from '@/theme/tokens';
@@ -63,6 +64,9 @@ export default function LibraryScreen() {
   const [showFilters, setShowFilters] = useState(false);
 
   const items = useMemo(() => data ?? [], [data]);
+  const copies = useMemo(() => copiesByIsbn(items), [items]);
+  const copiesOf = (item: LibraryItem) =>
+    item.book?.isbn13 ? (copies.get(item.book.isbn13) ?? 1) : 1;
   const facets = useMemo(() => computeFacets(items, filters), [items, filters]);
   const filtered = useMemo(
     () => sortItems(applyFilters(items, filters), sort),
@@ -219,13 +223,13 @@ export default function LibraryScreen() {
           {view === 'grid' ? (
             <XStack flexWrap="wrap" gap={GAP}>
               {filtered.map((item) => (
-                <LibraryCard key={item.id} item={item} width={coverWidth} />
+                <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
               ))}
             </XStack>
           ) : (
             <YStack gap="$2">
               {filtered.map((item) => (
-                <LibraryRow key={item.id} item={item} />
+                <LibraryRow key={item.id} item={item} copies={copiesOf(item)} />
               ))}
             </YStack>
           )}
@@ -255,20 +259,43 @@ function ViewToggle({ label, active, onPress }: { label: string; active: boolean
   );
 }
 
-function LibraryCard({ item, width }: { item: LibraryItem; width: number }) {
+function DuplicateBadge({ copies }: { copies: number }) {
+  if (copies <= 1) return null;
+  return (
+    <XStack
+      position="absolute"
+      top={6}
+      left={6}
+      backgroundColor={palette.terracotta}
+      borderRadius={999}
+      paddingHorizontal={7}
+      height={19}
+      alignItems="center"
+    >
+      <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
+        {`× ${copies}`}
+      </Text>
+    </XStack>
+  );
+}
+
+function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number; copies: number }) {
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
   return (
     <YStack width={width} gap="$2">
-      <BookCover
-        title={item.book?.title ?? 'Sans titre'}
-        author={item.book?.authors?.[0]}
-        coverUrl={item.book?.cover_url}
-        bg={bg}
-        fg={fg}
-        width={width}
-        onPress={() => router.push(`/book/${item.id}`)}
-      />
+      <YStack position="relative">
+        <BookCover
+          title={item.book?.title ?? 'Sans titre'}
+          author={item.book?.authors?.[0]}
+          coverUrl={item.book?.cover_url}
+          bg={bg}
+          fg={fg}
+          width={width}
+          onPress={() => router.push(`/book/${item.id}`)}
+        />
+        <DuplicateBadge copies={copies} />
+      </YStack>
       <YStack gap={2}>
         <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
           {item.book?.title ?? 'Sans titre'}
@@ -283,7 +310,7 @@ function LibraryCard({ item, width }: { item: LibraryItem; width: number }) {
   );
 }
 
-function LibraryRow({ item }: { item: LibraryItem }) {
+function LibraryRow({ item, copies }: { item: LibraryItem; copies: number }) {
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
   return (
@@ -313,6 +340,19 @@ function LibraryRow({ item }: { item: LibraryItem }) {
             {item.book?.authors?.[0] ?? 'Auteur inconnu'}
           </Text>
         </YStack>
+        {copies > 1 ? (
+          <XStack
+            backgroundColor={palette.terracotta}
+            borderRadius={999}
+            paddingHorizontal={7}
+            height={19}
+            alignItems="center"
+          >
+            <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
+              {`× ${copies}`}
+            </Text>
+          </XStack>
+        ) : null}
         <YStack
           width={10}
           height={10}
