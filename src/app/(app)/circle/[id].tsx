@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
+import { CircleLibrarySection, CircleProposalsSection } from '@/components/circle/CircleSpaces';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type CircleEvent,
@@ -37,7 +38,7 @@ export default function CircleScreen() {
   const send = useSendMessage(id, userId);
   const leave = useLeaveCircle(userId);
   const [text, setText] = useState('');
-  const [section, setSection] = useState<'chat' | 'agenda'>('chat');
+  const [section, setSection] = useState<'chat' | 'library' | 'proposals' | 'agenda'>('chat');
   const scrollRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
   const padH = Math.max(16, (width - 800) / 2);
@@ -140,23 +141,40 @@ export default function CircleScreen() {
         </Button>
       </XStack>
 
-      <XStack
-        paddingHorizontal="$3"
-        paddingVertical="$2"
-        gap="$2"
-        borderBottomColor="$borderColor"
-        borderBottomWidth={1}
-      >
-        <SegTab label="Discussion" active={section === 'chat'} onPress={() => setSection('chat')} />
-        <SegTab
-          label="Rendez-vous"
-          active={section === 'agenda'}
-          onPress={() => setSection('agenda')}
-        />
+      <XStack borderBottomColor="$borderColor" borderBottomWidth={1}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <XStack paddingHorizontal="$3" paddingVertical="$2" gap="$2">
+            <SegTab label="Discussion" active={section === 'chat'} onPress={() => setSection('chat')} />
+            <SegTab
+              label="Bibliothèque"
+              active={section === 'library'}
+              onPress={() => setSection('library')}
+            />
+            <SegTab
+              label="Propositions"
+              active={section === 'proposals'}
+              onPress={() => setSection('proposals')}
+            />
+            <SegTab
+              label="Rendez-vous"
+              active={section === 'agenda'}
+              onPress={() => setSection('agenda')}
+            />
+          </XStack>
+        </ScrollView>
       </XStack>
 
       {section === 'agenda' ? (
         <AgendaSection circleId={id} userId={userId} />
+      ) : section === 'library' ? (
+        <CircleLibrarySection circleId={id} userId={userId} members={members} />
+      ) : section === 'proposals' ? (
+        <CircleProposalsSection
+          circleId={id}
+          userId={userId}
+          members={members}
+          isOwner={circle?.owner_id === userId}
+        />
       ) : (
 
       <KeyboardAvoidingView
@@ -246,8 +264,8 @@ function SegTab({ label, active, onPress }: { label: string; active: boolean; on
   return (
     <Button
       onPress={onPress}
-      flex={1}
       height={34}
+      paddingHorizontal="$4"
       borderRadius={2}
       borderWidth={1}
       borderColor={active ? '$accent' : '$borderColor'}

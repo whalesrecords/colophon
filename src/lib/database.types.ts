@@ -65,41 +65,65 @@ export type Database = {
         }
         Relationships: []
       }
+      circle_book_comments: {
+        Row: {
+          body: string
+          circle_id: string
+          created_at: string
+          id: string
+          isbn13: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          circle_id: string
+          created_at?: string
+          id?: string
+          isbn13: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          circle_id?: string
+          created_at?: string
+          id?: string
+          isbn13?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       circle_books: {
         Row: {
           added_at: string
-          added_by: string | null
           circle_id: string
+          finished_on: string | null
           isbn13: string
+          rating: number | null
+          reading_status: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
           added_at?: string
-          added_by?: string | null
           circle_id: string
+          finished_on?: string | null
           isbn13: string
+          rating?: number | null
+          reading_status?: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
           added_at?: string
-          added_by?: string | null
           circle_id?: string
+          finished_on?: string | null
           isbn13?: string
+          rating?: number | null
+          reading_status?: string
+          updated_at?: string
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "circle_books_circle_id_fkey"
-            columns: ["circle_id"]
-            isOneToOne: false
-            referencedRelation: "circles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "circle_books_isbn13_fkey"
-            columns: ["isbn13"]
-            isOneToOne: false
-            referencedRelation: "book_metadata"
-            referencedColumns: ["isbn13"]
-          },
-        ]
+        Relationships: []
       }
       circle_events: {
         Row: {
@@ -132,15 +156,7 @@ export type Database = {
           starts_at?: string
           title?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "circle_events_circle_id_fkey"
-            columns: ["circle_id"]
-            isOneToOne: false
-            referencedRelation: "circles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       circle_members: {
         Row: {
@@ -161,15 +177,66 @@ export type Database = {
           joined_at?: string
           user_id?: string
         }
+        Relationships: []
+      }
+      circle_proposal_votes: {
+        Row: {
+          circle_id: string
+          created_at: string
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          circle_id: string
+          created_at?: string
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          circle_id?: string
+          created_at?: string
+          proposal_id?: string
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "circle_members_circle_id_fkey"
-            columns: ["circle_id"]
+            foreignKeyName: "circle_proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
             isOneToOne: false
-            referencedRelation: "circles"
+            referencedRelation: "circle_proposals"
             referencedColumns: ["id"]
           },
         ]
+      }
+      circle_proposals: {
+        Row: {
+          circle_id: string
+          created_at: string
+          id: string
+          isbn13: string
+          note: string | null
+          proposed_by: string
+          status: string
+        }
+        Insert: {
+          circle_id: string
+          created_at?: string
+          id?: string
+          isbn13: string
+          note?: string | null
+          proposed_by: string
+          status?: string
+        }
+        Update: {
+          circle_id?: string
+          created_at?: string
+          id?: string
+          isbn13?: string
+          note?: string | null
+          proposed_by?: string
+          status?: string
+        }
+        Relationships: []
       }
       circles: {
         Row: {
@@ -525,6 +592,10 @@ export type Database = {
         Args: { c_id: string; u_id: string }
         Returns: boolean
       }
+      is_circle_owner: {
+        Args: { c_id: string; u_id: string }
+        Returns: boolean
+      }
       join_circle: {
         Args: { p_code: string }
         Returns: {
@@ -534,6 +605,10 @@ export type Database = {
           name: string
           owner_id: string
         }
+      }
+      toggle_proposal_vote: {
+        Args: { p_proposal_id: string }
+        Returns: boolean
       }
     }
     Enums: {
