@@ -10,6 +10,7 @@ export interface TrendEntry {
 export interface CommunityTrends {
   genres: TrendEntry[];
   authors: TrendEntry[];
+  tags: TrendEntry[];
   readers: number;
   books: number;
 }

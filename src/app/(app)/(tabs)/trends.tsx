@@ -103,7 +103,14 @@ export default function TrendsScreen() {
               </YStack>
             ) : null}
 
-            {data.genres.length === 0 && data.authors.length === 0 ? (
+            {data.tags.length > 0 ? (
+              <YStack gap="$3">
+                <Label>Tags les plus utilisés</Label>
+                <BarList entries={data.tags.map((t) => ({ label: `#${t.label}`, count: t.count }))} />
+              </YStack>
+            ) : null}
+
+            {data.genres.length === 0 && data.authors.length === 0 && data.tags.length === 0 ? (
               <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
                 Les tendances apparaîtront dès que la communauté aura ajouté des livres.
               </Text>
