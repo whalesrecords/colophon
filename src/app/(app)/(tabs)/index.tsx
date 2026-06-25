@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ScrollView, useWindowDimensions } from 'react-native';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
@@ -78,8 +78,10 @@ export default function LibraryScreen() {
 }
 
 function LibraryCard({ item, width }: { item: LibraryItem; width: number }) {
+  const router = useRouter();
   const isbn = item.book?.isbn13 ?? item.id;
   const { bg, fg } = composedPalette(isbn);
+  const open = () => router.push(`/book/${item.id}`);
   return (
     <YStack width={width} gap="$2">
       <BookCover
@@ -89,6 +91,7 @@ function LibraryCard({ item, width }: { item: LibraryItem; width: number }) {
         bg={bg}
         fg={fg}
         width={width}
+        onPress={open}
       />
       <YStack gap={2}>
         <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
