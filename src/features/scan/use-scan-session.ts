@@ -23,6 +23,7 @@ export function useScanSession(userId: string | undefined) {
   const lookup = useIsbnLookup();
   const addItem = useAddItem(userId);
   const [entries, setEntries] = useState<ScanEntry[]>([]);
+  const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const seen = useRef<Set<string>>(new Set());
 
   const update = useCallback((key: string, patch: Partial<ScanEntry>) => {
@@ -65,7 +66,21 @@ export function useScanSession(userId: string | undefined) {
     [entries, submit],
   );
 
+  /** Bulk import: submit each ISBN sequentially (gentle on the lookup API). */
+  const submitMany = useCallback(
+    async (isbns: string[]): Promise<void> => {
+      if (isbns.length === 0) return;
+      setBulk({ done: 0, total: isbns.length });
+      for (let i = 0; i < isbns.length; i++) {
+        await submit(isbns[i]);
+        setBulk({ done: i + 1, total: isbns.length });
+      }
+      setBulk(null);
+    },
+    [submit],
+  );
+
   const addedCount = entries.filter((e) => e.status === 'added').length;
 
-  return { entries, submit, retry, addedCount };
+  return { entries, submit, submitMany, retry, addedCount, bulk };
 }

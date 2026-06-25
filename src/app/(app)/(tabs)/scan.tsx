@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { Platform, ScrollView, useWindowDimensions } from 'react-native';
-import { Button, Input, Spinner, type TamaguiElement, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, Spinner, type TamaguiElement, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
@@ -9,10 +9,11 @@ import { SearchPanel } from '@/components/scan/SearchPanel';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import { type ScanEntry, useScanSession } from '@/features/scan/use-scan-session';
+import { parseIsbnList } from '@/lib/isbn-list';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette } from '@/theme/tokens';
 
-type Mode = 'scan' | 'search';
+type Mode = 'scan' | 'search' | 'import';
 
 function Label({ children }: { children: string }) {
   return (
@@ -60,9 +61,11 @@ function ModeTab({
 export default function ScanScreen() {
   const { session } = useAuth();
   const router = useRouter();
-  const { entries, submit, retry, addedCount } = useScanSession(session?.user.id);
+  const { entries, submit, submitMany, retry, addedCount, bulk } = useScanSession(session?.user.id);
   const [mode, setMode] = useState<Mode>('scan');
   const [value, setValue] = useState('');
+  const [listText, setListText] = useState('');
+  const isbnList = useMemo(() => parseIsbnList(listText), [listText]);
   const { width } = useWindowDimensions();
   const padH = Math.max(20, (width - 720) / 2);
   // Tamagui Input forwards its ref to the underlying TextInput at runtime.
@@ -97,13 +100,58 @@ export default function ScanScreen() {
               Ajouter
             </Text>
           </YStack>
-          <XStack gap="$2">
+          <XStack gap="$2" flexWrap="wrap">
             <ModeTab label="Scanner / ISBN" active={mode === 'scan'} onPress={() => setMode('scan')} />
             <ModeTab label="Rechercher" active={mode === 'search'} onPress={() => setMode('search')} />
+            <ModeTab label="Importer" active={mode === 'import'} onPress={() => setMode('import')} />
           </XStack>
         </YStack>
 
-        {mode === 'search' ? (
+        {mode === 'import' ? (
+          <YStack gap="$3">
+            <Label>Coller une liste d'ISBN</Label>
+            <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
+              Un ISBN par ligne (ou séparés par des virgules) — depuis un export Goodreads / Calibre,
+              ou en scannant vos tomes.
+              {isbnList.length > 0
+                ? ` ${isbnList.length} ISBN détecté${isbnList.length > 1 ? 's' : ''}.`
+                : ''}
+            </Text>
+            <TextArea
+              value={listText}
+              onChangeText={setListText}
+              placeholder={'9782070360024\n9782203001237\n…'}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              minHeight={150}
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={2}
+              padding="$3"
+              fontFamily="$body"
+              fontSize={15}
+              color="$color"
+              placeholderTextColor="$concreteLight"
+              focusStyle={{ borderColor: '$accent' }}
+            />
+            <Button
+              onPress={() => void submitMany(isbnList)}
+              disabled={!!bulk || isbnList.length === 0}
+              backgroundColor="$accent"
+              color={palette.paper}
+              borderRadius={2}
+              height={50}
+              fontFamily="$body"
+              fontWeight="600"
+              opacity={!!bulk || isbnList.length === 0 ? 0.6 : 1}
+            >
+              {bulk
+                ? `Import… ${bulk.done}/${bulk.total}`
+                : `Importer ${isbnList.length} livre${isbnList.length > 1 ? 's' : ''}`}
+            </Button>
+          </YStack>
+        ) : mode === 'search' ? (
           <SearchPanel onPick={(isbn) => void submit(isbn)} addedIsbns={addedIsbns} />
         ) : (
           <YStack gap="$4">
