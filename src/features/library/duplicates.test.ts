@@ -7,6 +7,7 @@ function item(id: string, isbn13: string | null, title = 'T'): LibraryItem {
     status: 'to_read',
     rating: null,
     added_at: '2026-01-01',
+    coverOverride: null,
     shelfNames: [],
     tagNames: [],
     lentTo: null,

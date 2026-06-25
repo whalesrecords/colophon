@@ -19,6 +19,7 @@ export interface LibraryItem {
   status: ReadingStatus;
   rating: number | null;
   added_at: string;
+  coverOverride: string | null;
   book: LibraryBook | null;
   shelfNames: string[];
   tagNames: string[];
@@ -26,13 +27,14 @@ export interface LibraryItem {
 }
 
 const SELECT =
-  'id, status, rating, added_at, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
+  'id, status, rating, added_at, cover_override, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
 
 interface RawRow {
   id: string;
   status: ReadingStatus;
   rating: number | null;
   added_at: string;
+  cover_override: string | null;
   book: LibraryBook | null;
   item_shelves: { shelves: { name: string | null } | null }[] | null;
   item_tags: { tags: { name: string | null } | null }[] | null;
@@ -55,6 +57,7 @@ export function useLibrary(userId: string | undefined) {
         status: row.status,
         rating: row.rating,
         added_at: row.added_at,
+        coverOverride: row.cover_override,
         book: row.book,
         shelfNames: (row.item_shelves ?? [])
           .map((s) => s.shelves?.name)

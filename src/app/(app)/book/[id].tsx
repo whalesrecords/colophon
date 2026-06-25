@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { CoverPicker } from '@/components/book/CoverPicker';
 import { LoanSection } from '@/components/book/LoanSection';
 import { ReadingSection } from '@/components/book/ReadingSection';
 import { useAuth } from '@/features/auth/auth-context';
@@ -115,7 +116,7 @@ export default function BookDetailScreen() {
           <BookCover
             title={book?.title ?? 'Sans titre'}
             author={book?.authors?.[0]}
-            coverUrl={book?.cover_url}
+            coverUrl={item.cover_override ?? book?.cover_url}
             isbn={book?.isbn13}
             bg={bg}
             fg={fg}
@@ -150,6 +151,15 @@ export default function BookDetailScreen() {
               </Text>
             ) : null}
           </YStack>
+
+          {/* cover override */}
+          <CoverPicker
+            itemId={id}
+            userId={session?.user.id}
+            title={book?.title ?? ''}
+            author={book?.authors?.[0]}
+            hasOverride={!!item.cover_override}
+          />
 
           {/* duplicate notice */}
           {copyCount && copyCount > 1 ? (

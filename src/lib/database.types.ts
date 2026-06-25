@@ -218,6 +218,7 @@ export type Database = {
         Row: {
           added_at: string
           condition: string | null
+          cover_override: string | null
           id: string
           isbn13: string
           location: string | null
@@ -233,6 +234,7 @@ export type Database = {
         Insert: {
           added_at?: string
           condition?: string | null
+          cover_override?: string | null
           id?: string
           isbn13: string
           location?: string | null
@@ -248,6 +250,7 @@ export type Database = {
         Update: {
           added_at?: string
           condition?: string | null
+          cover_override?: string | null
           id?: string
           isbn13?: string
           location?: string | null

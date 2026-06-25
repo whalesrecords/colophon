@@ -307,7 +307,7 @@ function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number
         <BookCover
           title={item.book?.title ?? 'Sans titre'}
           author={item.book?.authors?.[0]}
-          coverUrl={item.book?.cover_url}
+          coverUrl={item.coverOverride ?? item.book?.cover_url}
           isbn={item.book?.isbn13}
           bg={bg}
           fg={fg}
@@ -348,7 +348,7 @@ function LibraryRow({ item, copies }: { item: LibraryItem; copies: number }) {
         <BookCover
           title={item.book?.title ?? 'Sans titre'}
           author={item.book?.authors?.[0]}
-          coverUrl={item.book?.cover_url}
+          coverUrl={item.coverOverride ?? item.book?.cover_url}
           isbn={item.book?.isbn13}
           bg={bg}
           fg={fg}
