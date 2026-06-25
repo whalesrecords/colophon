@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Platform, ScrollView, Share as RNShare } from 'react-native';
+import { Alert, Platform, ScrollView, Share as RNShare } from 'react-native';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
+import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
 import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
@@ -92,8 +93,73 @@ export default function ProfileScreen() {
         >
           Se déconnecter
         </Button>
+
+        <DangerZone onSignedOut={signOut} />
+
+        <Text
+          fontFamily="$body"
+          fontSize={11}
+          color="$colorMuted"
+          textAlign="center"
+          marginTop="$8"
+        >
+          Colophon · votre bibliothèque, vos lectures
+        </Text>
       </ScrollView>
     </Screen>
+  );
+}
+
+function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
+  const deleteAccount = useDeleteAccount();
+
+  const confirmDelete = () => {
+    const proceed = async () => {
+      try {
+        await deleteAccount.mutateAsync();
+        onSignedOut();
+      } catch {
+        // error surfaced below
+      }
+    };
+    const message =
+      'Cette action est définitive : votre bibliothèque, vos fiches, étagères et cercles seront supprimés.';
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm(`${message}\n\nSupprimer le compte ?`)) {
+        void proceed();
+      }
+    } else {
+      Alert.alert('Supprimer le compte', message, [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => void proceed() },
+      ]);
+    }
+  };
+
+  return (
+    <YStack gap="$2" marginTop="$8">
+      <Label>Compte</Label>
+      <Button
+        onPress={confirmDelete}
+        disabled={deleteAccount.isPending}
+        backgroundColor="transparent"
+        borderColor="$signal"
+        borderWidth={1}
+        color="$signal"
+        borderRadius={2}
+        height={46}
+        fontFamily="$body"
+        fontWeight="600"
+        pressStyle={{ opacity: 0.85 }}
+      >
+        {deleteAccount.isPending ? 'Suppression…' : 'Supprimer mon compte'}
+      </Button>
+      {deleteAccount.isError ? (
+        <Text fontFamily="$body" fontSize={13} color="$signal">
+          {(deleteAccount.error as Error).message}
+        </Text>
+      ) : null}
+    </YStack>
   );
 }
 

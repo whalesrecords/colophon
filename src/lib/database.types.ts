@@ -374,6 +374,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      community_trends: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_circle: {
         Args: { p_name: string }
         Returns: {
