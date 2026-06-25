@@ -78,11 +78,34 @@ identifiers: English.
 
 ## Roadmap
 - **Phase 1 ✅** scaffold, auth, schema + RLS, `isbn-lookup` (deployed & tested).
-- **Phase 2** scan (expo-camera burst mode, web BarcodeDetector/zxing, USB
-  scanner wedge, manual ISBN), lookup wired, add item.
-- **Phase 3** library grid/list, filters, sort, book detail, shelves.
-- **Phase 4** reading sessions + progress.
-- **Phase 5** stats, settings, account deletion (App Store req.), privacy policy.
-- **Social (full scope, in roadmap)** Tendances + Discussions (reading circles,
-  realtime chat) — the 5-tab shell is already in place.
+- **Phase 2 ✅** scan (expo-camera burst, web zxing, manual ISBN), `book-search`
+  (fielded title/author/publisher/theme search), lookup wired, add item.
+- **Phase 3 ✅** library grid/list, faceted filters (funnel), sort, search, book
+  detail (status, rating, notes, exemplaire), shelves CRUD + assign + facet.
+- **Phase 4 ✅** reading sessions: start / page progress / finish, "Lus en {year}".
+- **Phase 5 ✅** stats dashboard, sharing (public library/shelf link), account
+  deletion (App Store req.), Tendances (community trends).
+- **Social ✅** reading circles + realtime discussions (create/join by code,
+  member list, live chat); sharing via `/s/[token]` public route.
+
+## Edge functions (all deployed)
+- `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
+- `book-search` (public) — fielded search, Open Library primary.
+- `shared-library` (public, service role) — returns a shared library/shelf by
+  token for the anonymous `/s/[token]` page.
+- `delete-account` (`verify_jwt`) — identifies caller from JWT, deletes the auth
+  user via service role; FK cascades wipe their data.
+
+## More non-obvious facts
+- **Circle RLS avoids recursion** via `is_circle_member(circle_id, uid)`, a
+  `SECURITY DEFINER` function (bypasses RLS, so membership policies don't
+  self-reference). `create_circle` / `join_circle` are `SECURITY DEFINER` RPCs so
+  a user can join by invite code without prior read access. All four + the
+  `community_trends` RPC are `EXECUTE`-revoked from `anon`/`public`, granted to
+  `authenticated` only. `authenticated` MUST keep `EXECUTE` on `is_circle_member`
+  (RLS policies evaluate it under that role).
+- **Share links** use `EXPO_PUBLIC_WEB_URL` as the base, falling back to
+  `window.location.origin` on web. Set it to the Vercel domain for native shares.
+- **Pending (dashboard toggles, not code):** enable Auth "leaked password
+  protection" (HaveIBeenPwned); set `GOOGLE_BOOKS_KEY` to raise lookup quota.
 - **Phase 6 (later)** offline-first via expo-sqlite + PowerSync.
