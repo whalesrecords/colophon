@@ -1,8 +1,9 @@
 /**
  * Pure parsers that map each lookup source onto the common ParsedBook schema.
  * No network, no Deno/RN APIs — so they run in jest and inside the Deno edge
- * function unchanged. XML is parsed with tolerant regexes (the BnF Dublin Core
- * payload is flat), avoiding any XML-library dependency.
+ * function unchanged. XML is parsed with tolerant regexes; those regexes avoid
+ * backslash escapes (using [0-9], [^], [(], [/], lookaheads) so the module can
+ * be embedded verbatim in an edge-function deploy without escaping headaches.
  */
 
 import { EMPTY_PARSED, type ParsedBook } from './book';
@@ -15,42 +16,43 @@ export function normalizeLanguage(value: string | null | undefined): string | nu
   const v = value.trim().toLowerCase();
   if (v.length === 2) return v;
   const map: Record<string, string> = {
-    fre: 'fr',
-    fra: 'fr',
-    eng: 'en',
-    ger: 'de',
-    deu: 'de',
-    spa: 'es',
-    ita: 'it',
-    por: 'pt',
-    dut: 'nl',
-    nld: 'nl',
-    jpn: 'ja',
-    chi: 'zh',
-    zho: 'zh',
-    rus: 'ru',
-    ara: 'ar',
-    lat: 'la',
-    gre: 'el',
-    ell: 'el',
-    heb: 'he',
-    kor: 'ko',
-    pol: 'pl',
-    swe: 'sv',
-    dan: 'da',
-    nor: 'no',
-    fin: 'fi',
-    tur: 'tr',
-    ces: 'cs',
-    cze: 'cs',
+    fre: 'fr', fra: 'fr', eng: 'en', ger: 'de', deu: 'de', spa: 'es', ita: 'it',
+    por: 'pt', dut: 'nl', nld: 'nl', jpn: 'ja', chi: 'zh', zho: 'zh', rus: 'ru',
+    ara: 'ar', lat: 'la', gre: 'el', ell: 'el', heb: 'he', kor: 'ko', pol: 'pl',
+    swe: 'sv', dan: 'da', nor: 'no', fin: 'fi', tur: 'tr', ces: 'cs', cze: 'cs',
   };
   return map[v] ?? null;
 }
 
 function firstInt(value: string | null | undefined): number | null {
   if (!value) return null;
-  const m = value.match(/\d+/);
+  const m = value.match(/[0-9]+/);
   return m ? parseInt(m[0], 10) : null;
+}
+
+/** Normalize a list of genre/subject values (strings or {name}) into a clean set. */
+function cleanGenres(values: unknown): string[] | null {
+  if (!Array.isArray(values)) return null;
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const value of values) {
+    const raw =
+      typeof value === 'string'
+        ? value
+        : value && typeof value === 'object' && 'name' in value
+          ? String((value as { name: unknown }).name ?? '')
+          : '';
+    for (const part of raw.split('/')) {
+      const genre = part.trim();
+      if (!genre || genre.length > 40) continue;
+      const key = genre.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(genre);
+      if (out.length >= 8) return out;
+    }
+  }
+  return out.length ? out : null;
 }
 
 // --- Google Books ------------------------------------------------------------
@@ -78,6 +80,7 @@ export function parseGoogleBooks(json: unknown): ParsedBook | null {
     language: normalizeLanguage(info.language),
     coverUrl: cleanGoogleCover(info.imageLinks),
     description: info.description ?? null,
+    genres: cleanGenres(info.categories),
   };
 }
 
@@ -106,6 +109,7 @@ export function parseOpenLibrary(json: unknown, isbn13: string): ParsedBook | nu
     language: null, // jscmd=data does not expose a reliable language code
     coverUrl: cover,
     description: typeof entry.notes === 'string' ? entry.notes : null,
+    genres: cleanGenres(entry.subjects),
   };
 }
 
@@ -117,13 +121,16 @@ function decodeXmlEntities(s: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#([0-9]+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
     .replace(/&amp;/g, '&');
 }
 
 /** Extract all values of a Dublin Core element, tolerant of any namespace prefix. */
 function extractDc(xml: string, field: string): string[] {
-  const re = new RegExp(`<(?:\\w+:)?${field}\\b[^>]*>([\\s\\S]*?)</(?:\\w+:)?${field}>`, 'gi');
+  const re = new RegExp(
+    `<(?:[A-Za-z0-9]+:)?${field}(?=[ />])[^>]*>([^]*?)</(?:[A-Za-z0-9]+:)?${field}>`,
+    'gi',
+  );
   const out: string[] = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(xml)) !== null) {
@@ -134,9 +141,9 @@ function extractDc(xml: string, field: string): string[] {
 
 /** "Camus, Albert (1913-1960). Auteur du texte" -> "Albert Camus". */
 export function cleanBnfCreator(raw: string): string {
-  let s = raw.replace(/\([^)]*\)/g, ''); // drop (dates)
-  s = s.split(/\.\s/)[0].trim(); // drop trailing ". Role"
-  s = s.replace(/\s+/g, ' ').trim();
+  let s = raw.replace(/[(][^)]*[)]/g, ''); // drop (dates)
+  s = s.split(/[.][ ]/)[0].trim(); // drop trailing ". Role"
+  s = s.replace(/[ ]+/g, ' ').trim();
   const comma = s.indexOf(',');
   if (comma > -1) {
     const last = s.slice(0, comma).trim();
@@ -158,7 +165,9 @@ function cleanBnfTitle(raw: string): { title: string; subtitle: string | null } 
 
 export function parseBnfDublinCore(fullXml: string): ParsedBook | null {
   // A single ISBN can match several editions; scope to the first DC record.
-  const firstRecord = fullXml.match(/<(?:\w+:)?dc\b[^>]*>[\s\S]*?<\/(?:\w+:)?dc>/i);
+  const firstRecord = fullXml.match(
+    /<(?:[A-Za-z0-9]+:)?dc(?=[ >])[^]*?<[/](?:[A-Za-z0-9]+:)?dc>/i,
+  );
   const xml = firstRecord ? firstRecord[0] : fullXml;
 
   const titles = extractDc(xml, 'title');
@@ -166,11 +175,11 @@ export function parseBnfDublinCore(fullXml: string): ParsedBook | null {
 
   const { title, subtitle } = cleanBnfTitle(titles[0]);
   const creators = extractDc(xml, 'creator').map(cleanBnfCreator).filter(Boolean);
-  const publisher = (extractDc(xml, 'publisher')[0] ?? '').replace(/\s*\([^)]*\)\s*$/, '') || null;
+  const publisher = (extractDc(xml, 'publisher')[0] ?? '').replace(/[ ]*[(][^)]*[)][ ]*$/, '') || null;
   const date = extractDc(xml, 'date')[0] ?? null;
   const language = normalizeLanguage(extractDc(xml, 'language')[0]);
   const format = extractDc(xml, 'format')[0] ?? '';
-  const pageMatch = format.match(/(\d+)\s*p\b/);
+  const pageMatch = format.match(/([0-9]+)[ ]*p(?![A-Za-z])/);
   const description = extractDc(xml, 'description')[0] ?? null;
 
   return {
@@ -184,5 +193,6 @@ export function parseBnfDublinCore(fullXml: string): ParsedBook | null {
     language,
     coverUrl: null, // BnF Dublin Core carries no cover image
     description,
+    genres: cleanGenres(extractDc(xml, 'subject')),
   };
 }

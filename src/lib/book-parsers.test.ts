@@ -51,6 +51,7 @@ describe('parseGoogleBooks', () => {
       language: 'fr',
       coverUrl: 'https://books.google.com/books/content?id=A&img=1&zoom=1',
       description: 'Aujourd’hui, maman est morte.',
+      genres: ['Fiction'],
     });
   });
 
@@ -87,6 +88,7 @@ describe('parseOpenLibrary', () => {
       language: null,
       coverUrl: `https://covers.openlibrary.org/b/isbn/${isbn13}-L.jpg`,
       description: null,
+      genres: ['Fiction'],
     });
   });
 
@@ -149,6 +151,7 @@ describe('parseBnfDublinCore', () => {
       language: 'fr',
       coverUrl: null,
       description: 'Collection : Folio ; 2',
+      genres: null,
     });
   });
 

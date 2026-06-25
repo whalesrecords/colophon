@@ -14,6 +14,7 @@ export type Database = {
           cover_url: string | null;
           description: string | null;
           fetched_at: string;
+          genres: string[] | null;
           isbn13: string;
           language: string | null;
           page_count: number | null;
@@ -29,6 +30,7 @@ export type Database = {
           cover_url?: string | null;
           description?: string | null;
           fetched_at?: string;
+          genres?: string[] | null;
           isbn13: string;
           language?: string | null;
           page_count?: number | null;
@@ -44,6 +46,7 @@ export type Database = {
           cover_url?: string | null;
           description?: string | null;
           fetched_at?: string;
+          genres?: string[] | null;
           isbn13?: string;
           language?: string | null;
           page_count?: number | null;

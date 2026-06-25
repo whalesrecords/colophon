@@ -114,6 +114,7 @@ function toRow(book: NormalizedBook) {
     language: book.language,
     cover_url: book.coverUrl,
     description: book.description,
+    genres: book.genres,
     source: book.source,
     raw: book.raw as Record<string, unknown>,
     fetched_at: new Date().toISOString(),

@@ -17,6 +17,7 @@ export interface ParsedBook {
   language: string | null;
   coverUrl: string | null;
   description: string | null;
+  genres: string[] | null;
 }
 
 /** A fully-resolved book, ready to upsert into book_metadata. */
@@ -36,6 +37,7 @@ export const EMPTY_PARSED: ParsedBook = {
   language: null,
   coverUrl: null,
   description: null,
+  genres: null,
 };
 
 /** True when a parse produced at least a title — i.e. the source had the book. */
