@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { normalizeCover } from '@/lib/cover';
 import { COVER_ASPECT_RATIO, palette, shadows } from '@/theme/tokens';
 
 export type CoverLayout = 'champ' | 'filets' | 'bande';
@@ -11,6 +12,8 @@ export interface BookCoverProps {
   author?: string | null;
   tag?: string | null;
   coverUrl?: string | null;
+  /** ISBN-13, used to recover a cover from Open Library when none is supplied. */
+  isbn?: string | null;
   /** Composed-cover background / foreground (used when no photo is available). */
   bg?: string;
   fg?: string;
@@ -31,6 +34,7 @@ export function BookCover({
   author,
   tag,
   coverUrl,
+  isbn,
   bg = palette.surfaceWarmAlt,
   fg = palette.ink,
   layout = 'champ',
@@ -40,7 +44,8 @@ export function BookCover({
 }: BookCoverProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const height = width / COVER_ASPECT_RATIO;
-  const showPhoto = !!coverUrl && !imageFailed;
+  const effectiveCover = normalizeCover(coverUrl, isbn);
+  const showPhoto = !!effectiveCover && !imageFailed;
   const titleSize = Math.max(11, Math.min(24, width * 0.125));
 
   const Wrapper = onPress ? Pressable : View;
@@ -51,7 +56,7 @@ export function BookCover({
       <View style={[styles.cover, shadows.cover, { width, height, backgroundColor: bg }]}>
         {showPhoto ? (
           <Image
-            source={{ uri: coverUrl! }}
+            source={{ uri: effectiveCover! }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
             transition={180}

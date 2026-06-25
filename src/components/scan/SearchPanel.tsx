@@ -160,9 +160,10 @@ function ResultRow({
         title={result.title ?? 'Sans titre'}
         author={result.authors?.[0]}
         coverUrl={result.coverUrl}
+        isbn={result.isbn13}
         bg={bg}
         fg={fg}
-        width={40}
+        width={56}
       />
       <YStack flex={1} gap={2}>
         <Text fontFamily="$heading" fontSize={14} color="$color" numberOfLines={1}>

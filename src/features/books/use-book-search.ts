@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import type { BookSearchResult } from '@/lib/book-search-parsers';
+import { rankSearchResults } from '@/lib/rank-search';
 import { supabase } from '@/lib/supabase';
 
 export type { BookSearchResult };
@@ -19,7 +20,7 @@ export function useBookSearch() {
     mutationFn: async (params: BookSearchParams): Promise<BookSearchResult[]> => {
       const { data, error } = await supabase.functions.invoke('book-search', { body: params });
       if (error) throw new Error('Recherche impossible. Vérifiez votre connexion.');
-      return (data as { results?: BookSearchResult[] } | null)?.results ?? [];
+      return rankSearchResults((data as { results?: BookSearchResult[] } | null)?.results ?? []);
     },
   });
 }

@@ -109,12 +109,22 @@ Deno.serve(async (req: Request) => {
   }
   if (!hasQuery(params)) return json({ error: 'empty_query' }, 400);
 
-  // Open Library search is keyless and reliable; Google Books is used only when
-  // a key is configured (keyless Google Books frequently rate-limits).
+  // Query Google Books (when keyed — richer metadata + covers) AND Open Library
+  // in parallel, then merge: more editions means a better chance of finding the
+  // right version/cover. Google first, deduped by ISBN-13.
   const key = Deno.env.get('GOOGLE_BOOKS_KEY');
-  let results: BookSearchResult[] = [];
-  if (key) results = await searchGoogleBooks(params, key);
-  if (results.length === 0) results = await searchOpenLibrary(params);
+  const [google, openlib] = await Promise.all([
+    key ? searchGoogleBooks(params, key) : Promise.resolve([] as BookSearchResult[]),
+    searchOpenLibrary(params),
+  ]);
 
-  return json({ results }, 200);
+  const seen = new Set<string>();
+  const results: BookSearchResult[] = [];
+  for (const r of [...google, ...openlib]) {
+    if (seen.has(r.isbn13)) continue;
+    seen.add(r.isbn13);
+    results.push(r);
+  }
+
+  return json({ results: results.slice(0, 30) }, 200);
 });

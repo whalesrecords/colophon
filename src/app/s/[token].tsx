@@ -69,6 +69,7 @@ export default function SharedScreen() {
                     title={item.book?.title ?? 'Sans titre'}
                     author={item.book?.authors?.[0]}
                     coverUrl={item.book?.cover_url}
+                    isbn={item.book?.isbn13}
                     bg={bg}
                     fg={fg}
                     width={coverWidth}

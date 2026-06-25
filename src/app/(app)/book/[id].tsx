@@ -115,6 +115,7 @@ export default function BookDetailScreen() {
             title={book?.title ?? 'Sans titre'}
             author={book?.authors?.[0]}
             coverUrl={book?.cover_url}
+            isbn={book?.isbn13}
             bg={bg}
             fg={fg}
             width={150}
