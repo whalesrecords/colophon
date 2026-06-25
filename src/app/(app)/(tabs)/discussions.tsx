@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
@@ -46,6 +46,8 @@ export default function DiscussionsScreen() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { width } = useWindowDimensions();
+  const padH = Math.max(20, (width - 720) / 2);
 
   const onCreate = async () => {
     const n = name.trim();
@@ -75,7 +77,7 @@ export default function DiscussionsScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
         <YStack gap="$1" marginBottom="$5">
           <Label>Échanges</Label>
           <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">

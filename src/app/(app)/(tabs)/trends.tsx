@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native';
+import { ScrollView, useWindowDimensions } from 'react-native';
 import { Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
@@ -44,10 +44,12 @@ function BarList({ entries }: { entries: TrendEntry[] }) {
 
 export default function TrendsScreen() {
   const { data, isLoading } = useTrends();
+  const { width } = useWindowDimensions();
+  const padH = Math.max(20, (width - 900) / 2);
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
         <YStack gap="$1" marginBottom="$5">
           <Label>Tendances</Label>
           <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">

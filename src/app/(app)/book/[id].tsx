@@ -131,6 +131,9 @@ export default function BookDetailScreen() {
           marginTop={-20}
           padding="$5"
           gap="$5"
+          width="100%"
+          maxWidth={800}
+          alignSelf="center"
         >
           <YStack gap="$1">
             <Text fontFamily="$heading" fontSize={25} fontWeight="500" color="$color">

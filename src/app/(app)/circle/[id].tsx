@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
@@ -28,6 +28,8 @@ export default function CircleScreen() {
   const leave = useLeaveCircle(userId);
   const [text, setText] = useState('');
   const scrollRef = useRef<ScrollView>(null);
+  const { width } = useWindowDimensions();
+  const padH = Math.max(16, (width - 800) / 2);
 
   const memberCount = members?.length ?? 0;
   const nameByUser = new Map((members ?? []).map((m) => [m.user_id, m.display_name ?? 'Membre']));
@@ -96,7 +98,7 @@ export default function CircleScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top + 56}
       >
         {isLoading ? (
@@ -104,7 +106,10 @@ export default function CircleScreen() {
             <Spinner color="$accent" />
           </YStack>
         ) : (
-          <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 20 }}>
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 16, gap: 10, paddingBottom: 20 }}
+          >
             {(messages ?? []).length === 0 ? (
               <Text
                 fontFamily="$body"
@@ -130,7 +135,8 @@ export default function CircleScreen() {
 
         <XStack
           gap="$2"
-          padding="$3"
+          paddingHorizontal={padH}
+          paddingTop="$3"
           paddingBottom={insets.bottom + 8}
           borderTopColor="$borderColor"
           borderTopWidth={1}

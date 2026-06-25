@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Platform, ScrollView } from 'react-native';
+import { Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { Button, Input, Spinner, type TamaguiElement, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
@@ -63,6 +63,8 @@ export default function ScanScreen() {
   const { entries, submit, retry, addedCount } = useScanSession(session?.user.id);
   const [mode, setMode] = useState<Mode>('scan');
   const [value, setValue] = useState('');
+  const { width } = useWindowDimensions();
+  const padH = Math.max(20, (width - 720) / 2);
   // Tamagui Input forwards its ref to the underlying TextInput at runtime.
   const inputRef = useRef<TamaguiElement>(null);
 
@@ -85,7 +87,7 @@ export default function ScanScreen() {
   return (
     <Screen>
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
         <YStack gap="$3" marginBottom="$4">

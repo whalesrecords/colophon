@@ -1,6 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, Share as RNShare } from 'react-native';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share as RNShare,
+  useWindowDimensions,
+} from 'react-native';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { displayValue } from '@/components/library/FilterPanel';
@@ -64,10 +71,12 @@ export default function ProfileScreen() {
   const { data: stats, isLoading } = useStats(session?.user.id);
   const { data: libraryItems } = useLibrary(session?.user.id);
   const items = libraryItems ?? [];
+  const { width } = useWindowDimensions();
+  const padH = Math.max(20, (width - 900) / 2);
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
         <YStack gap="$1" marginBottom="$5">
           <Label>Profil</Label>
           <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color" numberOfLines={1}>

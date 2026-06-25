@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Platform, View, type ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icons';
 import { palette } from '@/theme/tokens';
@@ -30,6 +31,7 @@ function ScanTabIcon() {
 }
 
 export default function AppTabsLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -39,9 +41,10 @@ export default function AppTabsLayout() {
         tabBarStyle: {
           backgroundColor: 'rgba(244,241,234,0.96)',
           borderTopColor: palette.hairline,
-          height: Platform.select({ ios: 86, default: 66 }),
+          // Android: add the gesture-nav / nav-bar inset so labels clear the system bar.
+          height: Platform.select({ ios: 86, default: 60 + insets.bottom }),
           paddingTop: 8,
-          paddingBottom: Platform.select({ ios: 28, default: 8 }),
+          paddingBottom: Platform.select({ ios: 28, default: 8 + insets.bottom }),
         },
         tabBarLabelStyle: { fontFamily: 'SchibstedGrotesk_500Medium', fontSize: 11 },
       }}

@@ -1,7 +1,7 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, Linking, StyleSheet, View } from 'react-native';
 import { Button, Text, YStack } from 'tamagui';
 
 import { palette } from '@/theme/tokens';
@@ -14,6 +14,20 @@ interface BarcodeScannerProps {
 export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const last = useRef<{ value: string; at: number }>({ value: '', at: 0 });
+
+  const askPermission = async () => {
+    const result = await requestPermission();
+    if (!result.granted && !result.canAskAgain) {
+      Alert.alert(
+        'Caméra refusée',
+        'Autorisez la caméra dans les réglages pour scanner les codes-barres.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Ouvrir les réglages', onPress: () => Linking.openSettings() },
+        ],
+      );
+    }
+  };
 
   if (!permission) return null;
 
@@ -31,7 +45,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
           Autorisez la caméra pour scanner les codes-barres des livres.
         </Text>
         <Button
-          onPress={requestPermission}
+          onPress={askPermission}
           backgroundColor="$accent"
           color={palette.paper}
           borderRadius={2}
@@ -39,7 +53,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
           fontFamily="$body"
           fontWeight="600"
         >
-          Autoriser la caméra
+          {permission.canAskAgain ? 'Autoriser la caméra' : 'Ouvrir les réglages'}
         </Button>
       </YStack>
     );

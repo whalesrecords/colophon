@@ -45,3 +45,5 @@ example
 
 # heavy third-party design source kits (kept locally, not versioned)
 design/ui envato/
+.vercel
+.env*
