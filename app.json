@@ -44,17 +44,13 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
       "router": {},
       "eas": {
         "projectId": "a1ad6d36-5f54-4d37-8e49-08dee76d0efc"
       }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/a1ad6d36-5f54-4d37-8e49-08dee76d0efc"
     }
   }
 }

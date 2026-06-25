@@ -7,7 +7,6 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development",
       "ios": {
         "simulator": false
       },
@@ -18,7 +17,6 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview",
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://bwmhbnozduuoyavqkaha.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_iyTMZg2N9AsgKEKN-_Favw_prMbfshN"
@@ -26,7 +24,6 @@
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production",
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://bwmhbnozduuoyavqkaha.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_iyTMZg2N9AsgKEKN-_Favw_prMbfshN"

@@ -1,17 +1,14 @@
 /**
- * Public client configuration, read from EXPO_PUBLIC_* env vars at build time.
- * These are embedded in the app bundle — never put secrets here.
+ * Public client configuration. Read from EXPO_PUBLIC_* env vars when present,
+ * otherwise fall back to the known public values. These are NOT secrets — the
+ * Supabase URL and the publishable key are designed to ship in the client
+ * bundle (access is gated by RLS) — so a hard-coded fallback is safe and keeps
+ * the app from crashing on launch if env injection ever fails in a build.
  */
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase env. Copy .env.example to .env and set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY.',
-  );
-}
+const FALLBACK_SUPABASE_URL = 'https://bwmhbnozduuoyavqkaha.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_iyTMZg2N9AsgKEKN-_Favw_prMbfshN';
 
 export const env = {
-  supabaseUrl,
-  supabaseAnonKey,
+  supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL ?? FALLBACK_SUPABASE_URL,
+  supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? FALLBACK_SUPABASE_ANON_KEY,
 } as const;
