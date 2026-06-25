@@ -33,6 +33,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Colophon utilise la caméra pour scanner les codes-barres (ISBN) de vos livres."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
