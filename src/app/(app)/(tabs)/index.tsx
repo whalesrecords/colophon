@@ -18,7 +18,9 @@ import {
   sortItems,
 } from '@/features/library/faceting';
 import { copiesByIsbn } from '@/features/library/duplicates';
+import { groupBySeries, type SeriesGroup } from '@/features/library/group-series';
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
+import { useShelves } from '@/features/shelves/use-shelves';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette, statusColors } from '@/theme/tokens';
 
@@ -32,11 +34,9 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'rating', label: 'Note' },
 ];
 
-function columnsFor(width: number): number {
-  if (width >= 1100) return 6;
-  if (width >= 760) return 4;
-  return 3;
-}
+type GridSize = 'S' | 'M' | 'L';
+const GRID_BASE: Record<GridSize, number> = { S: 84, M: 112, L: 150 };
+const ROW_COVER: Record<GridSize, number> = { S: 30, M: 40, L: 56 };
 
 function Label({ children }: { children: string }) {
   return (
@@ -61,7 +61,11 @@ export default function LibraryScreen() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<SortKey>('added');
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [size, setSize] = useState<GridSize>('M');
+  const [group, setGroup] = useState(false);
+  const [openSeries, setOpenSeries] = useState<SeriesGroup | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const { data: shelves } = useShelves(session?.user.id);
 
   const items = useMemo(() => data ?? [], [data]);
   const copies = useMemo(() => copiesByIsbn(items), [items]);
@@ -71,6 +75,10 @@ export default function LibraryScreen() {
   const filtered = useMemo(
     () => sortItems(applyFilters(items, filters), sort),
     [items, filters, sort],
+  );
+  const grouped = useMemo(
+    () => (group ? groupBySeries(filtered) : { groups: [] as SeriesGroup[], singles: filtered }),
+    [group, filtered],
   );
 
   const toggleFacet = (key: FacetKey, value: string) =>
@@ -82,7 +90,7 @@ export default function LibraryScreen() {
 
   const nFilters = activeFilterCount(filters);
   const contentWidth = Math.min(width, 1200) - H_PADDING * 2;
-  const cols = columnsFor(width);
+  const cols = Math.max(1, Math.floor((contentWidth + GAP) / (GRID_BASE[size] + GAP)));
   const coverWidth = Math.floor((contentWidth - GAP * (cols - 1)) / cols);
 
   return (
@@ -122,7 +130,7 @@ export default function LibraryScreen() {
               focusStyle={{ borderColor: '$accent' }}
             />
 
-            <XStack justifyContent="space-between" alignItems="center">
+            <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
               <Button
                 onPress={() => setShowFilters((s) => !s)}
                 height={36}
@@ -138,7 +146,11 @@ export default function LibraryScreen() {
               >
                 {nFilters ? `Filtres · ${nFilters}` : 'Filtres'}
               </Button>
-              <XStack gap="$2">
+              <XStack gap="$2" alignItems="center" flexWrap="wrap">
+                {view === 'grid' ? (
+                  <ViewToggle label="Séries" active={group} onPress={() => setGroup((g) => !g)} />
+                ) : null}
+                <SizeControl size={size} onSize={setSize} />
                 <ViewToggle label="Grille" active={view === 'grid'} onPress={() => setView('grid')} />
                 <ViewToggle label="Liste" active={view === 'list'} onPress={() => setView('list')} />
               </XStack>
@@ -169,6 +181,37 @@ export default function LibraryScreen() {
                 ))}
               </XStack>
             </ScrollView>
+
+            {shelves && shelves.length > 0 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack gap="$2" alignItems="center" paddingRight="$4">
+                  <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                    Étagères :
+                  </Text>
+                  {shelves.map((sh) => {
+                    const active = filters.facets.shelf.includes(sh.name);
+                    return (
+                      <Button
+                        key={sh.id}
+                        onPress={() => toggleFacet('shelf', sh.name)}
+                        height={32}
+                        paddingHorizontal="$3"
+                        borderRadius={999}
+                        borderWidth={1}
+                        borderColor={active ? '$accent' : '$borderColor'}
+                        backgroundColor={active ? '$accent' : 'transparent'}
+                        color={active ? palette.paper : '$colorSoft'}
+                        fontFamily="$body"
+                        fontSize={13}
+                        fontWeight="500"
+                      >
+                        {sh.name}
+                      </Button>
+                    );
+                  })}
+                </XStack>
+              </ScrollView>
+            ) : null}
 
             {nFilters > 0 ? (
               <XStack gap="$2" flexWrap="wrap">
@@ -222,19 +265,66 @@ export default function LibraryScreen() {
         <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
           {view === 'grid' ? (
             <XStack flexWrap="wrap" gap={GAP}>
-              {filtered.map((item) => (
+              {grouped.groups.map((g) => (
+                <SeriesCard key={g.key} group={g} width={coverWidth} onPress={() => setOpenSeries(g)} />
+              ))}
+              {grouped.singles.map((item) => (
                 <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
               ))}
             </XStack>
           ) : (
             <YStack gap="$2">
               {filtered.map((item) => (
-                <LibraryRow key={item.id} item={item} copies={copiesOf(item)} />
+                <LibraryRow
+                  key={item.id}
+                  item={item}
+                  copies={copiesOf(item)}
+                  coverWidth={ROW_COVER[size]}
+                />
               ))}
             </YStack>
           )}
         </ScrollView>
       )}
+
+      {openSeries ? (
+        <YStack position="absolute" top={0} left={0} right={0} bottom={0} backgroundColor="$background">
+          <XStack
+            paddingHorizontal={H_PADDING}
+            paddingTop="$6"
+            paddingBottom="$3"
+            alignItems="center"
+            gap="$2"
+            borderBottomColor="$borderColor"
+            borderBottomWidth={1}
+          >
+            <YStack flex={1}>
+              <Text fontFamily="$heading" fontSize={20} color="$color" numberOfLines={1}>
+                {openSeries.name}
+              </Text>
+              <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                {`Série · ${openSeries.count} tomes`}
+              </Text>
+            </YStack>
+            <Button
+              onPress={() => setOpenSeries(null)}
+              chromeless
+              color="$accent"
+              fontFamily="$body"
+              fontWeight="600"
+            >
+              Fermer
+            </Button>
+          </XStack>
+          <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
+            <XStack flexWrap="wrap" gap={GAP}>
+              {openSeries.items.map((item) => (
+                <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
+              ))}
+            </XStack>
+          </ScrollView>
+        </YStack>
+      ) : null}
     </Screen>
   );
 }
@@ -256,6 +346,94 @@ function ViewToggle({ label, active, onPress }: { label: string; active: boolean
     >
       {label}
     </Button>
+  );
+}
+
+function SizeControl({ size, onSize }: { size: GridSize; onSize: (s: GridSize) => void }) {
+  return (
+    <XStack borderWidth={1} borderColor="$borderColor" borderRadius={2} overflow="hidden">
+      {(['S', 'M', 'L'] as GridSize[]).map((s) => (
+        <Button
+          key={s}
+          onPress={() => onSize(s)}
+          height={36}
+          width={30}
+          padding={0}
+          borderRadius={0}
+          backgroundColor={size === s ? '$accent' : 'transparent'}
+          color={size === s ? palette.paper : '$colorMuted'}
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+        >
+          {s}
+        </Button>
+      ))}
+    </XStack>
+  );
+}
+
+function SeriesCard({
+  group,
+  width,
+  onPress,
+}: {
+  group: SeriesGroup;
+  width: number;
+  onPress: () => void;
+}) {
+  const cover = group.cover;
+  const { bg, fg } = composedPalette(cover.book?.isbn13 ?? cover.id);
+  return (
+    <YStack width={width} gap="$2">
+      <Pressable onPress={onPress}>
+        <YStack>
+          {/* stacked-volumes hint behind the Tome 1 cover */}
+          <YStack
+            position="absolute"
+            top={4}
+            left={4}
+            right={-4}
+            bottom={-4}
+            backgroundColor="$backgroundStrong"
+            borderColor="$borderColor"
+            borderWidth={1}
+            borderRadius={2}
+          />
+          <BookCover
+            title={cover.book?.title ?? 'Sans titre'}
+            author={cover.book?.authors?.[0]}
+            coverUrl={cover.coverOverride ?? cover.book?.cover_url}
+            isbn={cover.book?.isbn13}
+            bg={bg}
+            fg={fg}
+            width={width}
+          />
+          <XStack
+            position="absolute"
+            top={6}
+            right={6}
+            backgroundColor={palette.aizome}
+            borderRadius={999}
+            paddingHorizontal={8}
+            height={20}
+            alignItems="center"
+          >
+            <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+              {group.count}
+            </Text>
+          </XStack>
+        </YStack>
+      </Pressable>
+      <YStack gap={2}>
+        <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
+          {group.name}
+        </Text>
+        <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+          {`Série · ${group.count} tomes`}
+        </Text>
+      </YStack>
+    </YStack>
   );
 }
 
@@ -331,7 +509,15 @@ function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number
   );
 }
 
-function LibraryRow({ item, copies }: { item: LibraryItem; copies: number }) {
+function LibraryRow({
+  item,
+  copies,
+  coverWidth = 40,
+}: {
+  item: LibraryItem;
+  copies: number;
+  coverWidth?: number;
+}) {
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
   return (
@@ -352,7 +538,7 @@ function LibraryRow({ item, copies }: { item: LibraryItem; copies: number }) {
           isbn={item.book?.isbn13}
           bg={bg}
           fg={fg}
-          width={40}
+          width={coverWidth}
         />
         <YStack flex={1} gap={2}>
           <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
