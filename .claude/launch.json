@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "expo", "start", "--web", "--port", "8090"],
+      "port": 8090,
+      "autoPort": false
+    }
+  ]
+}

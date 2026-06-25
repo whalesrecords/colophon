@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+</helmet>
+<div style="position:relative; width:100%; aspect-ratio:67/100; border-radius:2px; overflow:hidden; background:{{ bg }}; box-shadow:0 1px 2px rgba(28,26,23,0.13), 0 9px 24px rgba(28,26,23,0.14); container-type:inline-size;">
+
+  <sc-if value="{{ isChamp }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute; inset:0; padding:12cqw 9cqw 11cqw; display:flex; flex-direction:column;">
+      <div style="font-family:'Schibsted Grotesk',sans-serif; font-size:3.3cqw; letter-spacing:0.26em; text-transform:uppercase; color:{{ fg }}; opacity:0.6; font-weight:600;">{{ tag }}</div>
+      <div style="margin-top:8cqw; font-family:'Spectral',serif; font-weight:500; font-size:11.5cqw; line-height:1.04; color:{{ fg }}; letter-spacing:-0.012em; text-wrap:balance;">{{ title }}</div>
+      <div style="flex:1;"></div>
+      <div style="font-family:'Schibsted Grotesk',sans-serif; font-size:3.9cqw; letter-spacing:0.01em; color:{{ fg }}; opacity:0.82;">{{ author }}</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isFilets }}">
+    <div style="position:absolute; inset:0; padding:11cqw 8cqw; display:flex; flex-direction:column; align-items:center; text-align:center;">
+      <div style="font-family:'Schibsted Grotesk',sans-serif; font-size:3.2cqw; letter-spacing:0.28em; text-transform:uppercase; color:{{ fg }}; opacity:0.62; font-weight:600;">{{ tag }}</div>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">
+        <div style="width:34%; height:1px; background:{{ fg }}; opacity:0.45;"></div>
+        <div style="margin:6cqw 0; font-family:'Spectral',serif; font-weight:500; font-size:10.5cqw; line-height:1.06; color:{{ fg }}; letter-spacing:-0.01em; text-wrap:balance;">{{ title }}</div>
+        <div style="width:34%; height:1px; background:{{ fg }}; opacity:0.45;"></div>
+      </div>
+      <div style="font-family:'Schibsted Grotesk',sans-serif; font-size:3.7cqw; letter-spacing:0.04em; color:{{ fg }}; opacity:0.8;">{{ author }}</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isBande }}">
+    <div style="position:absolute; inset:0; display:flex; flex-direction:column;">
+      <div style="background:{{ fg }}; padding:7cqw 9cqw 6.5cqw; display:flex; align-items:center;">
+        <div style="font-family:'Schibsted Grotesk',sans-serif; font-size:3.3cqw; letter-spacing:0.24em; text-transform:uppercase; color:{{ bg }}; opacity:0.92; font-weight:600;">{{ tag }}</div>
+      </div>
+      <div style="flex:1; padding:9cqw 9cqw 11cqw; display:flex; flex-direction:column;">
+        <div style="font-family:'Spectral',serif; font-weight:500; font-size:11cqw; line-height:1.03; color:{{ fg }}; letter-spacing:-0.012em; text-wrap:balance;">{{ title }}</div>
+        <div style="flex:1;"></div>
+        <div style="font-family:'Schibsted Grotesk',sans-serif; font-size:3.9cqw; letter-spacing:0.01em; color:{{ fg }}; opacity:0.82;">{{ author }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="position:absolute; left:0; top:0; bottom:0; width:7%; background:linear-gradient(90deg, rgba(0,0,0,0.17), rgba(0,0,0,0.05) 55%, rgba(0,0,0,0)); pointer-events:none;"></div>
+  <div style="position:absolute; left:0; top:0; bottom:0; width:1.5px; background:rgba(255,255,255,0.16); pointer-events:none;"></div>
+  <div style="position:absolute; inset:0; border-radius:2px; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.08); pointer-events:none;"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:170,&quot;height&quot;:254},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Éloge de l'ombre&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;author&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Tanizaki&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;bg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2B3A55&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;fg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F4F1EA&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tag&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;ESSAI&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;champ&quot;,&quot;filets&quot;,&quot;bande&quot;],&quot;default&quot;:&quot;champ&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const layout = this.props.layout || 'champ';
+    return {
+      title: this.props.title || 'Sans titre',
+      author: this.props.author || '',
+      bg: this.props.bg || '#2B3A55',
+      fg: this.props.fg || '#F4F1EA',
+      tag: this.props.tag || '',
+      isChamp: layout === 'champ',
+      isFilets: layout === 'filets',
+      isBande: layout === 'bande',
+    };
+  }
+}
+</script>
+</body>
+</html>

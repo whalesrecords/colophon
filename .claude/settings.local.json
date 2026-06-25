@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(echo \"npm $\\(npm --version 2>&1\\)\")",
+      "Bash(pnpm --version)",
+      "Bash(echo \"pnpm $\\(pnpm --version 2>&1\\)\")",
+      "Bash(npx --version)"
+    ]
+  }
+}
