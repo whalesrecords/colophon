@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { ReadingSection } from '@/components/book/ReadingSection';
 import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
 import { useUpdateItem } from '@/features/library/use-update-item';
@@ -179,6 +180,9 @@ export default function BookDetailScreen() {
             </XStack>
           </YStack>
 
+          {/* reading sessions */}
+          <ReadingSection itemId={id} userId={session?.user.id} totalPages={book?.page_count ?? null} />
+
           {/* review */}
           <EditableText
             label="Votre fiche / avis"
@@ -245,10 +249,6 @@ export default function BookDetailScreen() {
               </Text>
             </YStack>
           ) : null}
-
-          <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
-            Les sessions de lecture (progression en pages, dates) arrivent très bientôt.
-          </Text>
         </YStack>
       </ScrollView>
 

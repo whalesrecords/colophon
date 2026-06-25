@@ -105,7 +105,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
       >
         <StatBig value={formatCount(stats.total)} label={stats.total > 1 ? 'Livres' : 'Livre'} />
         <YStack width={1} backgroundColor="$borderColor" />
-        <StatBig value={formatCount(stats.byStatus.read)} label="Lus" />
+        <StatBig value={formatCount(stats.readThisYear)} label={`Lus en ${stats.year}`} />
         <YStack width={1} backgroundColor="$borderColor" />
         <StatBig value={formatCount(stats.pagesRead)} label="Pages lues" />
       </XStack>
@@ -148,7 +148,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
       </XStack>
 
       <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
-        Objectif annuel, pages par année et temps de lecture arriveront avec le suivi de lecture.
+        Définissez un objectif de lecture annuel et suivez votre temps de lecture — bientôt.
       </Text>
     </YStack>
   );
