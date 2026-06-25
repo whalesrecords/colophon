@@ -49,6 +49,8 @@ function RootNavigator() {
       </Stack.Protected>
       {/* Public read-only shared library/shelf — accessible without auth. */}
       <Stack.Screen name="s/[token]" />
+      {/* Public privacy policy (App Store / Google Play requirement). */}
+      <Stack.Screen name="privacy" />
     </Stack>
   );
 }
