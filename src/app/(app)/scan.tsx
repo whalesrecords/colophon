@@ -1,15 +1,18 @@
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Platform, ScrollView } from 'react-native';
 import { Button, Input, Spinner, type TamaguiElement, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
-import { Screen } from '@/components/Screen';
 import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
+import { SearchPanel } from '@/components/scan/SearchPanel';
+import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import { type ScanEntry, useScanSession } from '@/features/scan/use-scan-session';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette } from '@/theme/tokens';
+
+type Mode = 'scan' | 'search';
 
 function Label({ children }: { children: string }) {
   return (
@@ -26,13 +29,50 @@ function Label({ children }: { children: string }) {
   );
 }
 
+function ModeTab({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Button
+      onPress={onPress}
+      flex={1}
+      height={40}
+      borderRadius={2}
+      borderWidth={1}
+      borderColor={active ? '$accent' : '$borderColor'}
+      backgroundColor={active ? '$accent' : 'transparent'}
+      color={active ? palette.paper : '$colorMuted'}
+      fontFamily="$body"
+      fontWeight="600"
+      fontSize={14}
+    >
+      {label}
+    </Button>
+  );
+}
+
 export default function ScanScreen() {
   const { session } = useAuth();
   const router = useRouter();
   const { entries, submit, retry, addedCount } = useScanSession(session?.user.id);
+  const [mode, setMode] = useState<Mode>('scan');
   const [value, setValue] = useState('');
   // Tamagui Input forwards its ref to the underlying TextInput at runtime.
   const inputRef = useRef<TamaguiElement>(null);
+
+  const addedIsbns = useMemo(
+    () =>
+      new Set(
+        entries.filter((e) => e.status === 'added' && e.isbn13).map((e) => e.isbn13 as string),
+      ),
+    [entries],
+  );
 
   const onSubmit = () => {
     const raw = value.trim();
@@ -44,56 +84,70 @@ export default function ScanScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-        <YStack gap="$1" marginBottom="$4">
-          <Label>Ajouter des livres</Label>
-          <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
-            Scanner
-          </Text>
-        </YStack>
-
-        <BarcodeScanner onScan={(v) => void submit(v)} />
-
-        <YStack gap="$2" marginTop="$4">
-          <Label>ISBN — saisie ou douchette</Label>
-          <XStack gap="$2">
-            <Input
-              ref={inputRef}
-              flex={1}
-              value={value}
-              onChangeText={setValue}
-              onSubmitEditing={onSubmit}
-              blurOnSubmit={false}
-              autoFocus={Platform.OS === 'web'}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              placeholder="978…"
-              backgroundColor="$backgroundStrong"
-              borderColor="$borderColor"
-              borderWidth={1}
-              borderRadius={2}
-              height={48}
-              paddingHorizontal="$3"
-              fontFamily="$body"
-              fontSize={15}
-              color="$color"
-              placeholderTextColor="$concreteLight"
-              focusStyle={{ borderColor: '$accent' }}
-            />
-            <Button
-              onPress={onSubmit}
-              backgroundColor="$accent"
-              color={palette.paper}
-              borderRadius={2}
-              height={48}
-              paddingHorizontal="$5"
-              fontFamily="$body"
-              fontWeight="600"
-            >
+      <ScrollView
+        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <YStack gap="$3" marginBottom="$4">
+          <YStack gap="$1">
+            <Label>Ajouter des livres</Label>
+            <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
               Ajouter
-            </Button>
+            </Text>
+          </YStack>
+          <XStack gap="$2">
+            <ModeTab label="Scanner / ISBN" active={mode === 'scan'} onPress={() => setMode('scan')} />
+            <ModeTab label="Rechercher" active={mode === 'search'} onPress={() => setMode('search')} />
           </XStack>
         </YStack>
+
+        {mode === 'search' ? (
+          <SearchPanel onPick={(isbn) => void submit(isbn)} addedIsbns={addedIsbns} />
+        ) : (
+          <YStack gap="$4">
+            <BarcodeScanner onScan={(v) => void submit(v)} />
+            <YStack gap="$2">
+              <Label>ISBN — saisie ou douchette</Label>
+              <XStack gap="$2">
+                <Input
+                  ref={inputRef}
+                  flex={1}
+                  value={value}
+                  onChangeText={setValue}
+                  onSubmitEditing={onSubmit}
+                  blurOnSubmit={false}
+                  autoFocus={Platform.OS === 'web'}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  placeholder="978…"
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                  borderRadius={2}
+                  height={48}
+                  paddingHorizontal="$3"
+                  fontFamily="$body"
+                  fontSize={15}
+                  color="$color"
+                  placeholderTextColor="$concreteLight"
+                  focusStyle={{ borderColor: '$accent' }}
+                />
+                <Button
+                  onPress={onSubmit}
+                  backgroundColor="$accent"
+                  color={palette.paper}
+                  borderRadius={2}
+                  height={48}
+                  paddingHorizontal="$5"
+                  fontFamily="$body"
+                  fontWeight="600"
+                >
+                  Ajouter
+                </Button>
+              </XStack>
+            </YStack>
+          </YStack>
+        )}
 
         {entries.length > 0 ? (
           <YStack gap="$2" marginTop="$5">
