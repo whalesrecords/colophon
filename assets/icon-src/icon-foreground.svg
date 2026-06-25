@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Android adaptive foreground: same mark, scaled into the central safe zone, transparent background -->
+  <g transform="translate(512 512) scale(0.62) translate(-512 -512)">
+    <g>
+      <rect x="185" y="412" width="78" height="336" rx="5" fill="#2B3A55"/>
+      <rect x="281" y="312" width="78" height="436" rx="5" fill="#B0853A"/>
+      <rect x="377" y="462" width="78" height="286" rx="5" fill="#1C1A17"/>
+      <rect x="473" y="272" width="78" height="476" rx="5" fill="#B65D3C"/>
+      <rect x="569" y="382" width="78" height="366" rx="5" fill="#7E8A6F"/>
+      <rect x="665" y="442" width="78" height="306" rx="5" fill="#9B968C"/>
+      <rect x="761" y="342" width="78" height="406" rx="5" fill="#1F2A40"/>
+    </g>
+    <g fill="#F4F1EA" opacity="0.82">
+      <rect x="198" y="456" width="52" height="9" rx="2"/>
+      <rect x="294" y="356" width="52" height="9" rx="2"/>
+      <rect x="390" y="506" width="52" height="9" rx="2"/>
+      <rect x="486" y="316" width="52" height="9" rx="2"/>
+      <rect x="582" y="426" width="52" height="9" rx="2"/>
+      <rect x="678" y="486" width="52" height="9" rx="2"/>
+      <rect x="774" y="386" width="52" height="9" rx="2"/>
+    </g>
+    <rect x="150" y="738" width="724" height="14" rx="7" fill="#1C1A17"/>
+  </g>
+</svg>

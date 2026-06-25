@@ -12,7 +12,6 @@
     "scheme": "colophon",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.whalesrecords.colophon",
       "supportsTablet": false,
       "infoPlist": {
@@ -22,10 +21,8 @@
     "android": {
       "package": "com.whalesrecords.colophon",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#F4F1EA",
+        "foregroundImage": "./assets/images/icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
