@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, YStack } from 'tamagui';
@@ -5,7 +6,7 @@ import { Text, YStack } from 'tamagui';
 const UPDATED = '25 juin 2026';
 const CONTACT = 'hello@whalesrecords.com';
 
-function H({ children }: { children: string }) {
+function H({ children }: { children: ReactNode }) {
   return (
     <Text fontFamily="$heading" fontSize={19} fontWeight="500" color="$color" marginTop="$4">
       {children}
@@ -13,7 +14,7 @@ function H({ children }: { children: string }) {
   );
 }
 
-function P({ children }: { children: string }) {
+function P({ children }: { children: ReactNode }) {
   return (
     <Text fontFamily="$body" fontSize={15} color="$colorSoft" lineHeight={23}>
       {children}
