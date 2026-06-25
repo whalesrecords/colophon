@@ -12,6 +12,7 @@ export default function AppLayout() {
     >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="book/[id]" options={{ presentation: 'card' }} />
+      <Stack.Screen name="circle/[id]" options={{ presentation: 'card' }} />
     </Stack>
   );
 }
