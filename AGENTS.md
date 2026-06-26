@@ -100,7 +100,8 @@ identifiers: English.
   **scan duplicate-alert** (flags already-owned at add); **real Goodreads/Babelio
   CSV import** (rating + status + review); **annual reading goal**
   (`profiles.annual_goal`, progress bar in Profil); **shareable year recap**
-  ("Wrapped"-style YearRecap — books/pages/top author+genre).
+  ("Wrapped"-style YearRecap — books/pages/top author+genre); **series completion
+  view** (missing tomes + bulk-add in the library series overlay).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
@@ -110,10 +111,12 @@ only fills for manga. Prioritized, grounded against what already ships:
   `items.ownership` (`owned`/`wishlist`/`borrowed`) + `borrowed_from`/`due_back`/
   `format`; keep `items.status` as the reading axis, add `dnf`. Additive
   migration; corrects every stat. Everything else depends on this.
-- **P0.2 — persist a `series` entity + owned-vs-missing completion view**
-  ("14/22 — il manque T7, T12"). Today series are only grouped from owned titles;
-  nothing is stored. The killer feature for the FR manga market. `add-series`
-  fetch already exists to seed it.
+- **P0.2 — owned-vs-missing series completion view** ("14/22 — il manque T7, T12").
+  **v1 SHIPPED**: tap a series stack in the library (group mode) → the overlay
+  now fetches the full volume list (`useSeriesVolumes`), shows the **missing
+  tomes** + "ajouter les N manquants" (`SeriesCompletion`). TODO: persist a
+  `series` table with `total_volumes` for at-a-glance "X/Y" badges on the grid
+  (the count is currently search-derived, not authoritative).
 - **P0.3 — first-class Wishlist (Envies)** — fed by manual add, scan "je le veux",
   missing series volumes, circle proposals. Low effort once P0.1 lands.
 - **P1 — quick wins:** duplicate-alert AT SCAN (logic already exists); real

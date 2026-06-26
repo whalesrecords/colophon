@@ -5,6 +5,7 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
+import { SeriesCompletion } from '@/components/library/SeriesCompletion';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import {
@@ -317,11 +318,25 @@ export default function LibraryScreen() {
             </Button>
           </XStack>
           <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
-            <XStack flexWrap="wrap" gap={GAP}>
-              {openSeries.items.map((item) => (
-                <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
-              ))}
-            </XStack>
+            <YStack gap="$6">
+              <XStack flexWrap="wrap" gap={GAP}>
+                {openSeries.items.map((item) => (
+                  <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
+                ))}
+              </XStack>
+              <SeriesCompletion
+                seriesName={openSeries.name}
+                ownedIsbns={
+                  new Set(
+                    openSeries.items
+                      .map((i) => i.book?.isbn13)
+                      .filter((x): x is string => !!x),
+                  )
+                }
+                userId={session?.user.id}
+                coverWidth={coverWidth}
+              />
+            </YStack>
           </ScrollView>
         </YStack>
       ) : null}
