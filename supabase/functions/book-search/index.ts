@@ -26,6 +26,8 @@ interface SearchParams {
   author?: string;
   publisher?: string;
   subject?: string;
+  /** Series mode: fetch several pages so long runs (e.g. Berserk, 40+ vol.) surface. */
+  deep?: boolean;
 }
 
 function withTimeout(ms: number): { signal: AbortSignal; done: () => void } {
@@ -42,7 +44,7 @@ function hasQuery(p: SearchParams): boolean {
   );
 }
 
-async function searchOpenLibrary(p: SearchParams): Promise<BookSearchResult[]> {
+async function searchOpenLibrary(p: SearchParams, limit: number): Promise<BookSearchResult[]> {
   const url = new URL('https://openlibrary.org/search.json');
   if (p.title?.trim()) url.searchParams.set('title', p.title.trim());
   if (p.author?.trim()) url.searchParams.set('author', p.author.trim());
@@ -51,7 +53,7 @@ async function searchOpenLibrary(p: SearchParams): Promise<BookSearchResult[]> {
   if (p.publisher?.trim()) q.push(`publisher:${phrase(p.publisher)}`);
   if (p.subject?.trim()) q.push(`subject:${phrase(p.subject)}`);
   if (q.length) url.searchParams.set('q', q.join(' '));
-  url.searchParams.set('limit', '20');
+  url.searchParams.set('limit', String(limit));
   url.searchParams.set('fields', 'title,author_name,publisher,first_publish_year,isbn,cover_i');
 
   const t = withTimeout(9000);
@@ -69,7 +71,11 @@ async function searchOpenLibrary(p: SearchParams): Promise<BookSearchResult[]> {
   }
 }
 
-async function searchGoogleBooks(p: SearchParams, key: string): Promise<BookSearchResult[]> {
+async function searchGoogleBooks(
+  p: SearchParams,
+  key: string,
+  pages: number,
+): Promise<BookSearchResult[]> {
   const parts: string[] = [];
   if (p.q?.trim()) parts.push(p.q.trim());
   if (p.title?.trim()) parts.push(`intitle:${phrase(p.title)}`);
@@ -79,22 +85,28 @@ async function searchGoogleBooks(p: SearchParams, key: string): Promise<BookSear
   const query = parts.join(' ').trim();
   if (!query) return [];
 
-  const url =
-    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}` +
-    `&maxResults=20&printType=books&key=${key}`;
-  const t = withTimeout(9000);
-  try {
-    const res = await fetch(url, {
-      signal: t.signal,
-      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
-    });
-    if (!res.ok) return [];
-    return parseGoogleBooksSearch(await res.json());
-  } catch {
-    return [];
-  } finally {
-    t.done();
+  const out: BookSearchResult[] = [];
+  for (let page = 0; page < pages; page++) {
+    const url =
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}` +
+      `&startIndex=${page * 40}&maxResults=40&printType=books&key=${key}`;
+    const t = withTimeout(9000);
+    try {
+      const res = await fetch(url, {
+        signal: t.signal,
+        headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+      });
+      if (!res.ok) break;
+      const parsed = parseGoogleBooksSearch(await res.json());
+      if (parsed.length === 0) break; // no more pages
+      out.push(...parsed);
+    } catch {
+      break;
+    } finally {
+      t.done();
+    }
   }
+  return out;
 }
 
 Deno.serve(async (req: Request) => {
@@ -112,10 +124,13 @@ Deno.serve(async (req: Request) => {
   // Query Google Books (when keyed — richer metadata + covers) AND Open Library
   // in parallel, then merge: more editions means a better chance of finding the
   // right version/cover. Google first, deduped by ISBN-13.
+  const deep = params.deep === true;
   const key = Deno.env.get('GOOGLE_BOOKS_KEY');
   const [google, openlib] = await Promise.all([
-    key ? searchGoogleBooks(params, key) : Promise.resolve([] as BookSearchResult[]),
-    searchOpenLibrary(params),
+    key
+      ? searchGoogleBooks(params, key, deep ? 3 : 1)
+      : Promise.resolve([] as BookSearchResult[]),
+    searchOpenLibrary(params, deep ? 60 : 20),
   ]);
 
   const seen = new Set<string>();
@@ -126,5 +141,5 @@ Deno.serve(async (req: Request) => {
     results.push(r);
   }
 
-  return json({ results: results.slice(0, 30) }, 200);
+  return json({ results: results.slice(0, deep ? 120 : 30) }, 200);
 });

@@ -344,15 +344,18 @@ export default function LibraryScreen() {
                 {`Série · ${openSeries.count} tomes`}
               </Text>
             </YStack>
-            <Button
+            <Text
               onPress={() => setOpenSeries(null)}
-              chromeless
-              color="$accent"
               fontFamily="$body"
+              fontSize={15}
               fontWeight="600"
+              color="$accent"
+              paddingVertical="$2"
+              paddingHorizontal="$2"
+              pressStyle={{ opacity: 0.6 }}
             >
               Fermer
-            </Button>
+            </Text>
           </XStack>
           <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
             <YStack gap="$6">

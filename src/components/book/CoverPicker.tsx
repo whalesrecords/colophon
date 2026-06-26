@@ -48,19 +48,18 @@ export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride
 
   return (
     <YStack gap="$2">
-      <Button
+      <Text
         onPress={() => setOpen((o) => !o)}
-        chromeless
-        height={34}
         alignSelf="flex-start"
-        paddingHorizontal={0}
+        paddingVertical="$2"
         color="$accent"
         fontFamily="$body"
         fontSize={14}
         fontWeight="600"
+        pressStyle={{ opacity: 0.6 }}
       >
         {open ? 'Fermer' : 'Changer la couverture'}
-      </Button>
+      </Text>
 
       {open ? (
         <YStack

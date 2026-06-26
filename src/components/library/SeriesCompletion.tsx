@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Pressable } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
@@ -34,6 +35,7 @@ export function SeriesCompletion({
   const [added, setAdded] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
   const [customTotal, setCustomTotal] = useState('');
+  const [excluded, setExcluded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchVols.mutate(seriesName);
@@ -49,9 +51,20 @@ export function SeriesCompletion({
   const isComplete = totalKnown && ownedCount >= effectiveTotal;
   const missingAll = volumes.filter((v) => !ownedIsbns.has(v.isbn13) && !added.has(v.isbn13));
   const missing = isComplete ? [] : missingAll.slice(0, Math.max(0, effectiveTotal - ownedCount));
+  const selectedMissing = missing.filter((v) => !excluded.has(v.isbn13));
 
-  const onAddAll = async () => {
-    const isbns = missing.map((v) => v.isbn13);
+  const toggle = (isbn: string) =>
+    setExcluded((prev) => {
+      const next = new Set(prev);
+      if (next.has(isbn)) next.delete(isbn);
+      else next.add(isbn);
+      return next;
+    });
+  const selectAll = () => setExcluded(new Set());
+  const selectNone = () => setExcluded(new Set(missing.map((v) => v.isbn13)));
+
+  const onAddSelected = async () => {
+    const isbns = selectedMissing.map((v) => v.isbn13);
     if (isbns.length === 0) return;
     await submitMany(isbns);
     setAdded((prev) => new Set([...prev, ...isbns]));
@@ -101,30 +114,86 @@ export function SeriesCompletion({
 
           {missing.length > 0 ? (
             <>
-              <XStack flexWrap="wrap" gap={12}>
-                {missing.map((v) => (
-                  <YStack key={v.isbn13} width={coverWidth} gap={4} alignItems="center" opacity={0.78}>
-                    <BookCover title={v.title} coverUrl={v.coverUrl} isbn={v.isbn13} width={coverWidth} />
-                    <Text fontFamily="$body" fontSize={11} color="$colorMuted">
-                      {`T${v.volume}`}
-                    </Text>
-                  </YStack>
-                ))}
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+                  {`${selectedMissing.length}/${missing.length} sélectionné${selectedMissing.length > 1 ? 's' : ''}`}
+                </Text>
+                <XStack gap="$3">
+                  <Button
+                    onPress={selectAll}
+                    chromeless
+                    height={28}
+                    paddingHorizontal={0}
+                    color="$accent"
+                    fontFamily="$body"
+                    fontSize={13}
+                    fontWeight="600"
+                  >
+                    Tout
+                  </Button>
+                  <Button
+                    onPress={selectNone}
+                    chromeless
+                    height={28}
+                    paddingHorizontal={0}
+                    color="$colorMuted"
+                    fontFamily="$body"
+                    fontSize={13}
+                  >
+                    Aucun
+                  </Button>
+                </XStack>
               </XStack>
+
+              <XStack flexWrap="wrap" gap={12}>
+                {missing.map((v) => {
+                  const sel = !excluded.has(v.isbn13);
+                  return (
+                    <Pressable key={v.isbn13} onPress={() => toggle(v.isbn13)}>
+                      <YStack width={coverWidth} gap={4} alignItems="center" opacity={sel ? 1 : 0.4}>
+                        <YStack position="relative">
+                          <BookCover title={v.title} coverUrl={v.coverUrl} isbn={v.isbn13} width={coverWidth} />
+                          {sel ? (
+                            <YStack
+                              position="absolute"
+                              top={4}
+                              right={4}
+                              width={20}
+                              height={20}
+                              borderRadius={999}
+                              backgroundColor="$accent"
+                              alignItems="center"
+                              justifyContent="center"
+                            >
+                              <Text fontFamily="$body" fontSize={12} fontWeight="700" color={palette.paper}>
+                                ✓
+                              </Text>
+                            </YStack>
+                          ) : null}
+                        </YStack>
+                        <Text fontFamily="$body" fontSize={11} color="$colorMuted">
+                          {`T${v.volume}`}
+                        </Text>
+                      </YStack>
+                    </Pressable>
+                  );
+                })}
+              </XStack>
+
               <Button
-                onPress={onAddAll}
-                disabled={!!bulk}
+                onPress={onAddSelected}
+                disabled={!!bulk || selectedMissing.length === 0}
                 backgroundColor="$accent"
                 color={palette.paper}
                 borderRadius={12}
                 height={48}
                 fontFamily="$body"
                 fontWeight="600"
-                opacity={bulk ? 0.7 : 1}
+                opacity={!!bulk || selectedMissing.length === 0 ? 0.6 : 1}
               >
                 {bulk
                   ? `Ajout… ${bulk.done}/${bulk.total}`
-                  : `Ajouter les ${missing.length} tome${missing.length > 1 ? 's' : ''} manquant${missing.length > 1 ? 's' : ''}`}
+                  : `Ajouter ${selectedMissing.length} tome${selectedMissing.length > 1 ? 's' : ''}`}
               </Button>
             </>
           ) : null}

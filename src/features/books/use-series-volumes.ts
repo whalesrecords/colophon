@@ -20,7 +20,7 @@ export function useSeriesVolumes() {
   return useMutation({
     mutationFn: async (seriesName: string): Promise<SeriesVolume[]> => {
       const { data, error } = await supabase.functions.invoke('book-search', {
-        body: { title: seriesName },
+        body: { title: seriesName, deep: true },
       });
       if (error) throw new Error('Recherche impossible. Réessayez.');
       const results = ((data as { results?: BookSearchResult[] } | null)?.results ?? []);

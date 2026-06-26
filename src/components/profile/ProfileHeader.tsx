@@ -94,16 +94,18 @@ export function ProfileHeader({
             {email}
           </Text>
         </YStack>
-        <Button
+        <Text
           onPress={() => setEditing((e) => !e)}
-          chromeless
-          color="$accent"
           fontFamily="$body"
-          fontWeight="600"
           fontSize={14}
+          fontWeight="600"
+          color="$accent"
+          paddingVertical="$2"
+          paddingHorizontal="$2"
+          pressStyle={{ opacity: 0.6 }}
         >
           {editing ? 'Fermer' : 'Modifier'}
-        </Button>
+        </Text>
       </XStack>
 
       {editing ? (

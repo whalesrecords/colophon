@@ -102,9 +102,18 @@ export function SeriesAddSheet({
             </Text>
           ) : null}
         </YStack>
-        <Button onPress={onClose} chromeless color="$accent" fontFamily="$body" fontWeight="600">
+        <Text
+          onPress={onClose}
+          fontFamily="$body"
+          fontSize={15}
+          fontWeight="600"
+          color="$accent"
+          paddingVertical="$2"
+          paddingHorizontal="$2"
+          pressStyle={{ opacity: 0.6 }}
+        >
           Fermer
-        </Button>
+        </Text>
       </XStack>
 
       {fetchVolumes.isPending ? (
