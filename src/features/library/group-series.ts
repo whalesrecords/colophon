@@ -20,14 +20,23 @@ export function groupBySeries(items: LibraryItem[]): {
   groups: SeriesGroup[];
   singles: LibraryItem[];
 } {
-  const map = new Map<string, { name: string; list: { item: LibraryItem; volume: number }[] }>();
+  const map = new Map<
+    string,
+    { name: string; list: { item: LibraryItem; volume: number | null }[] }
+  >();
   for (const item of items) {
-    const ref = parseSeries(item.book?.title);
-    if (!ref) continue;
-    const key = seriesKey(ref.name);
-    const entry = map.get(key) ?? { name: ref.name, list: [] };
-    entry.list.push({ item, volume: ref.volume });
-    if (ref.name.length > entry.name.length) entry.name = ref.name;
+    const title = item.book?.title;
+    if (!title) continue;
+    const ref = parseSeries(title);
+    // Fall back to the bare title so manga whose metadata has no tome number
+    // (e.g. every volume titled just "Berserk") still groups as a series.
+    const name = ref?.name ?? title;
+    const volume = ref?.volume ?? null;
+    const key = seriesKey(name);
+    if (!key) continue;
+    const entry = map.get(key) ?? { name, list: [] };
+    entry.list.push({ item, volume });
+    if (name.length > entry.name.length) entry.name = name;
     map.set(key, entry);
   }
 
@@ -35,7 +44,16 @@ export function groupBySeries(items: LibraryItem[]): {
   const groups: SeriesGroup[] = [];
   for (const [key, entry] of map) {
     if (entry.list.length < 2) continue;
-    entry.list.sort((a, b) => a.volume - b.volume);
+    entry.list.sort((a, b) => {
+      if (a.volume != null && b.volume != null) return a.volume - b.volume;
+      if (a.volume != null) return -1;
+      if (b.volume != null) return 1;
+      // Both lack a tome number: order by publication date, then ISBN (≈ tome order).
+      const ad = a.item.book?.published_date ?? '';
+      const bd = b.item.book?.published_date ?? '';
+      if (ad !== bd) return ad.localeCompare(bd);
+      return (a.item.book?.isbn13 ?? '').localeCompare(b.item.book?.isbn13 ?? '');
+    });
     groups.push({
       key,
       name: entry.name,

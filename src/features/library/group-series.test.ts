@@ -48,4 +48,18 @@ describe('groupBySeries', () => {
     // L'Étranger + the single Akira volume stay as standalone books
     expect(singles.map((i) => i.id).sort()).toEqual(['c', 'e']);
   });
+
+  it('stacks volumes that share a bare title (no tome number in the metadata)', () => {
+    const { groups, singles } = groupBySeries([
+      item('b1', 'Berserk'),
+      item('b2', 'Berserk'),
+      item('b3', 'Berserk'),
+      item('x', 'Dune'),
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].name).toBe('Berserk');
+    expect(groups[0].count).toBe(3);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['b1', 'b2', 'b3']);
+    expect(singles.map((i) => i.id)).toEqual(['x']);
+  });
 });
