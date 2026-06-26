@@ -16,6 +16,7 @@ import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
 import { duplicateGroups } from '@/features/library/duplicates';
+import { downloadCsv, toLibraryCsv } from '@/features/library/export-csv';
 import { computeFacets, EMPTY_FILTERS, type FacetKey } from '@/features/library/faceting';
 import { type ShelfSuggestion, suggestShelves } from '@/features/library/suggest-shelves';
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
@@ -98,6 +99,8 @@ export default function ProfileScreen() {
         {items.length > 0 ? <DuplicatesSection items={items} /> : null}
 
         <ShareSection userId={session?.user.id} />
+
+        <ExportSection items={items} />
 
         <Button
           marginTop="$6"
@@ -465,6 +468,47 @@ function DuplicatesSection({ items }: { items: LibraryItem[] }) {
           </Pressable>
         ))}
       </YStack>
+    </YStack>
+  );
+}
+
+function ExportSection({ items }: { items: LibraryItem[] }) {
+  const [done, setDone] = useState(false);
+
+  const onExport = () => {
+    if (items.length === 0) return;
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv(`colophon-bibliotheque-${stamp}.csv`, toLibraryCsv(items));
+    setDone(true);
+    setTimeout(() => setDone(false), 2500);
+  };
+
+  return (
+    <YStack gap="$2" marginTop="$6">
+      <Label>Données</Label>
+      <Button
+        onPress={onExport}
+        disabled={items.length === 0}
+        backgroundColor="$backgroundStrong"
+        borderColor="$borderColor"
+        borderWidth={1}
+        color="$color"
+        borderRadius={2}
+        height={48}
+        fontFamily="$body"
+        fontWeight="600"
+        opacity={items.length === 0 ? 0.5 : 1}
+        pressStyle={{ opacity: 0.85 }}
+      >
+        {done
+          ? 'Exporté ✓'
+          : `Exporter en CSV (${items.length} livre${items.length > 1 ? 's' : ''})`}
+      </Button>
+      <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+        {Platform.OS === 'web'
+          ? 'Télécharge un .csv — titre, auteurs, ISBN, éditeur, statut, note, étagères, tags. Ouvrable dans Excel ou Numbers.'
+          : 'Partage un .csv de toute votre bibliothèque (titre, auteurs, ISBN, statut, note, étagères, tags).'}
+      </Text>
     </YStack>
   );
 }

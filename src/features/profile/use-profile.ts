@@ -1,9 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
+import { Platform } from 'react-native';
 
 import type { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+
+/** Decode a base64 string to bytes (works on web + Hermes). */
+function base64ToBytes(b64: string): Uint8Array {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
 
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -65,28 +74,32 @@ export function useUploadAvatar(userId: string | undefined) {
   return useMutation({
     mutationFn: async (): Promise<void> => {
       if (!userId) throw new Error('Vous devez être connecté.');
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) throw new Error("Autorisez l'accès aux photos.");
+      // Web uses a file input (no permission); only native needs the prompt.
+      if (Platform.OS !== 'web') {
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!perm.granted) throw new Error("Autorisez l'accès aux photos dans les réglages.");
+      }
 
       const res = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.9,
       });
       if (res.canceled || !res.assets?.[0]) return;
 
+      // Resize to 512 wide + get base64 (reliable upload across web/native, vs blob).
       const manip = await ImageManipulator.manipulateAsync(
         res.assets[0].uri,
-        [{ resize: { width: 512, height: 512 } }],
-        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+        [{ resize: { width: 512 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG, base64: true },
       );
-      const blob = await (await fetch(manip.uri)).blob();
+      if (!manip.base64) throw new Error('Image illisible.');
 
       const path = `${userId}/avatar.jpg`;
       const { error } = await supabase.storage
         .from('avatars')
-        .upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+        .upload(path, base64ToBytes(manip.base64), { upsert: true, contentType: 'image/jpeg' });
       if (error) throw new Error(error.message);
 
       const { error: pErr } = await supabase
