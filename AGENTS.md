@@ -87,6 +87,36 @@ identifiers: English.
   deletion (App Store req.), Tendances (community trends).
 - **Social ✅** reading circles + realtime discussions (create/join by code,
   member list, live chat); sharing via `/s/[token]` public route.
+- **Shipped since ✅** customizable tags; delete book; duplicate detection;
+  dashboard Classement/Doublons/Prêtés; loans; **cover override + deep
+  `cover-search`** (Google/OL/BnF/AniList, validated); **add-the-whole-series**
+  (`useSeriesVolumes` + SeriesAddSheet); **CSV export**; **profiles + avatars**;
+  **installable PWA + Mac** (Designed-for-iPad + PWA); **circle moderation**
+  (report/block, App Store 1.2); **i18n** (FR/EN switcher in Settings, FR
+  fallback — only tabs/auth/profile translated so far, rest rolls out).
+
+## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
+The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
+books — the white space Goodreads/StoryGraph/Babelio leave open and Mangacollec
+only fills for manga. Prioritized, grounded against what already ships:
+- **P0.1 — split possession from reading status** (the #1 decision). Add
+  `items.ownership` (`owned`/`wishlist`/`borrowed`) + `borrowed_from`/`due_back`/
+  `format`; keep `items.status` as the reading axis, add `dnf`. Additive
+  migration; corrects every stat. Everything else depends on this.
+- **P0.2 — persist a `series` entity + owned-vs-missing completion view**
+  ("14/22 — il manque T7, T12"). Today series are only grouped from owned titles;
+  nothing is stored. The killer feature for the FR manga market. `add-series`
+  fetch already exists to seed it.
+- **P0.3 — first-class Wishlist (Envies)** — fed by manual add, scan "je le veux",
+  missing series volumes, circle proposals. Low effort once P0.1 lands.
+- **P1 — quick wins:** duplicate-alert AT SCAN (logic already exists); real
+  Goodreads/Babelio CSV *import* (current import only takes a pasted ISBN list);
+  release-calendar + new-volume alerts for followed series; mood/pace on the
+  reading; flexible annual goal + shareable "Wrapped"; neutral DNF; `format`.
+- **P2/P3 — bigger bets:** freemium (base cataloguing free forever); disable-able
+  surfaces (modularity); WEMI Work level (group editions of one title);
+  authors/subjects as authority entities (data.bnf.fr RAMEAU); anti-spoiler
+  page-anchored buddy reads; FR indie-bookseller affiliation (never Amazon).
 
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
