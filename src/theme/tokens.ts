@@ -145,7 +145,7 @@ export const STATUS_LABELS: Record<ReadingStatus, string> = {
   to_read: 'À lire',
   reading: 'En cours',
   read: 'Lu',
-  abandoned: 'Abandonné',
+  abandoned: 'Pas fini', // neutral framing (DNF), per the dossier's anti-pressure guardrail
 };
 
 // Possession axis — orthogonal to reading status.

@@ -31,7 +31,7 @@ export const fr = {
   'status.to_read': 'À lire',
   'status.reading': 'En cours',
   'status.read': 'Lu',
-  'status.abandoned': 'Abandonné',
+  'status.abandoned': 'Pas fini',
 
   // Profile / settings
   'profile.book': 'Livre',
@@ -149,7 +149,7 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'status.to_read': 'To read',
   'status.reading': 'Reading',
   'status.read': 'Read',
-  'status.abandoned': 'Abandoned',
+  'status.abandoned': 'Unfinished',
 
   'profile.book': 'Book',
   'profile.books': 'Books',
