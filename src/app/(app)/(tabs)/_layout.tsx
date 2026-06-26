@@ -3,6 +3,7 @@ import { Platform, View, type ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icons';
+import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
 function tabIcon(name: IconName) {
@@ -32,6 +33,7 @@ function ScanTabIcon() {
 
 export default function AppTabsLayout() {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   return (
     <Tabs
       screenOptions={{
@@ -51,18 +53,18 @@ export default function AppTabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Bibliothèque', tabBarIcon: tabIcon('library') }}
+        options={{ title: t('tabs.library'), tabBarIcon: tabIcon('library') }}
       />
-      <Tabs.Screen name="trends" options={{ title: 'Tendances', tabBarIcon: tabIcon('trends') }} />
+      <Tabs.Screen name="trends" options={{ title: t('tabs.trends'), tabBarIcon: tabIcon('trends') }} />
       <Tabs.Screen
         name="scan"
-        options={{ title: 'Scan', tabBarIcon: ScanTabIcon, tabBarLabelStyle: { display: 'none' } }}
+        options={{ title: t('tabs.scan'), tabBarIcon: ScanTabIcon, tabBarLabelStyle: { display: 'none' } }}
       />
       <Tabs.Screen
         name="discussions"
-        options={{ title: 'Échanges', tabBarIcon: tabIcon('discussions') }}
+        options={{ title: t('tabs.exchanges'), tabBarIcon: tabIcon('discussions') }}
       />
-      <Tabs.Screen name="profile" options={{ title: 'Profil', tabBarIcon: tabIcon('profile') }} />
+      <Tabs.Screen name="profile" options={{ title: t('tabs.profile'), tabBarIcon: tabIcon('profile') }} />
     </Tabs>
   );
 }

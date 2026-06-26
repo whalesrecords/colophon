@@ -6,10 +6,12 @@ import { TextField } from '@/components/Field';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import { authErrorMessage } from '@/features/auth/errors';
+import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
 export default function SignUpScreen() {
   const { signUp } = useAuth();
+  const { t } = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,10 +37,10 @@ export default function SignUpScreen() {
       <YStack width="100%" maxWidth={420} gap="$6">
         <YStack alignItems="center" gap="$2">
           <Text fontFamily="$heading" fontSize={32} fontWeight="500" color="$color">
-            Créer un compte
+            {t('auth.createAccount')}
           </Text>
           <Text fontFamily="$heading" fontSize={15} fontStyle="italic" color="$colorMuted">
-            Quelques secondes, et vos livres ont une maison.
+            {t('auth.signUpTagline')}
           </Text>
         </YStack>
 
@@ -52,31 +54,30 @@ export default function SignUpScreen() {
             borderRadius={2}
           >
             <Text fontFamily="$heading" fontSize={18} color="$color">
-              Vérifiez vos e-mails
+              {t('auth.checkEmailTitle')}
             </Text>
             <Text fontFamily="$body" fontSize={14} color="$colorSoft" lineHeight={21}>
-              Un lien de confirmation a été envoyé à {email}. Cliquez dessus pour activer votre
-              compte, puis connectez-vous.
+              {t('auth.checkEmailBody', { email })}
             </Text>
           </YStack>
         ) : (
           <>
             <YStack gap="$4">
               <TextField
-                label="E-mail"
+                label={t('auth.email')}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="vous@exemple.fr"
+                placeholder={t('auth.emailPlaceholder')}
                 autoCapitalize="none"
                 autoComplete="email"
                 keyboardType="email-address"
                 inputMode="email"
               />
               <TextField
-                label="Mot de passe"
+                label={t('auth.password')}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="6 caractères minimum"
+                placeholder={t('auth.passwordMin')}
                 secureTextEntry
                 autoCapitalize="none"
                 autoComplete="new-password"
@@ -103,18 +104,18 @@ export default function SignUpScreen() {
               opacity={loading ? 0.8 : 1}
               pressStyle={{ opacity: 0.9, backgroundColor: '$accentDeep' }}
             >
-              {loading ? <Spinner color={palette.paper} /> : 'Créer mon compte'}
+              {loading ? <Spinner color={palette.paper} /> : t('auth.createMyAccount')}
             </Button>
           </>
         )}
 
         <XStack justifyContent="center" gap="$2">
           <Text color="$colorMuted" fontFamily="$body" fontSize={14}>
-            Déjà un compte ?
+            {t('auth.haveAccount')}
           </Text>
           <Link href="/login">
             <Text color="$accent" fontFamily="$body" fontWeight="600" fontSize={14}>
-              Se connecter
+              {t('auth.signIn')}
             </Text>
           </Link>
         </XStack>

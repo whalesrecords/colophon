@@ -7,10 +7,12 @@ import { TextField } from '@/components/Field';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import { authErrorMessage } from '@/features/auth/errors';
+import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const { t } = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,23 +43,23 @@ export default function LoginScreen() {
             Colophon
           </Text>
           <Text fontFamily="$heading" fontSize={16} fontStyle="italic" color="$colorMuted">
-            Votre bibliothèque, au calme.
+            {t('auth.tagline')}
           </Text>
         </YStack>
 
         <YStack gap="$4">
           <TextField
-            label="E-mail"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
-            placeholder="vous@exemple.fr"
+            placeholder={t('auth.emailPlaceholder')}
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
             inputMode="email"
           />
           <TextField
-            label="Mot de passe"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
             placeholder="••••••••"
@@ -87,16 +89,16 @@ export default function LoginScreen() {
           opacity={loading ? 0.8 : 1}
           pressStyle={{ opacity: 0.9, backgroundColor: '$accentDeep' }}
         >
-          {loading ? <Spinner color={palette.paper} /> : 'Se connecter'}
+          {loading ? <Spinner color={palette.paper} /> : t('auth.signIn')}
         </Button>
 
         <XStack justifyContent="center" gap="$2">
           <Text color="$colorMuted" fontFamily="$body" fontSize={14}>
-            Pas encore de compte ?
+            {t('auth.noAccount')}
           </Text>
           <Link href="/sign-up">
             <Text color="$accent" fontFamily="$body" fontWeight="600" fontSize={14}>
-              Créer un compte
+              {t('auth.createAccount')}
             </Text>
           </Link>
         </XStack>

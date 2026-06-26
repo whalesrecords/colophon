@@ -20,6 +20,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider } from 'tamagui';
 
 import { AuthProvider, useAuth } from '@/features/auth/auth-context';
+import { LocaleProvider } from '@/i18n';
 import { palette } from '@/theme/tokens';
 import config from '@/theme/tamagui.config';
 
@@ -78,10 +79,12 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <TamaguiProvider config={config} defaultTheme="light">
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <StatusBar style="dark" />
-            <RootNavigator />
-          </AuthProvider>
+          <LocaleProvider>
+            <AuthProvider>
+              <StatusBar style="dark" />
+              <RootNavigator />
+            </AuthProvider>
+          </LocaleProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     </SafeAreaProvider>

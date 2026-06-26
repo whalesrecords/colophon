@@ -23,14 +23,8 @@ import { type LibraryItem, useLibrary } from '@/features/library/use-library';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
+import { LOCALES, type TranslationKey, useT } from '@/i18n';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
-
-const STATUS_LABELS: Record<ReadingStatus, string> = {
-  to_read: 'À lire',
-  reading: 'En cours',
-  read: 'Lu',
-  abandoned: 'Abandonné',
-};
 
 const STATUS_ORDER: ReadingStatus[] = ['reading', 'read', 'to_read', 'abandoned'];
 
@@ -72,6 +66,7 @@ function StatBig({ value, label }: { value: string; label: string }) {
 
 export default function ProfileScreen() {
   const { session, signOut } = useAuth();
+  const { t } = useT();
   const { data: stats, isLoading } = useStats(session?.user.id);
   const { data: libraryItems } = useLibrary(session?.user.id);
   const items = libraryItems ?? [];
@@ -102,6 +97,8 @@ export default function ProfileScreen() {
 
         <ExportSection items={items} />
 
+        <LanguageSection />
+
         <Button
           marginTop="$6"
           onPress={signOut}
@@ -115,7 +112,7 @@ export default function ProfileScreen() {
           fontWeight="600"
           pressStyle={{ opacity: 0.85 }}
         >
-          Se déconnecter
+          {t('profile.signOut')}
         </Button>
 
         <DangerZone onSignedOut={signOut} />
@@ -127,15 +124,51 @@ export default function ProfileScreen() {
           textAlign="center"
           marginTop="$8"
         >
-          Colophon · votre bibliothèque, vos lectures
+          {t('profile.footer')}
         </Text>
       </ScrollView>
     </Screen>
   );
 }
 
+function LanguageSection() {
+  const { locale, setLocale, t } = useT();
+  return (
+    <YStack gap="$2" marginTop="$6">
+      <Label>{t('settings.language')}</Label>
+      <XStack gap="$2">
+        {LOCALES.map((l) => {
+          const active = l.code === locale;
+          return (
+            <Button
+              key={l.code}
+              onPress={() => setLocale(l.code)}
+              flex={1}
+              height={44}
+              borderRadius={2}
+              borderWidth={1}
+              borderColor={active ? '$accent' : '$borderColor'}
+              backgroundColor={active ? '$accent' : 'transparent'}
+              color={active ? palette.paper : '$color'}
+              fontFamily="$body"
+              fontWeight="600"
+              pressStyle={{ opacity: 0.85 }}
+            >
+              {l.label}
+            </Button>
+          );
+        })}
+      </XStack>
+      <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+        {t('settings.languageHint')}
+      </Text>
+    </YStack>
+  );
+}
+
 function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
   const deleteAccount = useDeleteAccount();
+  const { t } = useT();
 
   const confirmDelete = () => {
     const proceed = async () => {
@@ -146,23 +179,25 @@ function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
         // error surfaced below
       }
     };
-    const message =
-      'Cette action est définitive : votre bibliothèque, vos fiches, étagères et cercles seront supprimés.';
+    const message = t('profile.deleteConfirmBody');
     if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined' && window.confirm(`${message}\n\nSupprimer le compte ?`)) {
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm(`${message}\n\n${t('profile.deleteConfirmAsk')}`)
+      ) {
         void proceed();
       }
     } else {
-      Alert.alert('Supprimer le compte', message, [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Supprimer', style: 'destructive', onPress: () => void proceed() },
+      Alert.alert(t('profile.deleteConfirmTitle'), message, [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: () => void proceed() },
       ]);
     }
   };
 
   return (
     <YStack gap="$2" marginTop="$8">
-      <Label>Compte</Label>
+      <Label>{t('profile.account')}</Label>
       <Button
         onPress={confirmDelete}
         disabled={deleteAccount.isPending}
@@ -176,7 +211,7 @@ function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
         fontWeight="600"
         pressStyle={{ opacity: 0.85 }}
       >
-        {deleteAccount.isPending ? 'Suppression…' : 'Supprimer mon compte'}
+        {deleteAccount.isPending ? t('profile.deleting') : t('profile.deleteAccount')}
       </Button>
       {deleteAccount.isError ? (
         <Text fontFamily="$body" fontSize={13} color="$signal">
@@ -188,6 +223,7 @@ function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
 }
 
 function Stats({ stats }: { stats: LibraryStats }) {
+  const { t } = useT();
   return (
     <YStack gap="$5">
       <XStack
@@ -197,15 +233,21 @@ function Stats({ stats }: { stats: LibraryStats }) {
         borderRadius={2}
         paddingVertical="$5"
       >
-        <StatBig value={formatCount(stats.total)} label={stats.total > 1 ? 'Livres' : 'Livre'} />
+        <StatBig
+          value={formatCount(stats.total)}
+          label={stats.total > 1 ? t('profile.books') : t('profile.book')}
+        />
         <YStack width={1} backgroundColor="$borderColor" />
-        <StatBig value={formatCount(stats.readThisYear)} label={`Lus en ${stats.year}`} />
+        <StatBig
+          value={formatCount(stats.readThisYear)}
+          label={t('profile.readInYear', { year: stats.year })}
+        />
         <YStack width={1} backgroundColor="$borderColor" />
-        <StatBig value={formatCount(stats.pagesRead)} label="Pages lues" />
+        <StatBig value={formatCount(stats.pagesRead)} label={t('profile.pagesRead')} />
       </XStack>
 
       <YStack gap="$3">
-        <Label>Par statut</Label>
+        <Label>{t('profile.byStatus')}</Label>
         <YStack gap="$2">
           {STATUS_ORDER.map((status) => (
             <XStack key={status} alignItems="center" gap="$3">
@@ -216,7 +258,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
                 backgroundColor={statusColors[status].dot}
               />
               <Text fontFamily="$body" fontSize={15} color="$colorSoft" flex={1}>
-                {STATUS_LABELS[status]}
+                {t(`status.${status}`)}
               </Text>
               <Text
                 fontFamily="$body"
@@ -234,7 +276,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
 
       <XStack justifyContent="space-between" alignItems="center">
         <Text fontFamily="$body" fontSize={15} color="$colorSoft">
-          Auteurs différents
+          {t('profile.differentAuthors')}
         </Text>
         <Text fontFamily="$body" fontSize={15} fontWeight="600" color="$color">
           {stats.authors}
@@ -242,18 +284,18 @@ function Stats({ stats }: { stats: LibraryStats }) {
       </XStack>
 
       <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
-        Définissez un objectif de lecture annuel et suivez votre temps de lecture — bientôt.
+        {t('profile.goalHint')}
       </Text>
     </YStack>
   );
 }
 
-const CLASS_FACETS: { key: FacetKey; label: string }[] = [
-  { key: 'genre', label: 'Genres' },
-  { key: 'shelf', label: 'Étagères' },
-  { key: 'tag', label: 'Tags' },
-  { key: 'decade', label: 'Décennies' },
-  { key: 'language', label: 'Langues' },
+const CLASS_FACETS: { key: FacetKey; labelKey: TranslationKey }[] = [
+  { key: 'genre', labelKey: 'facet.genre' },
+  { key: 'shelf', labelKey: 'facet.shelf' },
+  { key: 'tag', labelKey: 'facet.tag' },
+  { key: 'decade', labelKey: 'facet.decade' },
+  { key: 'language', labelKey: 'facet.language' },
 ];
 
 function BarList({ entries }: { entries: { label: string; count: number }[] }) {
@@ -281,16 +323,17 @@ function BarList({ entries }: { entries: { label: string; count: number }[] }) {
 
 /** Classify the library by facet (genres, shelves, tags, decades…) on the dashboard. */
 function ClassificationSection({ items }: { items: LibraryItem[] }) {
+  const { t } = useT();
   const facets = useMemo(() => computeFacets(items, EMPTY_FILTERS), [items]);
   const shown = CLASS_FACETS.filter((f) => facets[f.key].length > 0);
   if (shown.length === 0) return null;
   return (
     <YStack gap="$5" marginTop="$7">
-      <Label>Classement</Label>
+      <Label>{t('profile.classification')}</Label>
       {shown.map((f) => (
         <YStack key={f.key} gap="$2">
           <Text fontFamily="$heading" fontSize={16} fontStyle="italic" color="$colorSoft">
-            {f.label}
+            {t(f.labelKey)}
           </Text>
           <BarList
             entries={facets[f.key]
@@ -310,6 +353,7 @@ function SuggestedShelvesSection({
   items: LibraryItem[];
   userId: string | undefined;
 }) {
+  const { t } = useT();
   const { data: shelves } = useShelves(userId);
   const { createShelf, addToShelf } = useShelfActions(userId);
   const [done, setDone] = useState<Set<string>>(new Set());
@@ -340,10 +384,9 @@ function SuggestedShelvesSection({
 
   return (
     <YStack gap="$3" marginTop="$7">
-      <Label>Étagères suggérées</Label>
+      <Label>{t('profile.suggestedShelves')}</Label>
       <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
-        D'après votre bibliothèque. Touchez pour créer l'étagère et y ranger les livres
-        automatiquement.
+        {t('profile.suggestedShelvesHint')}
       </Text>
       <XStack gap="$2" flexWrap="wrap">
         {suggestions.map((s) => (
@@ -373,13 +416,14 @@ function SuggestedShelvesSection({
 
 function LoansSection({ items }: { items: LibraryItem[] }) {
   const router = useRouter();
+  const { t } = useT();
   const lent = useMemo(() => items.filter((i) => i.lentTo), [items]);
   if (lent.length === 0) return null;
   return (
     <YStack gap="$3" marginTop="$7">
-      <Label>Prêtés</Label>
+      <Label>{t('profile.loans')}</Label>
       <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-        {`${lent.length} livre${lent.length > 1 ? 's' : ''} actuellement prêté${lent.length > 1 ? 's' : ''}`}
+        {lent.length === 1 ? t('profile.loansOne') : t('profile.loansMany', { count: lent.length })}
       </Text>
       <YStack gap="$2">
         {lent.map((i) => (
@@ -398,7 +442,7 @@ function LoansSection({ items }: { items: LibraryItem[] }) {
                   {i.book?.title ?? 'Sans titre'}
                 </Text>
                 <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
-                  {`Prêté à ${i.lentTo}`}
+                  {t('profile.lentTo', { name: i.lentTo ?? '' })}
                 </Text>
               </YStack>
               <XStack
@@ -409,7 +453,7 @@ function LoansSection({ items }: { items: LibraryItem[] }) {
                 alignItems="center"
               >
                 <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
-                  Prêté
+                  {t('profile.badgeLent')}
                 </Text>
               </XStack>
             </XStack>
@@ -422,14 +466,15 @@ function LoansSection({ items }: { items: LibraryItem[] }) {
 
 function DuplicatesSection({ items }: { items: LibraryItem[] }) {
   const router = useRouter();
+  const { t } = useT();
   const groups = useMemo(() => duplicateGroups(items), [items]);
   if (groups.length === 0) return null;
   const total = groups.reduce((n, g) => n + (g.count - 1), 0);
   return (
     <YStack gap="$3" marginTop="$7">
-      <Label>Doublons</Label>
+      <Label>{t('profile.duplicates')}</Label>
       <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-        {`${groups.length} titre${groups.length > 1 ? 's' : ''} en plusieurs exemplaires · ${total} de trop`}
+        {t('profile.duplicatesSummary', { titles: groups.length, extra: total })}
       </Text>
       <YStack gap="$2">
         {groups.map((g) => (
@@ -473,6 +518,7 @@ function DuplicatesSection({ items }: { items: LibraryItem[] }) {
 }
 
 function ExportSection({ items }: { items: LibraryItem[] }) {
+  const { t } = useT();
   const [done, setDone] = useState(false);
 
   const onExport = () => {
@@ -485,7 +531,7 @@ function ExportSection({ items }: { items: LibraryItem[] }) {
 
   return (
     <YStack gap="$2" marginTop="$6">
-      <Label>Données</Label>
+      <Label>{t('profile.data')}</Label>
       <Button
         onPress={onExport}
         disabled={items.length === 0}
@@ -501,19 +547,20 @@ function ExportSection({ items }: { items: LibraryItem[] }) {
         pressStyle={{ opacity: 0.85 }}
       >
         {done
-          ? 'Exporté ✓'
-          : `Exporter en CSV (${items.length} livre${items.length > 1 ? 's' : ''})`}
+          ? t('profile.exported')
+          : items.length === 1
+            ? t('profile.exportOne')
+            : t('profile.exportMany', { count: items.length })}
       </Button>
       <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
-        {Platform.OS === 'web'
-          ? 'Télécharge un .csv — titre, auteurs, ISBN, éditeur, statut, note, étagères, tags. Ouvrable dans Excel ou Numbers.'
-          : 'Partage un .csv de toute votre bibliothèque (titre, auteurs, ISBN, statut, note, étagères, tags).'}
+        {Platform.OS === 'web' ? t('profile.exportHintWeb') : t('profile.exportHintNative')}
       </Text>
     </YStack>
   );
 }
 
 function ShareSection({ userId }: { userId: string | undefined }) {
+  const { t } = useT();
   const createShare = useCreateShare(userId);
   const [url, setUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -544,7 +591,7 @@ function ShareSection({ userId }: { userId: string | undefined }) {
 
   return (
     <YStack gap="$2" marginTop="$6">
-      <Label>Partage</Label>
+      <Label>{t('profile.share')}</Label>
       {url ? (
         <YStack gap="$2">
           <Text
@@ -569,7 +616,11 @@ function ShareSection({ userId }: { userId: string | undefined }) {
             fontFamily="$body"
             fontWeight="600"
           >
-            {copied ? 'Lien copié ✓' : Platform.OS === 'web' ? 'Copier le lien' : 'Partager le lien'}
+            {copied
+              ? t('profile.shareCopied')
+              : Platform.OS === 'web'
+                ? t('profile.shareCopy')
+                : t('profile.shareSend')}
           </Button>
         </YStack>
       ) : (
@@ -585,12 +636,11 @@ function ShareSection({ userId }: { userId: string | undefined }) {
           fontFamily="$body"
           fontWeight="600"
         >
-          Créer un lien public de ma bibliothèque
+          {t('profile.shareCreate')}
         </Button>
       )}
       <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
-        Lecture seule. Toute personne disposant du lien voit vos livres (sans vos notes ni vos
-        achats).
+        {t('profile.shareHint')}
       </Text>
     </YStack>
   );
