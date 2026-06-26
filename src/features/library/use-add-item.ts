@@ -32,6 +32,13 @@ export function useAddItem(userId: string | undefined) {
         .select('id')
         .single();
       if (error) throw new Error(error.message);
+      // Adding a book already "Lu" records a dated finish, so it counts in "Lus en {year}".
+      if (status === 'read') {
+        const today = new Date().toISOString().slice(0, 10);
+        await supabase
+          .from('reading_sessions')
+          .insert({ item_id: data.id, status: 'finished', started_on: today, finished_on: today });
+      }
       return data;
     },
     onSuccess: () => {

@@ -13,6 +13,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
 import { useCopyCount, useDeleteItem } from '@/features/library/use-delete-item';
 import { useUpdateItem } from '@/features/library/use-update-item';
+import { useMarkRead } from '@/features/reading/use-reading-sessions';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
@@ -55,6 +56,7 @@ export default function BookDetailScreen() {
   const { session } = useAuth();
   const { data: item, isLoading, error } = useBookDetail(id);
   const update = useUpdateItem(id, session?.user.id);
+  const markRead = useMarkRead(id, session?.user.id);
   const deleteItem = useDeleteItem(session?.user.id);
   const { data: copyCount } = useCopyCount(item?.book?.isbn13 ?? undefined);
   const [seriesOpen, setSeriesOpen] = useState(false);
@@ -249,7 +251,9 @@ export default function BookDetailScreen() {
                 return (
                   <Button
                     key={status}
-                    onPress={() => update.mutate({ status })}
+                    onPress={() =>
+                      status === 'read' ? markRead.mutate() : update.mutate({ status })
+                    }
                     height={36}
                     paddingHorizontal="$3"
                     borderRadius={999}

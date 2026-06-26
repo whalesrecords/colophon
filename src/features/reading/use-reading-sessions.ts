@@ -82,3 +82,44 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
 
   return { start, setPage, finish, remove };
 }
+
+/**
+ * Mark a book read via the status pill: set items.status='read' AND record a
+ * finished reading session dated today, so it counts in "Lus en {year}". A book
+ * that already has a finished session this year is not double-counted.
+ */
+export function useMarkRead(itemId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (): Promise<void> => {
+      const { error: upd } = await supabase
+        .from('items')
+        .update({ status: 'read' })
+        .eq('id', itemId);
+      if (upd) throw new Error(upd.message);
+
+      const year = String(new Date().getFullYear());
+      const { data: sessions } = await supabase
+        .from('reading_sessions')
+        .select('finished_on, status')
+        .eq('item_id', itemId)
+        .eq('status', 'finished');
+      const alreadyThisYear = (sessions ?? []).some((s) => s.finished_on?.startsWith(year));
+      if (!alreadyThisYear) {
+        const { error } = await supabase.from('reading_sessions').insert({
+          item_id: itemId,
+          status: 'finished',
+          started_on: today(),
+          finished_on: today(),
+        });
+        if (error) throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', itemId] });
+      queryClient.invalidateQueries({ queryKey: ['book-detail', itemId] });
+      queryClient.invalidateQueries({ queryKey: ['library'] });
+      queryClient.invalidateQueries({ queryKey: ['stats', userId] });
+    },
+  });
+}
