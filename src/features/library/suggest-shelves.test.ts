@@ -6,6 +6,7 @@ function item(id: string, book: Partial<NonNullable<LibraryItem['book']>>): Libr
     id,
     status: 'to_read',
     ownership: 'owned',
+    format: null,
     borrowedFrom: null,
     rating: null,
     added_at: '2026-01-01',

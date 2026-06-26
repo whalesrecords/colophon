@@ -156,3 +156,14 @@ export const OWNERSHIP_LABELS: Record<Ownership, string> = {
   wishlist: 'Envie',
   borrowed: 'Emprunté',
 };
+
+// Format of a copy (physical/digital).
+export type BookFormat = 'paperback' | 'hardcover' | 'pocket' | 'ebook' | 'audio';
+export const FORMAT_ORDER: BookFormat[] = ['paperback', 'hardcover', 'pocket', 'ebook', 'audio'];
+export const FORMAT_LABELS: Record<BookFormat, string> = {
+  paperback: 'Broché',
+  hardcover: 'Relié',
+  pocket: 'Poche',
+  ebook: 'Numérique',
+  audio: 'Audio',
+};

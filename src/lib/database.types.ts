@@ -328,6 +328,7 @@ export type Database = {
           borrowed_from: string | null
           condition: string | null
           cover_override: string | null
+          format: string | null
           id: string
           isbn13: string
           location: string | null
@@ -346,6 +347,7 @@ export type Database = {
           borrowed_from?: string | null
           condition?: string | null
           cover_override?: string | null
+          format?: string | null
           id?: string
           isbn13: string
           location?: string | null
@@ -364,6 +366,7 @@ export type Database = {
           borrowed_from?: string | null
           condition?: string | null
           cover_override?: string | null
+          format?: string | null
           id?: string
           isbn13?: string
           location?: string | null

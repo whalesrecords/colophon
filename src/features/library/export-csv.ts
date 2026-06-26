@@ -1,6 +1,6 @@
 import { Platform, Share } from 'react-native';
 
-import { OWNERSHIP_LABELS, STATUS_LABELS } from '@/theme/tokens';
+import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS } from '@/theme/tokens';
 
 import type { LibraryItem } from './use-library';
 
@@ -18,6 +18,7 @@ const HEADERS = [
   'Langue',
   'Statut',
   'Possession',
+  'Format',
   'Note',
   'Étagères',
   'Tags',
@@ -37,6 +38,7 @@ export function toLibraryCsv(items: LibraryItem[]): string {
       cell(i.book?.language),
       cell(STATUS_LABELS[i.status] ?? i.status),
       cell(OWNERSHIP_LABELS[i.ownership] ?? i.ownership),
+      cell(i.format ? (FORMAT_LABELS[i.format] ?? i.format) : ''),
       cell(i.rating),
       cell(i.shelfNames.join('; ')),
       cell(i.tagNames.join('; ')),

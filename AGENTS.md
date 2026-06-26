@@ -115,7 +115,9 @@ only fills for manga. Prioritized, grounded against what already ships:
   facet; the **default view hides the wishlist** (envies) — owned+borrowed only;
   wishlist/borrowed get a badge. **Stats exclude wishlist** (borrowed counts);
   duplicate detection scoped to owned; book detail has a Possession picker;
-  CSV export gains a "Possession" column. TODO later: `format`, neutral `dnf`.
+  CSV export gains a "Possession" column. **`format`** (Broché/Relié/Poche/
+  Numérique/Audio) SHIPPED: `items.format`, book-detail picker, library facet,
+  CSV "Format" column. TODO later: neutral `dnf`.
 - **P0.2 — owned-vs-missing series completion view** ("14/22 — il manque T7, T12").
   **v1 SHIPPED**: tap a series stack in the library (group mode) → the overlay
   now fetches the full volume list (`useSeriesVolumes`), shows the **missing

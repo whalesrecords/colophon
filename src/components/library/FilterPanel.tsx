@@ -6,11 +6,12 @@ import {
   type FacetValueCount,
   type Filters,
 } from '@/features/library/faceting';
-import { OWNERSHIP_LABELS, palette, STATUS_LABELS } from '@/theme/tokens';
+import { FORMAT_LABELS, OWNERSHIP_LABELS, palette, STATUS_LABELS } from '@/theme/tokens';
 
 const FACET_LABELS: Record<FacetKey, string> = {
   status: 'Statut',
   ownership: 'Possession',
+  format: 'Format',
   shelf: 'Étagère',
   tag: 'Tag',
   genre: 'Genre',
@@ -29,6 +30,7 @@ const LANG_VALUE: Record<string, string> = {
 export function displayValue(key: FacetKey, value: string): string {
   if (key === 'status') return STATUS_LABELS[value as keyof typeof STATUS_LABELS] ?? value;
   if (key === 'ownership') return OWNERSHIP_LABELS[value as keyof typeof OWNERSHIP_LABELS] ?? value;
+  if (key === 'format') return FORMAT_LABELS[value as keyof typeof FORMAT_LABELS] ?? value;
   if (key === 'language') return LANG_VALUE[value] ?? value;
   if (key === 'tag') return `#${value}`;
   return value;

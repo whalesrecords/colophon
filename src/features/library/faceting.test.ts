@@ -11,6 +11,7 @@ function makeItem(
     id,
     status,
     ownership: 'owned',
+    format: null,
     borrowedFrom: null,
     rating: null,
     added_at: '2026-01-01',

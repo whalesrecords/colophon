@@ -3,6 +3,7 @@ import type { LibraryItem } from './use-library';
 export type FacetKey =
   | 'status'
   | 'ownership'
+  | 'format'
   | 'shelf'
   | 'tag'
   | 'genre'
@@ -15,6 +16,7 @@ export type SortKey = 'added' | 'title' | 'author' | 'year' | 'rating';
 export const FACET_KEYS: FacetKey[] = [
   'status',
   'ownership',
+  'format',
   'shelf',
   'tag',
   'genre',
@@ -34,6 +36,7 @@ export const EMPTY_FILTERS: Filters = {
   facets: {
     status: [],
     ownership: [],
+    format: [],
     shelf: [],
     tag: [],
     genre: [],
@@ -65,6 +68,8 @@ export function facetValues(item: LibraryItem, key: FacetKey): string[] {
       return [item.status];
     case 'ownership':
       return [item.ownership];
+    case 'format':
+      return item.format ? [item.format] : [];
     case 'shelf':
       return item.shelfNames;
     case 'tag':

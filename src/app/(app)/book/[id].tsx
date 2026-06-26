@@ -19,6 +19,8 @@ import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
 import {
+  FORMAT_LABELS,
+  FORMAT_ORDER,
   OWNERSHIP_LABELS,
   OWNERSHIP_ORDER,
   palette,
@@ -240,6 +242,34 @@ export default function BookDetailScreen() {
                 onSave={(v) => update.mutate({ borrowed_from: v || null })}
               />
             ) : null}
+          </YStack>
+
+          {/* format */}
+          <YStack gap="$2">
+            <Label>Format</Label>
+            <XStack gap="$2" flexWrap="wrap">
+              {FORMAT_ORDER.map((f) => {
+                const active = item.format === f;
+                return (
+                  <Button
+                    key={f}
+                    onPress={() => update.mutate({ format: active ? null : f })}
+                    height={36}
+                    paddingHorizontal="$3"
+                    borderRadius={999}
+                    borderWidth={1}
+                    borderColor={active ? '$accent' : '$borderColor'}
+                    backgroundColor={active ? '$accent' : 'transparent'}
+                    fontFamily="$body"
+                    fontSize={13}
+                    fontWeight="600"
+                    color={active ? palette.paper : '$colorMuted'}
+                  >
+                    {FORMAT_LABELS[f]}
+                  </Button>
+                );
+              })}
+            </XStack>
           </YStack>
 
           {/* status */}
