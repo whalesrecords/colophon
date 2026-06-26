@@ -140,6 +140,72 @@ export function useSendMessage(circleId: string, userId: string | undefined) {
   });
 }
 
+/** The set of user ids the current user has blocked (their messages are hidden). */
+export function useBlockedUsers(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['blocked', userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase
+        .from('user_blocks')
+        .select('blocked_id')
+        .eq('blocker_id', userId as string);
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.blocked_id));
+    },
+  });
+}
+
+/** Report a message and block/unblock its author (App Store moderation, guideline 1.2). */
+export function useModeration(userId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  const report = useMutation({
+    mutationFn: async (input: {
+      messageId: string;
+      circleId: string;
+      reportedUserId: string;
+      reason?: string;
+    }): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      const { error } = await supabase.from('message_reports').insert({
+        message_id: input.messageId,
+        circle_id: input.circleId,
+        reporter_id: userId,
+        reported_user_id: input.reportedUserId,
+        reason: input.reason?.trim() || null,
+      });
+      if (error) throw new Error(error.message);
+    },
+  });
+
+  const block = useMutation({
+    mutationFn: async (blockedId: string): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      const { error } = await supabase
+        .from('user_blocks')
+        .insert({ blocker_id: userId, blocked_id: blockedId });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blocked', userId] }),
+  });
+
+  const unblock = useMutation({
+    mutationFn: async (blockedId: string): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      const { error } = await supabase
+        .from('user_blocks')
+        .delete()
+        .eq('blocker_id', userId)
+        .eq('blocked_id', blockedId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blocked', userId] }),
+  });
+
+  return { report, block, unblock };
+}
+
 /** Messages for a circle, kept live via a realtime subscription. */
 export function useCircleMessages(circleId: string | undefined) {
   const queryClient = useQueryClient();

@@ -454,6 +454,54 @@ export type Database = {
           },
         ]
       }
+      message_reports: {
+        Row: {
+          circle_id: string
+          created_at: string
+          id: string
+          message_id: string | null
+          reason: string | null
+          reported_user_id: string | null
+          reporter_id: string
+        }
+        Insert: {
+          circle_id: string
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reason?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string
+        }
+        Update: {
+          circle_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reason?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string
+        }
+        Relationships: []
+      }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_path: string | null

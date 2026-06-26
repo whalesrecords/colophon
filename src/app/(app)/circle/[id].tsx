@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,9 +20,11 @@ import {
   useCircle,
   useCircleEvents,
   useCircleMembers,
+  useBlockedUsers,
   useCircleMessages,
   useEventActions,
   useLeaveCircle,
+  useModeration,
   useSendMessage,
 } from '@/features/circles/use-circles';
 import { palette } from '@/theme/tokens';
@@ -37,6 +40,8 @@ export default function CircleScreen() {
   const { data: messages, isLoading } = useCircleMessages(id);
   const send = useSendMessage(id, userId);
   const leave = useLeaveCircle(userId);
+  const { data: blocked } = useBlockedUsers(userId);
+  const { report, block, unblock } = useModeration(userId);
   const [text, setText] = useState('');
   const [section, setSection] = useState<'chat' | 'library' | 'proposals' | 'agenda'>('chat');
   const scrollRef = useRef<ScrollView>(null);
@@ -66,6 +71,60 @@ export default function CircleScreen() {
 
   const memberCount = members?.length ?? 0;
   const nameByUser = new Map((members ?? []).map((m) => [m.user_id, m.display_name ?? 'Membre']));
+
+  const blockedSet = blocked ?? new Set<string>();
+  const visibleMessages = (messages ?? []).filter((m) => !blockedSet.has(m.user_id));
+  const blockedMembers = (members ?? []).filter((m) => blockedSet.has(m.user_id));
+
+  const confirm = (title: string, message: string, ok: string): Promise<boolean> =>
+    new Promise((resolve) => {
+      if (Platform.OS === 'web') {
+        resolve(typeof window !== 'undefined' && window.confirm(`${title}\n\n${message}`));
+      } else {
+        Alert.alert(title, message, [
+          { text: 'Annuler', style: 'cancel', onPress: () => resolve(false) },
+          { text: ok, style: 'destructive', onPress: () => resolve(true) },
+        ]);
+      }
+    });
+
+  const notify = (msg: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') window.alert(msg);
+    } else {
+      Alert.alert('Colophon', msg);
+    }
+  };
+
+  const onReport = async (m: Message) => {
+    const ok = await confirm(
+      'Signaler ce message',
+      'Notre équipe examinera ce contenu. Voulez-vous le signaler ?',
+      'Signaler',
+    );
+    if (!ok) return;
+    try {
+      await report.mutateAsync({ messageId: m.id, circleId: id, reportedUserId: m.user_id });
+      notify('Message signalé. Merci — nous allons l’examiner.');
+    } catch {
+      notify('Impossible de signaler pour le moment.');
+    }
+  };
+
+  const onBlock = async (m: Message) => {
+    const name = nameByUser.get(m.user_id) ?? 'ce membre';
+    const ok = await confirm(
+      `Bloquer ${name}`,
+      'Vous ne verrez plus ses messages dans ce cercle. Vous pourrez le réafficher ensuite.',
+      'Bloquer',
+    );
+    if (!ok) return;
+    try {
+      await block.mutateAsync(m.user_id);
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     const t = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
@@ -191,7 +250,41 @@ export default function CircleScreen() {
             ref={scrollRef}
             contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 16, gap: 10, paddingBottom: 20 }}
           >
-            {(messages ?? []).length === 0 ? (
+            {blockedMembers.length > 0 ? (
+              <YStack
+                gap="$1"
+                padding="$2"
+                backgroundColor="$backgroundStrong"
+                borderColor="$borderColor"
+                borderWidth={1}
+                borderRadius={2}
+              >
+                <Text fontFamily="$body" fontSize={11} color="$colorMuted">
+                  {`${blockedMembers.length} membre${blockedMembers.length > 1 ? 's' : ''} masqué${blockedMembers.length > 1 ? 's' : ''}`}
+                </Text>
+                {blockedMembers.map((bm) => (
+                  <XStack key={bm.user_id} alignItems="center" justifyContent="space-between">
+                    <Text fontFamily="$body" fontSize={13} color="$colorSoft">
+                      {bm.display_name ?? 'Membre'}
+                    </Text>
+                    <Button
+                      onPress={() => unblock.mutate(bm.user_id)}
+                      chromeless
+                      height={26}
+                      paddingHorizontal={0}
+                      color="$accent"
+                      fontFamily="$body"
+                      fontSize={13}
+                      fontWeight="600"
+                    >
+                      Réafficher
+                    </Button>
+                  </XStack>
+                ))}
+              </YStack>
+            ) : null}
+
+            {visibleMessages.length === 0 ? (
               <Text
                 fontFamily="$body"
                 fontSize={14}
@@ -202,12 +295,14 @@ export default function CircleScreen() {
                 Démarrez la discussion — partagez vos impressions de lecture.
               </Text>
             ) : (
-              (messages ?? []).map((m) => (
+              visibleMessages.map((m) => (
                 <Bubble
                   key={m.id}
                   message={m}
                   mine={m.user_id === userId}
                   author={nameByUser.get(m.user_id) ?? 'Membre'}
+                  onReport={() => onReport(m)}
+                  onBlock={() => onBlock(m)}
                 />
               ))
             )}
@@ -439,7 +534,20 @@ function EventRow({
   );
 }
 
-function Bubble({ message, mine, author }: { message: Message; mine: boolean; author: string }) {
+function Bubble({
+  message,
+  mine,
+  author,
+  onReport,
+  onBlock,
+}: {
+  message: Message;
+  mine: boolean;
+  author: string;
+  onReport?: () => void;
+  onBlock?: () => void;
+}) {
+  const [menu, setMenu] = useState(false);
   return (
     <YStack alignSelf={mine ? 'flex-end' : 'flex-start'} maxWidth="80%" gap={2}>
       {!mine ? (
@@ -459,6 +567,49 @@ function Bubble({ message, mine, author }: { message: Message; mine: boolean; au
           {message.body}
         </Text>
       </YStack>
+      {!mine && (onReport || onBlock) ? (
+        <YStack gap={2}>
+          <Pressable onPress={() => setMenu((o) => !o)} hitSlop={8}>
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginLeft="$2">
+              {menu ? 'Fermer' : '⋯'}
+            </Text>
+          </Pressable>
+          {menu ? (
+            <XStack gap="$3" marginLeft="$2">
+              <Button
+                onPress={() => {
+                  setMenu(false);
+                  onReport?.();
+                }}
+                chromeless
+                height={24}
+                paddingHorizontal={0}
+                color="$accent"
+                fontFamily="$body"
+                fontSize={12}
+                fontWeight="600"
+              >
+                Signaler
+              </Button>
+              <Button
+                onPress={() => {
+                  setMenu(false);
+                  onBlock?.();
+                }}
+                chromeless
+                height={24}
+                paddingHorizontal={0}
+                color="$signal"
+                fontFamily="$body"
+                fontSize={12}
+                fontWeight="600"
+              >
+                Bloquer
+              </Button>
+            </XStack>
+          ) : null}
+        </YStack>
+      ) : null}
     </YStack>
   );
 }
