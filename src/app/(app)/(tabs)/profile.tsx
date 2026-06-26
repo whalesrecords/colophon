@@ -24,6 +24,7 @@ import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { LOCALES, type TranslationKey, useT } from '@/i18n';
+import { THEME_OPTIONS, useThemePref } from '@/theme/theme-pref';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
 
 const STATUS_ORDER: ReadingStatus[] = ['reading', 'read', 'to_read', 'abandoned'];
@@ -97,6 +98,8 @@ export default function ProfileScreen() {
 
         <ExportSection items={items} />
 
+        <AppearanceSection />
+
         <LanguageSection />
 
         <Button
@@ -128,6 +131,40 @@ export default function ProfileScreen() {
         </Text>
       </ScrollView>
     </Screen>
+  );
+}
+
+function AppearanceSection() {
+  const { t } = useT();
+  const { pref, setPref } = useThemePref();
+  return (
+    <YStack gap="$2" marginTop="$6">
+      <Label>{t('settings.appearance')}</Label>
+      <XStack gap="$2">
+        {THEME_OPTIONS.map((opt) => {
+          const active = opt === pref;
+          return (
+            <Button
+              key={opt}
+              onPress={() => setPref(opt)}
+              flex={1}
+              height={44}
+              borderRadius={2}
+              borderWidth={1}
+              borderColor={active ? '$accent' : '$borderColor'}
+              backgroundColor={active ? '$accent' : 'transparent'}
+              color={active ? palette.paper : '$color'}
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={14}
+              pressStyle={{ opacity: 0.85 }}
+            >
+              {t(`theme.${opt}`)}
+            </Button>
+          );
+        })}
+      </XStack>
+    </YStack>
   );
 }
 

@@ -87,6 +87,12 @@ export const fr = {
   'settings.language': 'Langue',
   'settings.languageHint': "S'applique à toute l'application.",
 
+  // Appearance picker
+  'settings.appearance': 'Apparence',
+  'theme.system': 'Système',
+  'theme.light': 'Clair',
+  'theme.dark': 'Sombre',
+
   // Common
   'common.cancel': 'Annuler',
   'common.delete': 'Supprimer',
@@ -171,6 +177,11 @@ export const en: Partial<Record<TranslationKey, string>> = {
 
   'settings.language': 'Language',
   'settings.languageHint': 'Applies across the whole app.',
+
+  'settings.appearance': 'Appearance',
+  'theme.system': 'System',
+  'theme.light': 'Light',
+  'theme.dark': 'Dark',
 
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',

@@ -21,6 +21,7 @@ import { TamaguiProvider } from 'tamagui';
 
 import { AuthProvider, useAuth } from '@/features/auth/auth-context';
 import { LocaleProvider } from '@/i18n';
+import { DARK_BG, ThemePrefProvider, useThemePref } from '@/theme/theme-pref';
 import { palette } from '@/theme/tokens';
 import config from '@/theme/tamagui.config';
 
@@ -32,6 +33,7 @@ const queryClient = new QueryClient({
 
 function RootNavigator() {
   const { session, initializing } = useAuth();
+  const { effective } = useThemePref();
   if (initializing) return null;
   const signedIn = !!session;
 
@@ -39,7 +41,7 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: palette.paper },
+        contentStyle: { backgroundColor: effective === 'dark' ? DARK_BG : palette.paper },
       }}
     >
       <Stack.Protected guard={signedIn}>
@@ -77,16 +79,25 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <TamaguiProvider config={config} defaultTheme="light">
-        <QueryClientProvider client={queryClient}>
-          <LocaleProvider>
-            <AuthProvider>
-              <StatusBar style="dark" />
-              <RootNavigator />
-            </AuthProvider>
-          </LocaleProvider>
-        </QueryClientProvider>
-      </TamaguiProvider>
+      <ThemePrefProvider>
+        <ThemedApp />
+      </ThemePrefProvider>
     </SafeAreaProvider>
+  );
+}
+
+function ThemedApp() {
+  const { effective } = useThemePref();
+  return (
+    <TamaguiProvider config={config} defaultTheme={effective}>
+      <QueryClientProvider client={queryClient}>
+        <LocaleProvider>
+          <AuthProvider>
+            <StatusBar style={effective === 'dark' ? 'light' : 'dark'} />
+            <RootNavigator />
+          </AuthProvider>
+        </LocaleProvider>
+      </QueryClientProvider>
+    </TamaguiProvider>
   );
 }

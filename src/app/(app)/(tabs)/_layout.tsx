@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icons';
 import { useT } from '@/i18n';
+import { useThemePref } from '@/theme/theme-pref';
 import { palette } from '@/theme/tokens';
 
 function tabIcon(name: IconName) {
@@ -34,15 +35,17 @@ function ScanTabIcon() {
 export default function AppTabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useT();
+  const { effective } = useThemePref();
+  const dark = effective === 'dark';
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: palette.aizome,
-        tabBarInactiveTintColor: palette.concrete,
+        tabBarActiveTintColor: dark ? '#5E76A8' : palette.aizome,
+        tabBarInactiveTintColor: dark ? '#6E685E' : palette.concrete,
         tabBarStyle: {
-          backgroundColor: 'rgba(244,241,234,0.96)',
-          borderTopColor: palette.hairline,
+          backgroundColor: dark ? 'rgba(21,19,14,0.96)' : 'rgba(244,241,234,0.96)',
+          borderTopColor: dark ? '#332F26' : palette.hairline,
           // Android: add the gesture-nav / nav-bar inset so labels clear the system bar.
           height: Platform.select({ ios: 86, default: 60 + insets.bottom }),
           paddingTop: 8,
