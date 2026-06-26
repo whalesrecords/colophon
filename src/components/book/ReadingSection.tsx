@@ -51,7 +51,7 @@ export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionPro
           onPress={() => start.mutate(totalPages)}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={46}
           fontFamily="$body"
           fontWeight="600"
@@ -139,7 +139,7 @@ function Progress({
       </YStack>
 
       <XStack gap="$2" alignItems="center">
-        <Button onPress={() => commit(current - 10)} backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} color="$color" borderRadius={2} height={40} width={48} fontFamily="$body" fontSize={18}>
+        <Button onPress={() => commit(current - 10)} backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} color="$color" borderRadius={12} height={40} width={48} fontFamily="$body" fontSize={18}>
           −
         </Button>
         <Input
@@ -152,16 +152,16 @@ function Progress({
           backgroundColor="$background"
           borderColor="$borderColor"
           borderWidth={1}
-          borderRadius={2}
+          borderRadius={12}
           height={40}
           fontFamily="$body"
           fontSize={15}
           color="$color"
         />
-        <Button onPress={() => commit(current + 10)} backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} color="$color" borderRadius={2} height={40} width={48} fontFamily="$body" fontSize={18}>
+        <Button onPress={() => commit(current + 10)} backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} color="$color" borderRadius={12} height={40} width={48} fontFamily="$body" fontSize={18}>
           +
         </Button>
-        <Button onPress={onFinish} backgroundColor="$accent" color={palette.paper} borderRadius={2} height={40} paddingHorizontal="$4" fontFamily="$body" fontWeight="600">
+        <Button onPress={onFinish} backgroundColor="$accent" color={palette.paper} borderRadius={12} height={40} paddingHorizontal="$4" fontFamily="$body" fontWeight="600">
           Terminer
         </Button>
       </XStack>

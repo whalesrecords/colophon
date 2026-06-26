@@ -50,7 +50,7 @@ function ModeTab({
       onPress={onPress}
       flex={1}
       height={40}
-      borderRadius={2}
+      borderRadius={12}
       borderWidth={1}
       borderColor={active ? '$accent' : '$borderColor'}
       backgroundColor={active ? '$accent' : 'transparent'}
@@ -208,7 +208,7 @@ export default function ScanScreen() {
                   backgroundColor="$backgroundStrong"
                   borderColor="$borderColor"
                   borderWidth={1}
-                  borderRadius={2}
+                  borderRadius={12}
                   padding="$3"
                   fontFamily="$body"
                   fontSize={15}
@@ -221,7 +221,7 @@ export default function ScanScreen() {
                   disabled={!!bulk || isbnList.length === 0}
                   backgroundColor="$accent"
                   color={palette.paper}
-                  borderRadius={2}
+                  borderRadius={12}
                   height={50}
                   fontFamily="$body"
                   fontWeight="600"
@@ -255,7 +255,7 @@ export default function ScanScreen() {
                     borderColor="$borderColor"
                     borderWidth={1}
                     color="$color"
-                    borderRadius={2}
+                    borderRadius={12}
                     height={42}
                     fontFamily="$body"
                     fontWeight="600"
@@ -273,7 +273,7 @@ export default function ScanScreen() {
                   backgroundColor="$backgroundStrong"
                   borderColor="$borderColor"
                   borderWidth={1}
-                  borderRadius={2}
+                  borderRadius={12}
                   padding="$3"
                   fontFamily="$body"
                   fontSize={13}
@@ -286,7 +286,7 @@ export default function ScanScreen() {
                   disabled={!!csvImport.progress || parsedCsv.books.length === 0}
                   backgroundColor="$accent"
                   color={palette.paper}
-                  borderRadius={2}
+                  borderRadius={12}
                   height={50}
                   fontFamily="$body"
                   fontWeight="600"
@@ -319,7 +319,7 @@ export default function ScanScreen() {
                 backgroundColor="$backgroundStrong"
                 borderColor="$borderColor"
                 borderWidth={1}
-                borderRadius={2}
+                borderRadius={12}
               >
                 <Text fontFamily="$heading" fontSize={15} color="$color">
                   Caméra indisponible sur cet appareil
@@ -348,7 +348,7 @@ export default function ScanScreen() {
                   backgroundColor="$backgroundStrong"
                   borderColor="$borderColor"
                   borderWidth={1}
-                  borderRadius={2}
+                  borderRadius={12}
                   height={48}
                   paddingHorizontal="$3"
                   fontFamily="$body"
@@ -361,7 +361,7 @@ export default function ScanScreen() {
                   onPress={onSubmit}
                   backgroundColor="$accent"
                   color={palette.paper}
-                  borderRadius={2}
+                  borderRadius={12}
                   height={48}
                   paddingHorizontal="$5"
                   fontFamily="$body"
@@ -395,7 +395,7 @@ export default function ScanScreen() {
             onPress={() => router.push('/')}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={52}
             fontFamily="$body"
             fontWeight="600"
@@ -475,7 +475,7 @@ function EntryRow({
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius={2}
+      borderRadius={12}
     >
       {entry.status === 'added' && entry.book ? (
         <BookCover

@@ -51,7 +51,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
         backgroundColor="$backgroundStrong"
         borderColor="$borderColor"
         borderWidth={1}
-        borderRadius={2}
+        borderRadius={12}
         height={48}
         fontFamily="$body"
         fontWeight="600"

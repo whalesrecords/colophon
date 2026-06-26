@@ -121,7 +121,7 @@ export default function LibraryScreen() {
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               paddingHorizontal="$3"
               fontFamily="$body"
@@ -136,7 +136,7 @@ export default function LibraryScreen() {
                 onPress={() => setShowFilters((s) => !s)}
                 height={36}
                 paddingHorizontal="$3"
-                borderRadius={2}
+                borderRadius={12}
                 borderWidth={1}
                 borderColor={nFilters ? '$accent' : '$borderColor'}
                 backgroundColor="transparent"
@@ -350,7 +350,7 @@ function ViewToggle({ label, active, onPress }: { label: string; active: boolean
       onPress={onPress}
       height={36}
       paddingHorizontal="$3"
-      borderRadius={2}
+      borderRadius={12}
       borderWidth={1}
       borderColor={active ? '$accent' : '$borderColor'}
       backgroundColor={active ? '$accent' : 'transparent'}
@@ -366,7 +366,7 @@ function ViewToggle({ label, active, onPress }: { label: string; active: boolean
 
 function SizeControl({ size, onSize }: { size: GridSize; onSize: (s: GridSize) => void }) {
   return (
-    <XStack borderWidth={1} borderColor="$borderColor" borderRadius={2} overflow="hidden">
+    <XStack borderWidth={1} borderColor="$borderColor" borderRadius={12} overflow="hidden">
       {(['S', 'M', 'L'] as GridSize[]).map((s) => (
         <Button
           key={s}
@@ -413,7 +413,7 @@ function SeriesCard({
             backgroundColor="$backgroundStrong"
             borderColor="$borderColor"
             borderWidth={1}
-            borderRadius={2}
+            borderRadius={12}
           />
           <BookCover
             title={cover.book?.title ?? 'Sans titre'}
@@ -566,7 +566,7 @@ function LibraryRow({
         backgroundColor="$backgroundStrong"
         borderColor="$borderColor"
         borderWidth={1}
-        borderRadius={2}
+        borderRadius={12}
       >
         <BookCover
           title={item.book?.title ?? 'Sans titre'}
@@ -650,7 +650,7 @@ function EmptyLibrary({ coverWidth }: { coverWidth: number }) {
         onPress={() => router.push('/scan')}
         backgroundColor="$accent"
         color={palette.paper}
-        borderRadius={2}
+        borderRadius={12}
         height={50}
         paddingHorizontal="$6"
         fontFamily="$body"

@@ -28,7 +28,7 @@ const inputProps = {
   backgroundColor: '$background' as const,
   borderColor: '$borderColor' as const,
   borderWidth: 1,
-  borderRadius: 2,
+  borderRadius: 12,
   height: 44,
   paddingHorizontal: '$3' as const,
   fontFamily: '$body' as const,
@@ -100,7 +100,7 @@ export default function DiscussionsScreen() {
               disabled={createCircle.isPending}
               backgroundColor="$accent"
               color={palette.paper}
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               paddingHorizontal="$4"
               fontFamily="$body"
@@ -126,7 +126,7 @@ export default function DiscussionsScreen() {
               borderColor="$borderColor"
               borderWidth={1}
               color="$color"
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               paddingHorizontal="$4"
               fontFamily="$body"
@@ -156,7 +156,7 @@ export default function DiscussionsScreen() {
                   backgroundColor="$backgroundStrong"
                   borderColor="$borderColor"
                   borderWidth={1}
-                  borderRadius={2}
+                  borderRadius={12}
                   padding="$4"
                 >
                   <YStack flex={1} gap="$1">

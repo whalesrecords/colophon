@@ -2,7 +2,7 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
-import { BookSpines } from '@/components/BookSpines';
+import { CatOnBooks } from '@/components/CatOnBooks';
 import { TextField } from '@/components/Field';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
@@ -31,7 +31,7 @@ export default function LoginScreen() {
     <Screen alignItems="center" justifyContent="center" paddingHorizontal="$6">
       <YStack width="100%" maxWidth={420} gap="$6">
         <YStack alignItems="center" gap="$2">
-          <BookSpines />
+          <CatOnBooks />
           <Text
             fontFamily="$heading"
             fontSize={44}
@@ -81,7 +81,7 @@ export default function LoginScreen() {
           disabled={loading}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={52}
           fontFamily="$body"
           fontWeight="600"

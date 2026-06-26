@@ -68,7 +68,7 @@ export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride
           padding="$3"
           borderWidth={1}
           borderColor="$borderColor"
-          borderRadius={2}
+          borderRadius={12}
           backgroundColor="$background"
         >
           <YStack gap="$2">
@@ -85,7 +85,7 @@ export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride
                 backgroundColor="$backgroundStrong"
                 borderColor="$borderColor"
                 borderWidth={1}
-                borderRadius={2}
+                borderRadius={12}
                 height={42}
                 paddingHorizontal="$3"
                 fontFamily="$body"
@@ -96,7 +96,7 @@ export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride
                 onPress={() => url.trim() && setCover(url.trim())}
                 backgroundColor="$accent"
                 color={palette.paper}
-                borderRadius={2}
+                borderRadius={12}
                 height={42}
                 paddingHorizontal="$4"
                 fontFamily="$body"
@@ -116,7 +116,7 @@ export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride
               borderColor="$borderColor"
               borderWidth={1}
               color="$color"
-              borderRadius={2}
+              borderRadius={12}
               height={42}
               fontFamily="$body"
               fontWeight="600"

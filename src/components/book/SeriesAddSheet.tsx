@@ -129,7 +129,7 @@ export function SeriesAddSheet({
                   backgroundColor="$backgroundStrong"
                   borderColor="$borderColor"
                   borderWidth={1}
-                  borderRadius={2}
+                  borderRadius={12}
                   width="100%"
                   opacity={isOwned ? 0.55 : 1}
                 >
@@ -167,7 +167,7 @@ export function SeriesAddSheet({
             disabled={!!bulk || toAdd.length === 0}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={50}
             fontFamily="$body"
             fontWeight="600"

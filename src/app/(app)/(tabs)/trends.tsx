@@ -67,7 +67,7 @@ export default function TrendsScreen() {
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
               paddingVertical="$4"
             >
               <YStack flex={1} alignItems="center" gap="$1">

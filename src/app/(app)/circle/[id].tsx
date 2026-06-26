@@ -260,7 +260,7 @@ export default function CircleScreen() {
                 backgroundColor="$backgroundStrong"
                 borderColor="$borderColor"
                 borderWidth={1}
-                borderRadius={2}
+                borderRadius={12}
               >
                 <Text fontFamily="$body" fontSize={11} color="$colorMuted">
                   {`${blockedMembers.length} membre${blockedMembers.length > 1 ? 's' : ''} masqué${blockedMembers.length > 1 ? 's' : ''}`}
@@ -380,7 +380,7 @@ function SegTab({ label, active, onPress }: { label: string; active: boolean; on
       onPress={onPress}
       height={34}
       paddingHorizontal="$4"
-      borderRadius={2}
+      borderRadius={12}
       borderWidth={1}
       borderColor={active ? '$accent' : '$borderColor'}
       backgroundColor={active ? '$accent' : 'transparent'}
@@ -435,7 +435,7 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
     backgroundColor: '$background' as const,
     borderColor: '$borderColor' as const,
     borderWidth: 1,
-    borderRadius: 2,
+    borderRadius: 12,
     height: 42,
     paddingHorizontal: '$3' as const,
     fontFamily: '$body' as const,
@@ -446,7 +446,7 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 20 }}>
-      <YStack gap="$2" backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} borderRadius={2} padding="$3">
+      <YStack gap="$2" backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} borderRadius={12} padding="$3">
         <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
           Nouveau rendez-vous
         </Text>
@@ -461,7 +461,7 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
           disabled={createEvent.isPending}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={44}
           fontFamily="$body"
           fontWeight="600"
@@ -521,7 +521,7 @@ function EventRow({
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius={2}
+      borderRadius={12}
     >
       <YStack flex={1} gap={2}>
         <Text fontFamily="$heading" fontSize={16} color="$color" numberOfLines={1}>

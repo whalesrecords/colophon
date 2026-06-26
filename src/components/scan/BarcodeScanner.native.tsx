@@ -39,7 +39,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
         backgroundColor="$backgroundStrong"
         borderColor="$borderColor"
         borderWidth={1}
-        borderRadius={2}
+        borderRadius={12}
       >
         <Text fontFamily="$body" color="$colorSoft" lineHeight={20}>
           Autorisez la caméra pour scanner les codes-barres des livres.
@@ -48,7 +48,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
           onPress={askPermission}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={46}
           fontFamily="$body"
           fontWeight="600"

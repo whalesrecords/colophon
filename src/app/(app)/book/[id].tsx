@@ -179,7 +179,7 @@ export default function BookDetailScreen() {
               borderColor="$accent"
               borderWidth={1}
               color="$accent"
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               fontFamily="$body"
               fontWeight="600"
@@ -193,7 +193,7 @@ export default function BookDetailScreen() {
             <XStack
               alignItems="center"
               padding="$3"
-              borderRadius={2}
+              borderRadius={12}
               borderWidth={1}
               borderColor={palette.terracotta}
               backgroundColor="$backgroundStrong"
@@ -383,7 +383,7 @@ export default function BookDetailScreen() {
             borderColor="$signal"
             borderWidth={1}
             color="$signal"
-            borderRadius={2}
+            borderRadius={12}
             height={46}
             fontFamily="$body"
             fontWeight="600"
@@ -458,7 +458,7 @@ function EditableText({
     backgroundColor: '$background' as const,
     borderColor: '$borderColor' as const,
     borderWidth: 1,
-    borderRadius: 2,
+    borderRadius: 12,
     paddingHorizontal: '$3' as const,
     fontFamily: '$body' as const,
     fontSize: 15,
@@ -553,7 +553,7 @@ function ShelvesSection({
           backgroundColor="$background"
           borderColor="$borderColor"
           borderWidth={1}
-          borderRadius={2}
+          borderRadius={12}
           height={42}
           paddingHorizontal="$3"
           fontFamily="$body"
@@ -566,7 +566,7 @@ function ShelvesSection({
           borderColor="$borderColor"
           borderWidth={1}
           color="$color"
-          borderRadius={2}
+          borderRadius={12}
           height={42}
           paddingHorizontal="$4"
           fontFamily="$body"
@@ -650,7 +650,7 @@ function TagsSection({
           backgroundColor="$background"
           borderColor="$borderColor"
           borderWidth={1}
-          borderRadius={2}
+          borderRadius={12}
           height={42}
           paddingHorizontal="$3"
           fontFamily="$body"
@@ -663,7 +663,7 @@ function TagsSection({
           borderColor="$borderColor"
           borderWidth={1}
           color="$color"
-          borderRadius={2}
+          borderRadius={12}
           height={42}
           paddingHorizontal="$4"
           fontFamily="$body"

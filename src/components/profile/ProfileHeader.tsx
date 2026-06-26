@@ -10,7 +10,7 @@ const field = {
   backgroundColor: '$background' as const,
   borderColor: '$borderColor' as const,
   borderWidth: 1,
-  borderRadius: 2,
+  borderRadius: 12,
   height: 42,
   paddingHorizontal: '$3' as const,
   fontFamily: '$body' as const,
@@ -112,7 +112,7 @@ export function ProfileHeader({
           padding="$3"
           borderWidth={1}
           borderColor="$borderColor"
-          borderRadius={2}
+          borderRadius={12}
           backgroundColor="$backgroundStrong"
         >
           <Button
@@ -120,7 +120,7 @@ export function ProfileHeader({
             disabled={upload.isPending}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={42}
             fontFamily="$body"
             fontWeight="600"
@@ -148,7 +148,7 @@ export function ProfileHeader({
               borderColor="$borderColor"
               borderWidth={1}
               color="$color"
-              borderRadius={2}
+              borderRadius={12}
               height={42}
               paddingHorizontal="$4"
               fontFamily="$body"
@@ -178,7 +178,7 @@ export function ProfileHeader({
             disabled={update.isPending}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={44}
             fontFamily="$body"
             fontWeight="600"

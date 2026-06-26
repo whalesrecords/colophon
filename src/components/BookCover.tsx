@@ -177,7 +177,7 @@ function ComposedCover({
 
 const styles = StyleSheet.create({
   cover: {
-    borderRadius: 2,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   composed: {
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     inset: 0,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.08)',
-    borderRadius: 2,
+    borderRadius: 12,
   },
   rule: {
     height: 1,

@@ -110,7 +110,7 @@ export function YearRecap({
           onPress={onShare}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={48}
           paddingHorizontal="$5"
           fontFamily="$body"

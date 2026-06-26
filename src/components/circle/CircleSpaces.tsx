@@ -108,7 +108,7 @@ export function CircleLibrarySection({
             onPress={() => setAdding((a) => !a)}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={44}
             fontFamily="$body"
             fontWeight="600"
@@ -152,7 +152,7 @@ export function CircleLibrarySection({
                   backgroundColor="$backgroundStrong"
                   borderColor="$borderColor"
                   borderWidth={1}
-                  borderRadius={2}
+                  borderRadius={12}
                   width="100%"
                 >
                   <BookCover
@@ -331,7 +331,7 @@ function BookPanel({
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
             >
               <XStack justifyContent="space-between" alignItems="center">
                 <Text fontFamily="$body" fontSize={12} fontWeight="600" color="$colorSoft">
@@ -372,7 +372,7 @@ function BookPanel({
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
               height={42}
               paddingHorizontal="$3"
               fontFamily="$body"
@@ -388,7 +388,7 @@ function BookPanel({
               }}
               backgroundColor="$accent"
               color={palette.paper}
-              borderRadius={2}
+              borderRadius={12}
               height={42}
               paddingHorizontal="$4"
               fontFamily="$body"
@@ -427,7 +427,7 @@ export function CircleProposalsSection({
           onPress={() => setAdding((a) => !a)}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={44}
           fontFamily="$body"
           fontWeight="600"
@@ -502,7 +502,7 @@ function ProposalRowView({
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius={2}
+      borderRadius={12}
     >
       <XStack gap="$3" alignItems="center">
         <BookCover

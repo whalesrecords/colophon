@@ -50,7 +50,7 @@ export function FilterPanel({ facets, filters, onToggle }: FilterPanelProps) {
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius={2}
+      borderRadius={12}
     >
       {FACET_KEYS.map((key) => {
         const selected = filters.facets[key];

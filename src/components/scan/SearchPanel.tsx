@@ -85,7 +85,7 @@ export function SearchPanel({ onPick, addedIsbns }: SearchPanelProps) {
           backgroundColor="$backgroundStrong"
           borderColor="$borderColor"
           borderWidth={1}
-          borderRadius={2}
+          borderRadius={12}
           height={48}
           paddingHorizontal="$3"
           fontFamily="$body"
@@ -99,7 +99,7 @@ export function SearchPanel({ onPick, addedIsbns }: SearchPanelProps) {
           disabled={search.isPending}
           backgroundColor="$accent"
           color={palette.paper}
-          borderRadius={2}
+          borderRadius={12}
           height={48}
           paddingHorizontal="$5"
           fontFamily="$body"
@@ -154,7 +154,7 @@ function ResultRow({
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius={2}
+      borderRadius={12}
     >
       <BookCover
         title={result.title ?? 'Sans titre'}

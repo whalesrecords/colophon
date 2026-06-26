@@ -24,7 +24,7 @@ const inputProps = {
   backgroundColor: '$background' as const,
   borderColor: '$borderColor' as const,
   borderWidth: 1,
-  borderRadius: 2,
+  borderRadius: 12,
   height: 44,
   paddingHorizontal: '$3' as const,
   fontFamily: '$body' as const,
@@ -61,7 +61,7 @@ export function LoanSection({ itemId, userId }: { itemId: string; userId: string
         <YStack
           gap="$2"
           padding="$3"
-          borderRadius={2}
+          borderRadius={12}
           borderWidth={1}
           borderColor={palette.ochre}
           backgroundColor="$backgroundStrong"
@@ -83,7 +83,7 @@ export function LoanSection({ itemId, userId }: { itemId: string; userId: string
               onPress={() => markReturned.mutate(active.id)}
               backgroundColor="$accent"
               color={palette.paper}
-              borderRadius={2}
+              borderRadius={12}
               height={42}
               paddingHorizontal="$4"
               fontFamily="$body"
@@ -126,7 +126,7 @@ export function LoanSection({ itemId, userId }: { itemId: string; userId: string
               disabled={lend.isPending}
               backgroundColor="$accent"
               color={palette.paper}
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               paddingHorizontal="$5"
               fontFamily="$body"

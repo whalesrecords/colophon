@@ -28,7 +28,7 @@ export function TextField({ label, ...props }: { label: string } & InputProps) {
         backgroundColor="$backgroundStrong"
         borderColor="$borderColor"
         borderWidth={1}
-        borderRadius={2}
+        borderRadius={12}
         height={50}
         paddingHorizontal="$3"
         fontFamily="$body"

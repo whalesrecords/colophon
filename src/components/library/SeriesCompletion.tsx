@@ -91,7 +91,7 @@ export function SeriesCompletion({
             disabled={!!bulk}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={48}
             fontFamily="$body"
             fontWeight="600"

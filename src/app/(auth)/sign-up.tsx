@@ -51,7 +51,7 @@ export default function SignUpScreen() {
             backgroundColor="$backgroundStrong"
             borderColor="$borderColor"
             borderWidth={1}
-            borderRadius={2}
+            borderRadius={12}
           >
             <Text fontFamily="$heading" fontSize={18} color="$color">
               {t('auth.checkEmailTitle')}
@@ -96,7 +96,7 @@ export default function SignUpScreen() {
               disabled={loading}
               backgroundColor="$accent"
               color={palette.paper}
-              borderRadius={2}
+              borderRadius={12}
               height={52}
               fontFamily="$body"
               fontWeight="600"

@@ -94,7 +94,7 @@ export function AddSheet({
                   disabled={busy}
                   flex={1}
                   height={56}
-                  borderRadius={2}
+                  borderRadius={12}
                   borderWidth={1}
                   borderColor={owned ? '$accent' : '$borderColor'}
                   backgroundColor={owned ? '$accent' : '$backgroundStrong'}

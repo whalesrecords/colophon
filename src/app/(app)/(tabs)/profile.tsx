@@ -106,7 +106,7 @@ export default function ProfileScreen() {
             borderColor="$borderColor"
             borderWidth={1}
             color="$color"
-            borderRadius={2}
+            borderRadius={12}
             height={48}
             fontFamily="$body"
             fontWeight="600"
@@ -138,7 +138,7 @@ export default function ProfileScreen() {
           borderColor="$borderColor"
           borderWidth={1}
           color="$color"
-          borderRadius={2}
+          borderRadius={12}
           height={48}
           fontFamily="$body"
           fontWeight="600"
@@ -271,7 +271,7 @@ function GoalSection({
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               paddingHorizontal="$3"
               fontFamily="$body"
@@ -283,7 +283,7 @@ function GoalSection({
               disabled={!custom.trim()}
               backgroundColor="$accent"
               color={palette.paper}
-              borderRadius={2}
+              borderRadius={12}
               height={44}
               paddingHorizontal="$4"
               fontFamily="$body"
@@ -314,7 +314,7 @@ function AppearanceSection() {
               onPress={() => setPref(opt)}
               flex={1}
               height={44}
-              borderRadius={2}
+              borderRadius={12}
               borderWidth={1}
               borderColor={active ? '$accent' : '$borderColor'}
               backgroundColor={active ? '$accent' : 'transparent'}
@@ -347,7 +347,7 @@ function LanguageSection() {
               onPress={() => setLocale(l.code)}
               flex={1}
               height={44}
-              borderRadius={2}
+              borderRadius={12}
               borderWidth={1}
               borderColor={active ? '$accent' : '$borderColor'}
               backgroundColor={active ? '$accent' : 'transparent'}
@@ -407,7 +407,7 @@ function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
         borderColor="$signal"
         borderWidth={1}
         color="$signal"
-        borderRadius={2}
+        borderRadius={12}
         height={46}
         fontFamily="$body"
         fontWeight="600"
@@ -432,7 +432,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
         backgroundColor="$backgroundStrong"
         borderColor="$borderColor"
         borderWidth={1}
-        borderRadius={2}
+        borderRadius={12}
         paddingVertical="$5"
       >
         <StatBig
@@ -640,7 +640,7 @@ function LoansSection({ items }: { items: LibraryItem[] }) {
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
             >
               <YStack flex={1} gap={2}>
                 <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
@@ -694,7 +694,7 @@ function DuplicatesSection({ items }: { items: LibraryItem[] }) {
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
               borderWidth={1}
-              borderRadius={2}
+              borderRadius={12}
             >
               <YStack flex={1} gap={2}>
                 <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
@@ -747,7 +747,7 @@ function ExportSection({ items }: { items: LibraryItem[] }) {
         borderColor="$borderColor"
         borderWidth={1}
         color="$color"
-        borderRadius={2}
+        borderRadius={12}
         height={48}
         fontFamily="$body"
         fontWeight="600"
@@ -810,7 +810,7 @@ function ShareSection({ userId }: { userId: string | undefined }) {
             backgroundColor="$backgroundStrong"
             borderColor="$borderColor"
             borderWidth={1}
-            borderRadius={2}
+            borderRadius={12}
             padding="$3"
           >
             {url}
@@ -819,7 +819,7 @@ function ShareSection({ userId }: { userId: string | undefined }) {
             onPress={onShare}
             backgroundColor="$accent"
             color={palette.paper}
-            borderRadius={2}
+            borderRadius={12}
             height={46}
             fontFamily="$body"
             fontWeight="600"
@@ -839,7 +839,7 @@ function ShareSection({ userId }: { userId: string | undefined }) {
           borderColor="$borderColor"
           borderWidth={1}
           color="$color"
-          borderRadius={2}
+          borderRadius={12}
           height={48}
           fontFamily="$body"
           fontWeight="600"
