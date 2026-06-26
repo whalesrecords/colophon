@@ -8,8 +8,10 @@ import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
 import { SearchPanel } from '@/components/scan/SearchPanel';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
+import { useCsvImport } from '@/features/library/use-csv-import';
 import { useLibrary } from '@/features/library/use-library';
 import { type ScanEntry, useScanSession } from '@/features/scan/use-scan-session';
+import { parseBookCsv } from '@/lib/book-csv';
 import { parseIsbnList } from '@/lib/isbn-list';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette } from '@/theme/tokens';
@@ -79,6 +81,25 @@ export default function ScanScreen() {
   const [value, setValue] = useState('');
   const [listText, setListText] = useState('');
   const isbnList = useMemo(() => parseIsbnList(listText), [listText]);
+  const [importKind, setImportKind] = useState<'isbn' | 'csv'>('isbn');
+  const [csvText, setCsvText] = useState('');
+  const parsedCsv = useMemo(() => parseBookCsv(csvText), [csvText]);
+  const csvImport = useCsvImport(session?.user.id);
+
+  const pickCsvFile = () => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,text/csv';
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => setCsvText(String(reader.result ?? ''));
+      reader.readAsText(file);
+    };
+    input.click();
+  };
   const { width } = useWindowDimensions();
   const padH = Math.max(20, (width - 720) / 2);
   // Desktop browsers / iPad-app-on-Mac expose no usable camera; route to manual ISBN.
@@ -127,47 +148,138 @@ export default function ScanScreen() {
 
         {mode === 'import' ? (
           <YStack gap="$3">
-            <Label>Coller une liste d'ISBN</Label>
-            <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
-              Un ISBN par ligne (ou séparés par des virgules) — depuis un export Goodreads / Calibre,
-              ou en scannant vos tomes.
-              {isbnList.length > 0
-                ? ` ${isbnList.length} ISBN détecté${isbnList.length > 1 ? 's' : ''}.`
-                : ''}
-            </Text>
-            <TextArea
-              value={listText}
-              onChangeText={setListText}
-              placeholder={'9782070360024\n9782203001237\n…'}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              minHeight={150}
-              backgroundColor="$backgroundStrong"
-              borderColor="$borderColor"
-              borderWidth={1}
-              borderRadius={2}
-              padding="$3"
-              fontFamily="$body"
-              fontSize={15}
-              color="$color"
-              placeholderTextColor="$concreteLight"
-              focusStyle={{ borderColor: '$accent' }}
-            />
-            <Button
-              onPress={() => void submitMany(isbnList)}
-              disabled={!!bulk || isbnList.length === 0}
-              backgroundColor="$accent"
-              color={palette.paper}
-              borderRadius={2}
-              height={50}
-              fontFamily="$body"
-              fontWeight="600"
-              opacity={!!bulk || isbnList.length === 0 ? 0.6 : 1}
-            >
-              {bulk
-                ? `Import… ${bulk.done}/${bulk.total}`
-                : `Importer ${isbnList.length} livre${isbnList.length > 1 ? 's' : ''}`}
-            </Button>
+            <XStack gap="$2">
+              <ModeTab
+                label="Liste d'ISBN"
+                active={importKind === 'isbn'}
+                onPress={() => setImportKind('isbn')}
+              />
+              <ModeTab
+                label="CSV (Goodreads, Babelio)"
+                active={importKind === 'csv'}
+                onPress={() => setImportKind('csv')}
+              />
+            </XStack>
+
+            {importKind === 'isbn' ? (
+              <>
+                <Label>Coller une liste d'ISBN</Label>
+                <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
+                  Un ISBN par ligne (ou séparés par des virgules) — depuis un export Goodreads /
+                  Calibre, ou en scannant vos tomes.
+                  {isbnList.length > 0
+                    ? ` ${isbnList.length} ISBN détecté${isbnList.length > 1 ? 's' : ''}.`
+                    : ''}
+                </Text>
+                <TextArea
+                  value={listText}
+                  onChangeText={setListText}
+                  placeholder={'9782070360024\n9782203001237\n…'}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  minHeight={150}
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                  borderRadius={2}
+                  padding="$3"
+                  fontFamily="$body"
+                  fontSize={15}
+                  color="$color"
+                  placeholderTextColor="$concreteLight"
+                  focusStyle={{ borderColor: '$accent' }}
+                />
+                <Button
+                  onPress={() => void submitMany(isbnList)}
+                  disabled={!!bulk || isbnList.length === 0}
+                  backgroundColor="$accent"
+                  color={palette.paper}
+                  borderRadius={2}
+                  height={50}
+                  fontFamily="$body"
+                  fontWeight="600"
+                  opacity={!!bulk || isbnList.length === 0 ? 0.6 : 1}
+                >
+                  {bulk
+                    ? `Import… ${bulk.done}/${bulk.total}`
+                    : `Importer ${isbnList.length} livre${isbnList.length > 1 ? 's' : ''}`}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Label>Importer un fichier CSV</Label>
+                <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
+                  Exportez votre bibliothèque depuis Goodreads (My Books → Import/Export → Export
+                  Library) ou Babelio, puis{' '}
+                  {Platform.OS === 'web' ? 'choisissez le fichier' : 'collez son contenu'} ci-dessous.
+                  La note, le statut de lecture et la critique sont repris.
+                  {parsedCsv.books.length > 0
+                    ? ` ${parsedCsv.books.length} livre${parsedCsv.books.length > 1 ? 's' : ''} détecté${parsedCsv.books.length > 1 ? 's' : ''}${
+                        parsedCsv.skipped > 0
+                          ? `, ${parsedCsv.skipped} ignoré${parsedCsv.skipped > 1 ? 's' : ''} (sans ISBN)`
+                          : ''
+                      }.`
+                    : ''}
+                </Text>
+                {Platform.OS === 'web' ? (
+                  <Button
+                    onPress={pickCsvFile}
+                    backgroundColor="$backgroundStrong"
+                    borderColor="$borderColor"
+                    borderWidth={1}
+                    color="$color"
+                    borderRadius={2}
+                    height={42}
+                    fontFamily="$body"
+                    fontWeight="600"
+                  >
+                    Choisir un fichier .csv
+                  </Button>
+                ) : null}
+                <TextArea
+                  value={csvText}
+                  onChangeText={setCsvText}
+                  placeholder={'Title,Author,ISBN13,My Rating,Exclusive Shelf\n…'}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  minHeight={120}
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                  borderRadius={2}
+                  padding="$3"
+                  fontFamily="$body"
+                  fontSize={13}
+                  color="$color"
+                  placeholderTextColor="$concreteLight"
+                  focusStyle={{ borderColor: '$accent' }}
+                />
+                <Button
+                  onPress={() => void csvImport.run(parsedCsv.books)}
+                  disabled={!!csvImport.progress || parsedCsv.books.length === 0}
+                  backgroundColor="$accent"
+                  color={palette.paper}
+                  borderRadius={2}
+                  height={50}
+                  fontFamily="$body"
+                  fontWeight="600"
+                  opacity={!!csvImport.progress || parsedCsv.books.length === 0 ? 0.6 : 1}
+                >
+                  {csvImport.progress
+                    ? `Import… ${csvImport.progress.done}/${csvImport.progress.total}`
+                    : `Importer ${parsedCsv.books.length} livre${parsedCsv.books.length > 1 ? 's' : ''}`}
+                </Button>
+                {csvImport.result ? (
+                  <Text fontFamily="$body" fontSize={13} color="$colorSoft">
+                    {`Importé : ${csvImport.result.added}${
+                      csvImport.result.failed > 0
+                        ? ` · ${csvImport.result.failed} échec${csvImport.result.failed > 1 ? 's' : ''}`
+                        : ''
+                    }.`}
+                  </Text>
+                ) : null}
+              </>
+            )}
           </YStack>
         ) : mode === 'search' ? (
           <SearchPanel onPick={(isbn) => void submit(isbn)} addedIsbns={addedIsbns} />
