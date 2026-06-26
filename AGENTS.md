@@ -117,13 +117,16 @@ only fills for manga. Prioritized, grounded against what already ships:
   duplicate detection scoped to owned; book detail has a Possession picker;
   CSV export gains a "Possession" column. **`format`** (Broché/Relié/Poche/
   Numérique/Audio) SHIPPED: `items.format`, book-detail picker, library facet,
-  CSV "Format" column. TODO later: neutral `dnf`.
+  CSV "Format" column. Neutral **DNF** ("Pas fini") shipped too.
 - **P0.2 — owned-vs-missing series completion view** ("14/22 — il manque T7, T12").
   **v1 SHIPPED**: tap a series stack in the library (group mode) → the overlay
   now fetches the full volume list (`useSeriesVolumes`), shows the **missing
-  tomes** + "ajouter les N manquants" (`SeriesCompletion`). TODO: persist a
-  `series` table with `total_volumes` for at-a-glance "X/Y" badges on the grid
-  (the count is currently search-derived, not authoritative).
+  tomes** + "ajouter les N manquants" (`SeriesCompletion`). **X/Y badge DONE**: a
+  shared `series` cache (`normalized_key`, `total_volumes`) is upserted whenever a
+  series' volume list is fetched (`useSeriesTotals` reads it); the SeriesCard
+  shows "X/Y" (green ✓ when complete). Lazy — a series gets its total the first
+  time it's opened/added. Also: a library **Envies/Empruntés** quick-chip surfaces
+  the otherwise-hidden wishlist.
 - **P0.3 — first-class Wishlist (Envies)** — fed by manual add, scan "je le veux",
   missing series volumes, circle proposals. Low effort once P0.1 lands.
 - **P1 — quick wins:** duplicate-alert AT SCAN (logic already exists); real

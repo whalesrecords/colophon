@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { BookSearchResult } from '@/lib/book-search-parsers';
 import { parseSeries, seriesKey } from '@/lib/series';
@@ -43,7 +43,39 @@ export function useSeriesVolumes() {
           });
         }
       }
-      return [...byVolume.values()].sort((a, b) => a.volume - b.volume);
+      const result = [...byVolume.values()].sort((a, b) => a.volume - b.volume);
+      // Cache the series total (best-effort) for at-a-glance "X/Y" library badges.
+      if (result.length > 0) {
+        void supabase.from('series').upsert(
+          {
+            normalized_key: key,
+            name: seriesName,
+            total_volumes: result.length,
+            source: 'book-search',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'normalized_key' },
+        );
+      }
+      return result;
+    },
+  });
+}
+
+/** Cached series total-volume counts, keyed by normalized series key. */
+export function useSeriesTotals(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['series-totals', userId],
+    enabled: !!userId,
+    staleTime: 60_000,
+    queryFn: async (): Promise<Map<string, number>> => {
+      const { data, error } = await supabase.from('series').select('normalized_key, total_volumes');
+      if (error) throw error;
+      const totals = new Map<string, number>();
+      for (const row of data ?? []) {
+        if (row.total_volumes != null) totals.set(row.normalized_key, row.total_volumes);
+      }
+      return totals;
     },
   });
 }

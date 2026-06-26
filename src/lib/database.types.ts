@@ -431,6 +431,30 @@ export type Database = {
           },
         ]
       }
+      series: {
+        Row: {
+          name: string
+          normalized_key: string
+          source: string | null
+          total_volumes: number | null
+          updated_at: string
+        }
+        Insert: {
+          name: string
+          normalized_key: string
+          source?: string | null
+          total_volumes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          name?: string
+          normalized_key?: string
+          source?: string | null
+          total_volumes?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           body: string

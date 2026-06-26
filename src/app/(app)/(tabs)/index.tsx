@@ -6,6 +6,7 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
+import { useSeriesTotals } from '@/features/books/use-series-volumes';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import {
@@ -67,8 +68,17 @@ export default function LibraryScreen() {
   const [openSeries, setOpenSeries] = useState<SeriesGroup | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const { data: shelves } = useShelves(session?.user.id);
+  const { data: seriesTotals } = useSeriesTotals(session?.user.id);
 
   const items = useMemo(() => data ?? [], [data]);
+  const wishlistCount = useMemo(
+    () => items.filter((i) => i.ownership === 'wishlist').length,
+    [items],
+  );
+  const borrowedCount = useMemo(
+    () => items.filter((i) => i.ownership === 'borrowed').length,
+    [items],
+  );
   const copies = useMemo(() => copiesByIsbn(items), [items]);
   const copiesOf = (item: LibraryItem) =>
     item.book?.isbn13 ? (copies.get(item.book.isbn13) ?? 1) : 1;
@@ -156,6 +166,27 @@ export default function LibraryScreen() {
                 <ViewToggle label="Liste" active={view === 'list'} onPress={() => setView('list')} />
               </XStack>
             </XStack>
+
+            {wishlistCount > 0 || borrowedCount > 0 ? (
+              <XStack gap="$2" flexWrap="wrap">
+                {wishlistCount > 0 ? (
+                  <OwnershipChip
+                    label={`♡ Envies · ${wishlistCount}`}
+                    color={palette.sage}
+                    active={filters.facets.ownership.includes('wishlist')}
+                    onPress={() => toggleFacet('ownership', 'wishlist')}
+                  />
+                ) : null}
+                {borrowedCount > 0 ? (
+                  <OwnershipChip
+                    label={`Empruntés · ${borrowedCount}`}
+                    color={palette.aizome}
+                    active={filters.facets.ownership.includes('borrowed')}
+                    onPress={() => toggleFacet('ownership', 'borrowed')}
+                  />
+                ) : null}
+              </XStack>
+            ) : null}
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <XStack gap="$2" alignItems="center" paddingRight="$4">
@@ -267,7 +298,13 @@ export default function LibraryScreen() {
           {view === 'grid' ? (
             <XStack flexWrap="wrap" gap={GAP}>
               {grouped.groups.map((g) => (
-                <SeriesCard key={g.key} group={g} width={coverWidth} onPress={() => setOpenSeries(g)} />
+                <SeriesCard
+                  key={g.key}
+                  group={g}
+                  total={seriesTotals?.get(g.key)}
+                  width={coverWidth}
+                  onPress={() => setOpenSeries(g)}
+                />
               ))}
               {grouped.singles.map((item) => (
                 <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
@@ -364,6 +401,36 @@ function ViewToggle({ label, active, onPress }: { label: string; active: boolean
   );
 }
 
+function OwnershipChip({
+  label,
+  color,
+  active,
+  onPress,
+}: {
+  label: string;
+  color: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Button
+      onPress={onPress}
+      height={32}
+      paddingHorizontal="$3"
+      borderRadius={999}
+      borderWidth={1}
+      borderColor={active ? '$accent' : color}
+      backgroundColor={active ? '$accent' : 'transparent'}
+      color={active ? palette.paper : color}
+      fontFamily="$body"
+      fontSize={13}
+      fontWeight="600"
+    >
+      {label}
+    </Button>
+  );
+}
+
 function SizeControl({ size, onSize }: { size: GridSize; onSize: (s: GridSize) => void }) {
   return (
     <XStack borderWidth={1} borderColor="$borderColor" borderRadius={12} overflow="hidden">
@@ -390,14 +457,18 @@ function SizeControl({ size, onSize }: { size: GridSize; onSize: (s: GridSize) =
 
 function SeriesCard({
   group,
+  total,
   width,
   onPress,
 }: {
   group: SeriesGroup;
+  total?: number;
   width: number;
   onPress: () => void;
 }) {
   const cover = group.cover;
+  const showTotal = total != null && total >= group.count;
+  const complete = showTotal && group.count >= (total as number);
   const { bg, fg } = composedPalette(cover.book?.isbn13 ?? cover.id);
   return (
     <YStack width={width} gap="$2">
@@ -428,14 +499,14 @@ function SeriesCard({
             position="absolute"
             top={6}
             right={6}
-            backgroundColor={palette.aizome}
+            backgroundColor={complete ? palette.sage : palette.aizome}
             borderRadius={999}
             paddingHorizontal={8}
             height={20}
             alignItems="center"
           >
             <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
-              {group.count}
+              {showTotal ? `${group.count}/${total}` : group.count}
             </Text>
           </XStack>
         </YStack>
@@ -445,7 +516,9 @@ function SeriesCard({
           {group.name}
         </Text>
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-          {`Série · ${group.count} tomes`}
+          {showTotal
+            ? `Série · ${group.count}/${total} tomes${complete ? ' ✓' : ''}`
+            : `Série · ${group.count} tomes`}
         </Text>
       </YStack>
     </YStack>
