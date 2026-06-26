@@ -106,6 +106,8 @@ export const fr = {
   // Year recap (Wrapped)
   'recap.open': 'Voir mon bilan {year}',
   'recap.title': 'Votre année {year}',
+  'recap.subtitle': 'Quelle belle traversée.',
+  'recap.bookOne': 'livre lu',
   'recap.books': 'livres lus',
   'recap.pages': 'pages lues',
   'recap.topAuthor': 'Auteur le plus lu',
@@ -216,6 +218,8 @@ export const en: Partial<Record<TranslationKey, string>> = {
 
   'recap.open': 'See my {year} recap',
   'recap.title': 'Your year {year}',
+  'recap.subtitle': 'What a beautiful journey.',
+  'recap.bookOne': 'book read',
   'recap.books': 'books read',
   'recap.pages': 'pages read',
   'recap.topAuthor': 'Most-read author',
