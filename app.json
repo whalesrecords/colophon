@@ -19,7 +19,7 @@
       }
     },
     "android": {
-      "package": "com.whalesrecords.colophon",
+      "package": "com.colophon.app",
       "adaptiveIcon": {
         "backgroundColor": "#F4F1EA",
         "foregroundImage": "./assets/images/icon-foreground.png"
