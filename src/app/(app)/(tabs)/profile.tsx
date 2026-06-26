@@ -16,7 +16,9 @@ import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
 import { duplicateGroups } from '@/features/library/duplicates';
 import { computeFacets, EMPTY_FILTERS, type FacetKey } from '@/features/library/faceting';
+import { type ShelfSuggestion, suggestShelves } from '@/features/library/suggest-shelves';
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
+import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
@@ -93,6 +95,9 @@ export default function ProfileScreen() {
         )}
 
         {items.length > 0 ? <ClassificationSection items={items} /> : null}
+        {items.length > 0 ? (
+          <SuggestedShelvesSection items={items} userId={session?.user.id} />
+        ) : null}
         {items.length > 0 ? <LoansSection items={items} /> : null}
         {items.length > 0 ? <DuplicatesSection items={items} /> : null}
 
@@ -295,6 +300,74 @@ function ClassificationSection({ items }: { items: LibraryItem[] }) {
           />
         </YStack>
       ))}
+    </YStack>
+  );
+}
+
+function SuggestedShelvesSection({
+  items,
+  userId,
+}: {
+  items: LibraryItem[];
+  userId: string | undefined;
+}) {
+  const { data: shelves } = useShelves(userId);
+  const { createShelf, addToShelf } = useShelfActions(userId);
+  const [done, setDone] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const suggestions = useMemo(
+    () =>
+      suggestShelves(
+        items,
+        (shelves ?? []).map((s) => s.name),
+      ).filter((s) => !done.has(s.key)),
+    [items, shelves, done],
+  );
+  if (suggestions.length === 0) return null;
+
+  const onCreate = async (s: ShelfSuggestion) => {
+    setBusy(s.key);
+    try {
+      const shelf = await createShelf.mutateAsync(s.label);
+      for (const id of s.itemIds) await addToShelf.mutateAsync({ itemId: id, shelfId: shelf.id });
+      setDone((d) => new Set(d).add(s.key));
+    } catch {
+      // ignore
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <YStack gap="$3" marginTop="$7">
+      <Label>Étagères suggérées</Label>
+      <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
+        D'après votre bibliothèque. Touchez pour créer l'étagère et y ranger les livres
+        automatiquement.
+      </Text>
+      <XStack gap="$2" flexWrap="wrap">
+        {suggestions.map((s) => (
+          <Button
+            key={s.key}
+            onPress={() => onCreate(s)}
+            disabled={busy !== null}
+            height={36}
+            paddingHorizontal="$3"
+            borderRadius={999}
+            borderWidth={1}
+            borderColor="$borderColor"
+            backgroundColor="transparent"
+            color="$colorSoft"
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="500"
+            opacity={busy === s.key ? 0.5 : 1}
+          >
+            {`+ ${s.label} · ${s.count}`}
+          </Button>
+        ))}
+      </XStack>
     </YStack>
   );
 }
