@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { BookSearchResult } from '@/lib/book-search-parsers';
 import { parseSeries, seriesKey } from '@/lib/series';
@@ -69,13 +69,41 @@ export function useSeriesTotals(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 60_000,
     queryFn: async (): Promise<Map<string, number>> => {
-      const { data, error } = await supabase.from('series').select('normalized_key, total_volumes');
-      if (error) throw error;
+      const [shared, mine] = await Promise.all([
+        supabase.from('series').select('normalized_key, total_volumes'),
+        supabase.from('user_series_totals').select('normalized_key, total_volumes'),
+      ]);
+      if (shared.error) throw shared.error;
       const totals = new Map<string, number>();
-      for (const row of data ?? []) {
+      for (const row of shared.data ?? []) {
+        if (row.total_volumes != null) totals.set(row.normalized_key, row.total_volumes);
+      }
+      // A per-user override (e.g. a special edition's count) wins over the shared cache.
+      for (const row of mine.data ?? []) {
         if (row.total_volumes != null) totals.set(row.normalized_key, row.total_volumes);
       }
       return totals;
     },
+  });
+}
+
+/** Set a per-user override for a series' total volume count (null clears it). */
+export function useSetSeriesTotal(userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ key, total }: { key: string; total: number | null }): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      const { error } = await supabase.from('user_series_totals').upsert(
+        {
+          user_id: userId,
+          normalized_key: key,
+          total_volumes: total,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,normalized_key' },
+      );
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['series-totals', userId] }),
   });
 }

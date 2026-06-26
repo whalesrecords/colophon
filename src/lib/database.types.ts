@@ -431,6 +431,27 @@ export type Database = {
           },
         ]
       }
+      user_series_totals: {
+        Row: {
+          normalized_key: string
+          total_volumes: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          normalized_key: string
+          total_volumes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          normalized_key?: string
+          total_volumes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       series: {
         Row: {
           name: string
