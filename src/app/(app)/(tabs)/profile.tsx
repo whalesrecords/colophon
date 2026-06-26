@@ -11,6 +11,7 @@ import {
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { displayValue } from '@/components/library/FilterPanel';
+import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
@@ -79,12 +80,7 @@ export default function ProfileScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
-        <YStack gap="$1" marginBottom="$5">
-          <Label>Profil</Label>
-          <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color" numberOfLines={1}>
-            {session?.user.email ?? 'Lecteur'}
-          </Text>
-        </YStack>
+        <ProfileHeader userId={session?.user.id} email={session?.user.email} />
 
         {isLoading || !stats ? (
           <YStack alignItems="center" justifyContent="center" paddingVertical="$8">

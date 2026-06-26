@@ -39,6 +39,13 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Colophon accède à vos photos pour choisir un avatar ou une couverture de livre.",
+          "cameraPermission": "Colophon utilise l'appareil photo pour vos avatars et couvertures."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",

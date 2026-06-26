@@ -454,6 +454,36 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_path: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          pseudo: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_path?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          pseudo?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_path?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          pseudo?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reading_sessions: {
         Row: {
           created_at: string
