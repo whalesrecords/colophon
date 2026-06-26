@@ -12,6 +12,7 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { displayValue } from '@/components/library/FilterPanel';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import { YearRecap } from '@/components/profile/YearRecap';
 import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
@@ -72,6 +73,7 @@ export default function ProfileScreen() {
   const { data: stats, isLoading } = useStats(session?.user.id);
   const { data: libraryItems } = useLibrary(session?.user.id);
   const items = libraryItems ?? [];
+  const [recapOpen, setRecapOpen] = useState(false);
   const { width } = useWindowDimensions();
   const padH = Math.max(20, (width - 900) / 2);
 
@@ -94,6 +96,24 @@ export default function ProfileScreen() {
             readThisYear={stats.readThisYear}
             year={stats.year}
           />
+        ) : null}
+
+        {stats && stats.readThisYear > 0 ? (
+          <Button
+            onPress={() => setRecapOpen(true)}
+            marginTop="$5"
+            backgroundColor="$backgroundStrong"
+            borderColor="$borderColor"
+            borderWidth={1}
+            color="$color"
+            borderRadius={2}
+            height={48}
+            fontFamily="$body"
+            fontWeight="600"
+            pressStyle={{ opacity: 0.85 }}
+          >
+            {t('recap.open', { year: stats.year })}
+          </Button>
         ) : null}
 
         {items.length > 0 ? <ClassificationSection items={items} /> : null}
@@ -139,6 +159,10 @@ export default function ProfileScreen() {
           {t('profile.footer')}
         </Text>
       </ScrollView>
+
+      {recapOpen && stats ? (
+        <YearRecap items={items} stats={stats} onClose={() => setRecapOpen(false)} />
+      ) : null}
     </Screen>
   );
 }

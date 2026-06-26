@@ -103,6 +103,18 @@ export const fr = {
   'goal.edit': 'Modifier',
   'goal.remove': "Retirer l'objectif",
 
+  // Year recap (Wrapped)
+  'recap.open': 'Voir mon bilan {year}',
+  'recap.title': 'Votre année {year}',
+  'recap.books': 'livres lus',
+  'recap.pages': 'pages lues',
+  'recap.topAuthor': 'Auteur le plus lu',
+  'recap.topGenre': 'Genre favori',
+  'recap.share': 'Partager',
+  'recap.close': 'Fermer',
+  'recap.shareText':
+    'Mon année de lecture {year} sur Colophon : {books} livres, {pages} pages lues.',
+
   // Common
   'common.cancel': 'Annuler',
   'common.delete': 'Supprimer',
@@ -201,6 +213,16 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'goal.save': 'Save',
   'goal.edit': 'Edit',
   'goal.remove': 'Remove goal',
+
+  'recap.open': 'See my {year} recap',
+  'recap.title': 'Your year {year}',
+  'recap.books': 'books read',
+  'recap.pages': 'pages read',
+  'recap.topAuthor': 'Most-read author',
+  'recap.topGenre': 'Favourite genre',
+  'recap.share': 'Share',
+  'recap.close': 'Close',
+  'recap.shareText': 'My {year} in reading on Colophon: {books} books, {pages} pages read.',
 
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',
