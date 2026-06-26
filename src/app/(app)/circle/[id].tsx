@@ -43,6 +43,7 @@ export default function CircleScreen() {
   const { data: blocked } = useBlockedUsers(userId);
   const { report, block, unblock } = useModeration(userId);
   const [text, setText] = useState('');
+  const [sendError, setSendError] = useState<string | null>(null);
   const [section, setSection] = useState<'chat' | 'library' | 'proposals' | 'agenda'>('chat');
   const scrollRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
@@ -135,10 +136,12 @@ export default function CircleScreen() {
     const body = text.trim();
     if (!body) return;
     setText('');
+    setSendError(null);
     try {
       await send.mutateAsync(body);
-    } catch {
+    } catch (e) {
       setText(body);
+      setSendError(e instanceof Error ? e.message : "Échec de l'envoi.");
     }
   };
 
@@ -309,6 +312,19 @@ export default function CircleScreen() {
           </ScrollView>
         )}
 
+        {sendError ? (
+          <Text
+            fontFamily="$body"
+            fontSize={12}
+            color="$signal"
+            paddingHorizontal={padH}
+            paddingTop="$2"
+            backgroundColor="$backgroundStrong"
+          >
+            {sendError}
+          </Text>
+        ) : null}
+
         <XStack
           gap="$2"
           paddingHorizontal={padH}
@@ -321,7 +337,10 @@ export default function CircleScreen() {
           <Input
             flex={1}
             value={text}
-            onChangeText={setText}
+            onChangeText={(v) => {
+              setText(v);
+              if (sendError) setSendError(null);
+            }}
             onSubmitEditing={onSend}
             placeholder="Votre message…"
             placeholderTextColor="$concreteLight"

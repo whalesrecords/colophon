@@ -92,8 +92,13 @@ identifiers: English.
   `cover-search`** (Google/OL/BnF/AniList, validated); **add-the-whole-series**
   (`useSeriesVolumes` + SeriesAddSheet); **CSV export**; **profiles + avatars**;
   **installable PWA + Mac** (Designed-for-iPad + PWA); **circle moderation**
-  (report/block, App Store 1.2); **i18n** (FR/EN switcher in Settings, FR
-  fallback — only tabs/auth/profile translated so far, rest rolls out).
+  (report/block, App Store 1.2) + **anti comment-bombing** (a SECURITY DEFINER
+  `enforce_comment_rate_limit` BEFORE-INSERT trigger on `messages` +
+  `circle_book_comments`: ≥8 posts/10s or a 3rd identical body/30s is rejected);
+  **i18n** (FR/EN switcher in Settings, FR fallback — tabs/auth/profile done so
+  far); **dark mode** ("sumi ink" theme, Système/Clair/Sombre in Settings);
+  **scan duplicate-alert** (flags already-owned at add); **real Goodreads/Babelio
+  CSV import** (rating + status + review).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
