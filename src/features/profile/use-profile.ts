@@ -45,6 +45,7 @@ export interface ProfilePatch {
   pseudo?: string | null;
   bio?: string | null;
   avatar_path?: string | null;
+  annual_goal?: number | null;
 }
 
 export function useUpdateProfile(userId: string | undefined) {

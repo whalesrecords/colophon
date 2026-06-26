@@ -8,13 +8,14 @@ import {
   Share as RNShare,
   useWindowDimensions,
 } from 'react-native';
-import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { displayValue } from '@/components/library/FilterPanel';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
+import { useProfile, useUpdateProfile } from '@/features/profile/use-profile';
 import { duplicateGroups } from '@/features/library/duplicates';
 import { downloadCsv, toLibraryCsv } from '@/features/library/export-csv';
 import { computeFacets, EMPTY_FILTERS, type FacetKey } from '@/features/library/faceting';
@@ -87,6 +88,14 @@ export default function ProfileScreen() {
           <Stats stats={stats} />
         )}
 
+        {stats ? (
+          <GoalSection
+            userId={session?.user.id}
+            readThisYear={stats.readThisYear}
+            year={stats.year}
+          />
+        ) : null}
+
         {items.length > 0 ? <ClassificationSection items={items} /> : null}
         {items.length > 0 ? (
           <SuggestedShelvesSection items={items} userId={session?.user.id} />
@@ -131,6 +140,138 @@ export default function ProfileScreen() {
         </Text>
       </ScrollView>
     </Screen>
+  );
+}
+
+const GOAL_PRESETS = [12, 24, 36, 52];
+
+function GoalSection({
+  userId,
+  readThisYear,
+  year,
+}: {
+  userId: string | undefined;
+  readThisYear: number;
+  year: number;
+}) {
+  const { t } = useT();
+  const { data: profile } = useProfile(userId);
+  const update = useUpdateProfile(userId);
+  const [editing, setEditing] = useState(false);
+  const [custom, setCustom] = useState('');
+
+  const goal = profile?.annual_goal ?? null;
+  const save = (n: number) => {
+    if (!Number.isFinite(n) || n <= 0) return;
+    update.mutate({ annual_goal: Math.min(1000, Math.round(n)) });
+    setEditing(false);
+    setCustom('');
+  };
+
+  return (
+    <YStack gap="$3" marginTop="$7">
+      <Label>{t('goal.title')}</Label>
+      {goal && !editing ? (
+        <YStack gap="$2">
+          <Text fontFamily="$body" fontSize={15} color="$colorSoft">
+            {readThisYear >= goal
+              ? t('goal.done')
+              : t('goal.progress', { done: readThisYear, target: goal, year })}
+          </Text>
+          <YStack height={6} borderRadius={999} backgroundColor="$track" overflow="hidden">
+            <YStack
+              height={6}
+              width={`${Math.min(100, Math.round((readThisYear / goal) * 100))}%`}
+              backgroundColor="$accent"
+            />
+          </YStack>
+          <XStack gap="$4">
+            <Button
+              onPress={() => setEditing(true)}
+              chromeless
+              height={30}
+              paddingHorizontal={0}
+              color="$accent"
+              fontFamily="$body"
+              fontSize={14}
+              fontWeight="600"
+            >
+              {t('goal.edit')}
+            </Button>
+            <Button
+              onPress={() => update.mutate({ annual_goal: null })}
+              chromeless
+              height={30}
+              paddingHorizontal={0}
+              color="$colorMuted"
+              fontFamily="$body"
+              fontSize={14}
+            >
+              {t('goal.remove')}
+            </Button>
+          </XStack>
+        </YStack>
+      ) : (
+        <YStack gap="$2">
+          <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+            {t('goal.hint')}
+          </Text>
+          <XStack gap="$2" flexWrap="wrap">
+            {GOAL_PRESETS.map((n) => (
+              <Button
+                key={n}
+                onPress={() => save(n)}
+                height={40}
+                paddingHorizontal="$4"
+                borderRadius={999}
+                borderWidth={1}
+                borderColor={goal === n ? '$accent' : '$borderColor'}
+                backgroundColor={goal === n ? '$accent' : 'transparent'}
+                color={goal === n ? palette.paper : '$colorSoft'}
+                fontFamily="$body"
+                fontWeight="600"
+              >
+                {String(n)}
+              </Button>
+            ))}
+          </XStack>
+          <XStack gap="$2">
+            <Input
+              flex={1}
+              value={custom}
+              onChangeText={setCustom}
+              keyboardType="number-pad"
+              inputMode="numeric"
+              placeholder={t('goal.custom')}
+              placeholderTextColor="$concreteLight"
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={2}
+              height={44}
+              paddingHorizontal="$3"
+              fontFamily="$body"
+              fontSize={15}
+              color="$color"
+            />
+            <Button
+              onPress={() => save(Number.parseInt(custom, 10))}
+              disabled={!custom.trim()}
+              backgroundColor="$accent"
+              color={palette.paper}
+              borderRadius={2}
+              height={44}
+              paddingHorizontal="$4"
+              fontFamily="$body"
+              fontWeight="600"
+              opacity={custom.trim() ? 1 : 0.6}
+            >
+              {t('goal.save')}
+            </Button>
+          </XStack>
+        </YStack>
+      )}
+    </YStack>
   );
 }
 

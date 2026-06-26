@@ -98,7 +98,8 @@ identifiers: English.
   **i18n** (FR/EN switcher in Settings, FR fallback — tabs/auth/profile done so
   far); **dark mode** ("sumi ink" theme, Système/Clair/Sombre in Settings);
   **scan duplicate-alert** (flags already-owned at add); **real Goodreads/Babelio
-  CSV import** (rating + status + review).
+  CSV import** (rating + status + review); **annual reading goal**
+  (`profiles.annual_goal`, progress bar in Profil).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL

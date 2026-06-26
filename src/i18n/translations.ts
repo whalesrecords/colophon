@@ -93,6 +93,16 @@ export const fr = {
   'theme.light': 'Clair',
   'theme.dark': 'Sombre',
 
+  // Reading goal
+  'goal.title': 'Objectif de lecture',
+  'goal.progress': '{done} / {target} · Lus en {year}',
+  'goal.done': 'Objectif atteint cette année 🎉',
+  'goal.hint': 'Combien de livres souhaitez-vous lire cette année ?',
+  'goal.custom': 'Autre',
+  'goal.save': 'Enregistrer',
+  'goal.edit': 'Modifier',
+  'goal.remove': "Retirer l'objectif",
+
   // Common
   'common.cancel': 'Annuler',
   'common.delete': 'Supprimer',
@@ -182,6 +192,15 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'theme.system': 'System',
   'theme.light': 'Light',
   'theme.dark': 'Dark',
+
+  'goal.title': 'Reading goal',
+  'goal.progress': '{done} / {target} · Read in {year}',
+  'goal.done': 'Goal reached this year 🎉',
+  'goal.hint': 'How many books do you want to read this year?',
+  'goal.custom': 'Custom',
+  'goal.save': 'Save',
+  'goal.edit': 'Edit',
+  'goal.remove': 'Remove goal',
 
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',

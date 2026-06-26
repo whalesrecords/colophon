@@ -504,6 +504,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          annual_goal: number | null
           avatar_path: string | null
           bio: string | null
           created_at: string
@@ -513,6 +514,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          annual_goal?: number | null
           avatar_path?: string | null
           bio?: string | null
           created_at?: string
@@ -522,6 +524,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          annual_goal?: number | null
           avatar_path?: string | null
           bio?: string | null
           created_at?: string
