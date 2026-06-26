@@ -1,13 +1,8 @@
 import { Platform, Share } from 'react-native';
 
-import type { LibraryItem } from './use-library';
+import { OWNERSHIP_LABELS, STATUS_LABELS } from '@/theme/tokens';
 
-const STATUS_FR: Record<string, string> = {
-  to_read: 'À lire',
-  reading: 'En cours',
-  read: 'Lu',
-  abandoned: 'Abandonné',
-};
+import type { LibraryItem } from './use-library';
 
 function cell(value: string | number | null | undefined): string {
   const s = value == null ? '' : String(value);
@@ -22,6 +17,7 @@ const HEADERS = [
   'Année',
   'Langue',
   'Statut',
+  'Possession',
   'Note',
   'Étagères',
   'Tags',
@@ -39,7 +35,8 @@ export function toLibraryCsv(items: LibraryItem[]): string {
       cell(i.book?.publisher),
       cell(i.book?.published_date),
       cell(i.book?.language),
-      cell(STATUS_FR[i.status] ?? i.status),
+      cell(STATUS_LABELS[i.status] ?? i.status),
+      cell(OWNERSHIP_LABELS[i.ownership] ?? i.ownership),
       cell(i.rating),
       cell(i.shelfNames.join('; ')),
       cell(i.tagNames.join('; ')),

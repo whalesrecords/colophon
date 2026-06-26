@@ -1,8 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { type BookMetadata, useIsbnLookup } from '@/features/books/use-isbn-lookup';
-import { useAddItem } from '@/features/library/use-add-item';
+import { type AddItemInput, useAddItem } from '@/features/library/use-add-item';
 import { normalizeIsbn } from '@/lib/isbn';
+
+/** Possession + reading-status chosen at add time (defaults to owned/to_read). */
+export type AddOptions = Omit<AddItemInput, 'isbn13'>;
 
 export type ScanStatus = 'looking' | 'added' | 'error';
 
@@ -31,7 +34,7 @@ export function useScanSession(userId: string | undefined) {
   }, []);
 
   const submit = useCallback(
-    async (raw: string): Promise<boolean> => {
+    async (raw: string, opts?: AddOptions): Promise<boolean> => {
       const norm = normalizeIsbn(raw);
       const isbn13 = norm.ok ? norm.isbn13 : null;
       const key = isbn13 ?? raw.trim();
@@ -46,7 +49,7 @@ export function useScanSession(userId: string | undefined) {
 
       try {
         const book = await lookup.mutateAsync(raw);
-        await addItem.mutateAsync(book.isbn13);
+        await addItem.mutateAsync({ isbn13: book.isbn13, ...opts });
         update(key, { isbn13: book.isbn13, status: 'added', book });
         return true;
       } catch (err) {
@@ -59,20 +62,20 @@ export function useScanSession(userId: string | undefined) {
   );
 
   const retry = useCallback(
-    (key: string) => {
+    (key: string, opts?: AddOptions) => {
       const entry = entries.find((e) => e.key === key);
-      if (entry) void submit(entry.isbn13 ?? entry.key);
+      if (entry) void submit(entry.isbn13 ?? entry.key, opts);
     },
     [entries, submit],
   );
 
   /** Bulk import: submit each ISBN sequentially (gentle on the lookup API). */
   const submitMany = useCallback(
-    async (isbns: string[]): Promise<void> => {
+    async (isbns: string[], opts?: AddOptions): Promise<void> => {
       if (isbns.length === 0) return;
       setBulk({ done: 0, total: isbns.length });
       for (let i = 0; i < isbns.length; i++) {
-        await submit(isbns[i]);
+        await submit(isbns[i], opts);
         setBulk({ done: i + 1, total: isbns.length });
       }
       setBulk(null);

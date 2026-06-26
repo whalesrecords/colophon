@@ -4,15 +4,18 @@ import { Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { Button, Input, Spinner, type TamaguiElement, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { AddSheet } from '@/components/scan/AddSheet';
 import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
 import { SearchPanel } from '@/components/scan/SearchPanel';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
+import { type BookMetadata, useIsbnLookup } from '@/features/books/use-isbn-lookup';
 import { useCsvImport } from '@/features/library/use-csv-import';
 import { useLibrary } from '@/features/library/use-library';
 import { type ScanEntry, useScanSession } from '@/features/scan/use-scan-session';
 import { parseBookCsv } from '@/lib/book-csv';
 import { parseIsbnList } from '@/lib/isbn-list';
+import type { Ownership, ReadingStatus } from '@/theme/tokens';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette } from '@/theme/tokens';
 
@@ -85,6 +88,10 @@ export default function ScanScreen() {
   const [csvText, setCsvText] = useState('');
   const parsedCsv = useMemo(() => parseBookCsv(csvText), [csvText]);
   const csvImport = useCsvImport(session?.user.id);
+  const lookup = useIsbnLookup();
+  const [pendingBook, setPendingBook] = useState<BookMetadata | null>(null);
+  const [committing, setCommitting] = useState(false);
+  const [resolveError, setResolveError] = useState<string | null>(null);
 
   const pickCsvFile = () => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
@@ -118,12 +125,32 @@ export default function ScanScreen() {
     [entries],
   );
 
+  // Resolve a book then open the "possession en 1 tap" sheet (instead of auto-adding).
+  const openAddSheet = async (raw: string) => {
+    if (pendingBook || lookup.isPending) return;
+    setResolveError(null);
+    try {
+      const book = await lookup.mutateAsync(raw);
+      setPendingBook(book);
+    } catch (e) {
+      setResolveError(e instanceof Error ? e.message : 'Livre introuvable.');
+    }
+  };
+
+  const commitAdd = async (opts: { ownership: Ownership; status: ReadingStatus }) => {
+    if (!pendingBook) return;
+    setCommitting(true);
+    await submit(pendingBook.isbn13, opts);
+    setCommitting(false);
+    setPendingBook(null);
+    (inputRef.current as { focus?: () => void } | null)?.focus?.();
+  };
+
   const onSubmit = () => {
     const raw = value.trim();
     if (!raw) return;
     setValue('');
-    (inputRef.current as { focus?: () => void } | null)?.focus?.();
-    void submit(raw);
+    void openAddSheet(raw);
   };
 
   return (
@@ -282,7 +309,7 @@ export default function ScanScreen() {
             )}
           </YStack>
         ) : mode === 'search' ? (
-          <SearchPanel onPick={(isbn) => void submit(isbn)} addedIsbns={addedIsbns} />
+          <SearchPanel onPick={(isbn) => void openAddSheet(isbn)} addedIsbns={addedIsbns} />
         ) : (
           <YStack gap="$4">
             {noCamera ? (
@@ -302,7 +329,7 @@ export default function ScanScreen() {
                 </Text>
               </YStack>
             ) : (
-              <BarcodeScanner onScan={(v) => void submit(v)} />
+              <BarcodeScanner onScan={(v) => void openAddSheet(v)} />
             )}
             <YStack gap="$2">
               <Label>ISBN — saisie ou douchette</Label>
@@ -377,6 +404,53 @@ export default function ScanScreen() {
             {`Terminer · ${addedCount} livre${addedCount > 1 ? 's' : ''}`}
           </Button>
         </YStack>
+      ) : null}
+
+      {lookup.isPending && !pendingBook ? (
+        <YStack
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          padding="$4"
+          backgroundColor="$backgroundStrong"
+          borderTopColor="$borderColor"
+          borderTopWidth={1}
+          alignItems="center"
+        >
+          <XStack gap="$2" alignItems="center">
+            <Spinner color="$accent" />
+            <Text fontFamily="$body" fontSize={14} color="$colorMuted">
+              Recherche du livre…
+            </Text>
+          </XStack>
+        </YStack>
+      ) : null}
+
+      {resolveError ? (
+        <YStack
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          padding="$4"
+          backgroundColor="$backgroundStrong"
+          borderTopColor="$borderColor"
+          borderTopWidth={1}
+        >
+          <Text fontFamily="$body" fontSize={14} color="$signal" textAlign="center">
+            {resolveError}
+          </Text>
+        </YStack>
+      ) : null}
+
+      {pendingBook ? (
+        <AddSheet
+          book={pendingBook}
+          busy={committing}
+          onConfirm={(opts) => void commitAdd(opts)}
+          onCancel={() => setPendingBook(null)}
+        />
       ) : null}
     </Screen>
   );

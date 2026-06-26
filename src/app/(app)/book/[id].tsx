@@ -17,7 +17,13 @@ import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
-import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
+import {
+  OWNERSHIP_LABELS,
+  OWNERSHIP_ORDER,
+  palette,
+  type ReadingStatus,
+  statusColors,
+} from '@/theme/tokens';
 
 const STATUS_LABELS: Record<ReadingStatus, string> = {
   to_read: 'À lire',
@@ -197,6 +203,42 @@ export default function BookDetailScreen() {
               </Text>
             </XStack>
           ) : null}
+
+          {/* possession */}
+          <YStack gap="$2">
+            <Label>Possession</Label>
+            <XStack gap="$2" flexWrap="wrap">
+              {OWNERSHIP_ORDER.map((o) => {
+                const active = item.ownership === o;
+                return (
+                  <Button
+                    key={o}
+                    onPress={() => update.mutate({ ownership: o })}
+                    height={36}
+                    paddingHorizontal="$3"
+                    borderRadius={999}
+                    borderWidth={1}
+                    borderColor={active ? '$accent' : '$borderColor'}
+                    backgroundColor={active ? '$accent' : 'transparent'}
+                    fontFamily="$body"
+                    fontSize={13}
+                    fontWeight="600"
+                    color={active ? palette.paper : '$colorMuted'}
+                  >
+                    {OWNERSHIP_LABELS[o]}
+                  </Button>
+                );
+              })}
+            </XStack>
+            {item.ownership === 'borrowed' ? (
+              <EditableText
+                label="Emprunté à"
+                value={item.borrowed_from ?? ''}
+                placeholder="Nom (facultatif)"
+                onSave={(v) => update.mutate({ borrowed_from: v || null })}
+              />
+            ) : null}
+          </YStack>
 
           {/* status */}
           <YStack gap="$2">

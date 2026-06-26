@@ -29,7 +29,8 @@ export function useCopyCount(isbn13: string | undefined) {
       const { count, error } = await supabase
         .from('items')
         .select('id', { count: 'exact', head: true })
-        .eq('isbn13', isbn13 as string);
+        .eq('isbn13', isbn13 as string)
+        .eq('ownership', 'owned');
       if (error) throw error;
       return count ?? 0;
     },

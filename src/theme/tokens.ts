@@ -138,3 +138,21 @@ export const shadows = {
 export const COVER_ASPECT_RATIO = 67 / 100;
 
 export type ReadingStatus = keyof typeof statusColors;
+
+// Reading status — single source of truth (data labels are FR-only).
+export const STATUS_ORDER: ReadingStatus[] = ['to_read', 'reading', 'read', 'abandoned'];
+export const STATUS_LABELS: Record<ReadingStatus, string> = {
+  to_read: 'À lire',
+  reading: 'En cours',
+  read: 'Lu',
+  abandoned: 'Abandonné',
+};
+
+// Possession axis — orthogonal to reading status.
+export type Ownership = 'owned' | 'wishlist' | 'borrowed';
+export const OWNERSHIP_ORDER: Ownership[] = ['owned', 'wishlist', 'borrowed'];
+export const OWNERSHIP_LABELS: Record<Ownership, string> = {
+  owned: 'Possédé',
+  wishlist: 'Envie',
+  borrowed: 'Emprunté',
+};

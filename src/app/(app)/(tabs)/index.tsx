@@ -23,7 +23,7 @@ import { groupBySeries, type SeriesGroup } from '@/features/library/group-series
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
 import { useShelves } from '@/features/shelves/use-shelves';
 import { composedPalette } from '@/theme/cover-palettes';
-import { palette, statusColors } from '@/theme/tokens';
+import { OWNERSHIP_LABELS, palette, statusColors } from '@/theme/tokens';
 
 const H_PADDING = 20;
 const GAP = 16;
@@ -491,12 +491,33 @@ function LentBadge() {
   );
 }
 
+function OwnershipBadge({ ownership }: { ownership: LibraryItem['ownership'] }) {
+  if (ownership === 'owned') return null;
+  const wish = ownership === 'wishlist';
+  return (
+    <XStack
+      position="absolute"
+      bottom={6}
+      left={6}
+      backgroundColor={wish ? palette.sage : palette.aizome}
+      borderRadius={999}
+      paddingHorizontal={7}
+      height={19}
+      alignItems="center"
+    >
+      <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
+        {OWNERSHIP_LABELS[ownership]}
+      </Text>
+    </XStack>
+  );
+}
+
 function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number; copies: number }) {
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
   return (
     <YStack width={width} gap="$2">
-      <YStack position="relative">
+      <YStack position="relative" opacity={item.ownership === 'wishlist' ? 0.82 : 1}>
         <BookCover
           title={item.book?.title ?? 'Sans titre'}
           author={item.book?.authors?.[0]}
@@ -509,6 +530,7 @@ function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number
         />
         <DuplicateBadge copies={copies} />
         {item.lentTo ? <LentBadge /> : null}
+        <OwnershipBadge ownership={item.ownership} />
       </YStack>
       <YStack gap={2}>
         <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>

@@ -10,6 +10,8 @@ function makeItem(
   return {
     id,
     status,
+    ownership: 'owned',
+    borrowedFrom: null,
     rating: null,
     added_at: '2026-01-01',
     coverOverride: null,

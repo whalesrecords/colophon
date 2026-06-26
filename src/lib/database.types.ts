@@ -325,12 +325,14 @@ export type Database = {
       items: {
         Row: {
           added_at: string
+          borrowed_from: string | null
           condition: string | null
           cover_override: string | null
           id: string
           isbn13: string
           location: string | null
           notes: string | null
+          ownership: string
           purchase_date: string | null
           purchase_price: number | null
           purchase_store: string | null
@@ -341,12 +343,14 @@ export type Database = {
         }
         Insert: {
           added_at?: string
+          borrowed_from?: string | null
           condition?: string | null
           cover_override?: string | null
           id?: string
           isbn13: string
           location?: string | null
           notes?: string | null
+          ownership?: string
           purchase_date?: string | null
           purchase_price?: number | null
           purchase_store?: string | null
@@ -357,12 +361,14 @@ export type Database = {
         }
         Update: {
           added_at?: string
+          borrowed_from?: string | null
           condition?: string | null
           cover_override?: string | null
           id?: string
           isbn13?: string
           location?: string | null
           notes?: string | null
+          ownership?: string
           purchase_date?: string | null
           purchase_price?: number | null
           purchase_store?: string | null

@@ -5,6 +5,8 @@ function item(id: string, title: string): LibraryItem {
   return {
     id,
     status: 'to_read',
+    ownership: 'owned',
+    borrowedFrom: null,
     rating: null,
     added_at: '2026-01-01',
     coverOverride: null,

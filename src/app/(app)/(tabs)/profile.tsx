@@ -619,7 +619,10 @@ function SuggestedShelvesSection({
 function LoansSection({ items }: { items: LibraryItem[] }) {
   const router = useRouter();
   const { t } = useT();
-  const lent = useMemo(() => items.filter((i) => i.lentTo), [items]);
+  const lent = useMemo(
+    () => items.filter((i) => i.lentTo && i.ownership === 'owned'),
+    [items],
+  );
   if (lent.length === 0) return null;
   return (
     <YStack gap="$3" marginTop="$7">
@@ -669,7 +672,10 @@ function LoansSection({ items }: { items: LibraryItem[] }) {
 function DuplicatesSection({ items }: { items: LibraryItem[] }) {
   const router = useRouter();
   const { t } = useT();
-  const groups = useMemo(() => duplicateGroups(items), [items]);
+  const groups = useMemo(
+    () => duplicateGroups(items.filter((i) => i.ownership === 'owned')),
+    [items],
+  );
   if (groups.length === 0) return null;
   const total = groups.reduce((n, g) => n + (g.count - 1), 0);
   return (

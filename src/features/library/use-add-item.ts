@@ -1,19 +1,34 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/lib/supabase';
+import type { Ownership, ReadingStatus } from '@/theme/tokens';
+
+export interface AddItemInput {
+  isbn13: string;
+  ownership?: Ownership;
+  status?: ReadingStatus;
+  borrowedFrom?: string | null;
+}
 
 /**
- * Add a physical copy to the current user's library. The book_metadata row for
- * `isbn13` must already exist (the isbn-lookup function upserts it first).
+ * Add a copy to the current user's library with its possession + reading status.
+ * The book_metadata row for `isbn13` must already exist (isbn-lookup upserts it).
  */
 export function useAddItem(userId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (isbn13: string): Promise<{ id: string }> => {
+    mutationFn: async (input: AddItemInput): Promise<{ id: string }> => {
       if (!userId) throw new Error('Vous devez être connecté.');
+      const { isbn13, ownership, status, borrowedFrom } = input;
       const { data, error } = await supabase
         .from('items')
-        .insert({ isbn13, user_id: userId })
+        .insert({
+          isbn13,
+          user_id: userId,
+          ...(ownership ? { ownership } : {}),
+          ...(status ? { status } : {}),
+          ...(borrowedFrom != null ? { borrowed_from: borrowedFrom } : {}),
+        })
         .select('id')
         .single();
       if (error) throw new Error(error.message);
@@ -21,6 +36,7 @@ export function useAddItem(userId: string | undefined) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['library'] });
+      queryClient.invalidateQueries({ queryKey: ['stats', userId] });
     },
   });
 }

@@ -14,7 +14,9 @@ export interface LibraryStats {
 }
 
 interface ItemRow {
+  id: string;
   status: ReadingStatus;
+  ownership: string;
   book: { page_count: number | null; authors: string[] | null } | null;
 }
 
@@ -31,13 +33,17 @@ export function useStats(userId: string | undefined) {
     enabled: !!userId,
     queryFn: async (): Promise<LibraryStats> => {
       const [itemsRes, sessionsRes] = await Promise.all([
-        supabase.from('items').select('status, book:book_metadata(page_count, authors)'),
+        supabase.from('items').select('id, status, ownership, book:book_metadata(page_count, authors)'),
         supabase.from('reading_sessions').select('item_id, status, finished_on'),
       ]);
       if (itemsRes.error) throw itemsRes.error;
       if (sessionsRes.error) throw sessionsRes.error;
 
-      const rows = (itemsRes.data ?? []) as unknown as ItemRow[];
+      // Wishlist (envies) are not owned — exclude them from every count. Borrowed counts.
+      const rows = ((itemsRes.data ?? []) as unknown as ItemRow[]).filter(
+        (r) => r.ownership !== 'wishlist',
+      );
+      const presentIds = new Set(rows.map((r) => r.id));
       const sessions = (sessionsRes.data ?? []) as unknown as SessionRow[];
 
       const stats: LibraryStats = {
@@ -63,7 +69,12 @@ export function useStats(userId: string | undefined) {
       const yearPrefix = String(stats.year);
       const finishedThisYear = new Set(
         sessions
-          .filter((s) => s.status === 'finished' && s.finished_on?.startsWith(yearPrefix))
+          .filter(
+            (s) =>
+              s.status === 'finished' &&
+              s.finished_on?.startsWith(yearPrefix) &&
+              presentIds.has(s.item_id),
+          )
           .map((s) => s.item_id),
       );
       stats.readThisYear = finishedThisYear.size;

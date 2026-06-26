@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { supabase } from '@/lib/supabase';
-import type { ReadingStatus } from '@/theme/tokens';
+import type { Ownership, ReadingStatus } from '@/theme/tokens';
 
 export interface LibraryBook {
   isbn13: string;
@@ -17,6 +17,8 @@ export interface LibraryBook {
 export interface LibraryItem {
   id: string;
   status: ReadingStatus;
+  ownership: Ownership;
+  borrowedFrom: string | null;
   rating: number | null;
   added_at: string;
   coverOverride: string | null;
@@ -27,11 +29,13 @@ export interface LibraryItem {
 }
 
 const SELECT =
-  'id, status, rating, added_at, cover_override, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
+  'id, status, ownership, borrowed_from, rating, added_at, cover_override, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
 
 interface RawRow {
   id: string;
   status: ReadingStatus;
+  ownership: Ownership;
+  borrowed_from: string | null;
   rating: number | null;
   added_at: string;
   cover_override: string | null;
@@ -55,6 +59,8 @@ export function useLibrary(userId: string | undefined) {
       return ((data ?? []) as unknown as RawRow[]).map((row) => ({
         id: row.id,
         status: row.status,
+        ownership: row.ownership ?? 'owned',
+        borrowedFrom: row.borrowed_from,
         rating: row.rating,
         added_at: row.added_at,
         coverOverride: row.cover_override,

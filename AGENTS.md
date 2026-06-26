@@ -107,10 +107,15 @@ identifiers: English.
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
 books — the white space Goodreads/StoryGraph/Babelio leave open and Mangacollec
 only fills for manga. Prioritized, grounded against what already ships:
-- **P0.1 — split possession from reading status** (the #1 decision). Add
-  `items.ownership` (`owned`/`wishlist`/`borrowed`) + `borrowed_from`/`due_back`/
-  `format`; keep `items.status` as the reading axis, add `dnf`. Additive
-  migration; corrects every stat. Everything else depends on this.
+- **P0.1 — possession axis, separate from reading status. v1 SHIPPED.**
+  `items.ownership` (`owned`/`wishlist`/`borrowed`) + `borrowed_from` (additive,
+  all existing rows → owned). Scan/manual/search single-add now opens an
+  **AddSheet** ("Je le possède / Je le veux / Emprunté" + reading-status pills,
+  possession en 1 tap); bulk paths stay sheet-free. Library has an ownership
+  facet; the **default view hides the wishlist** (envies) — owned+borrowed only;
+  wishlist/borrowed get a badge. **Stats exclude wishlist** (borrowed counts);
+  duplicate detection scoped to owned; book detail has a Possession picker;
+  CSV export gains a "Possession" column. TODO later: `format`, neutral `dnf`.
 - **P0.2 — owned-vs-missing series completion view** ("14/22 — il manque T7, T12").
   **v1 SHIPPED**: tap a series stack in the library (group mode) → the overlay
   now fetches the full volume list (`useSeriesVolumes`), shows the **missing

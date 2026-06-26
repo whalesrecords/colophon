@@ -2,6 +2,7 @@ import type { LibraryItem } from './use-library';
 
 export type FacetKey =
   | 'status'
+  | 'ownership'
   | 'shelf'
   | 'tag'
   | 'genre'
@@ -13,6 +14,7 @@ export type SortKey = 'added' | 'title' | 'author' | 'year' | 'rating';
 
 export const FACET_KEYS: FacetKey[] = [
   'status',
+  'ownership',
   'shelf',
   'tag',
   'genre',
@@ -31,6 +33,7 @@ export const EMPTY_FILTERS: Filters = {
   search: '',
   facets: {
     status: [],
+    ownership: [],
     shelf: [],
     tag: [],
     genre: [],
@@ -60,6 +63,8 @@ export function facetValues(item: LibraryItem, key: FacetKey): string[] {
   switch (key) {
     case 'status':
       return [item.status];
+    case 'ownership':
+      return [item.ownership];
     case 'shelf':
       return item.shelfNames;
     case 'tag':
@@ -103,6 +108,16 @@ export function applyFilters(
 ): LibraryItem[] {
   return items.filter((item) => {
     if (!matchesSearch(item, filters.search)) return false;
+    // The default view hides the wishlist (envies): an empty ownership selection
+    // means "books physically present" (owned + borrowed). Lifted when counting
+    // the ownership funnel itself, so the wishlist facet still shows a real count.
+    if (
+      except !== 'ownership' &&
+      filters.facets.ownership.length === 0 &&
+      item.ownership === 'wishlist'
+    ) {
+      return false;
+    }
     for (const key of FACET_KEYS) {
       if (key === except) continue;
       if (!matchesFacet(item, key, filters.facets[key])) return false;
