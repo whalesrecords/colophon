@@ -68,6 +68,11 @@ export default function ScanScreen() {
   const isbnList = useMemo(() => parseIsbnList(listText), [listText]);
   const { width } = useWindowDimensions();
   const padH = Math.max(20, (width - 720) / 2);
+  // Desktop browsers / iPad-app-on-Mac expose no usable camera; route to manual ISBN.
+  const noCamera =
+    Platform.OS === 'web' &&
+    typeof navigator !== 'undefined' &&
+    !navigator.mediaDevices?.getUserMedia;
   // Tamagui Input forwards its ref to the underlying TextInput at runtime.
   const inputRef = useRef<TamaguiElement>(null);
 
@@ -155,7 +160,25 @@ export default function ScanScreen() {
           <SearchPanel onPick={(isbn) => void submit(isbn)} addedIsbns={addedIsbns} />
         ) : (
           <YStack gap="$4">
-            <BarcodeScanner onScan={(v) => void submit(v)} />
+            {noCamera ? (
+              <YStack
+                gap="$1"
+                padding="$3"
+                backgroundColor="$backgroundStrong"
+                borderColor="$borderColor"
+                borderWidth={1}
+                borderRadius={2}
+              >
+                <Text fontFamily="$heading" fontSize={15} color="$color">
+                  Caméra indisponible sur cet appareil
+                </Text>
+                <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
+                  Saisissez l'ISBN ci-dessous (ou avec une douchette), ou utilisez « Rechercher ».
+                </Text>
+              </YStack>
+            ) : (
+              <BarcodeScanner onScan={(v) => void submit(v)} />
+            )}
             <YStack gap="$2">
               <Label>ISBN — saisie ou douchette</Label>
               <XStack gap="$2">
