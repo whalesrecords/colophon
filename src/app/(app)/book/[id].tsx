@@ -156,6 +156,7 @@ export default function BookDetailScreen() {
           <CoverPicker
             itemId={id}
             userId={session?.user.id}
+            isbn13={book?.isbn13}
             title={book?.title ?? ''}
             author={book?.authors?.[0]}
             hasOverride={!!item.cover_override}

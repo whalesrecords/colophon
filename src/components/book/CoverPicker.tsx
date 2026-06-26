@@ -3,9 +3,8 @@ import { ScrollView } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
-import { useBookSearch } from '@/features/books/use-book-search';
+import { useCoverSearch } from '@/features/books/use-cover-search';
 import { useUpdateItem } from '@/features/library/use-update-item';
-import { openLibraryCover } from '@/lib/cover';
 import { palette } from '@/theme/tokens';
 
 function Label({ children }: { children: string }) {
@@ -26,17 +25,18 @@ function Label({ children }: { children: string }) {
 interface CoverPickerProps {
   itemId: string;
   userId: string | undefined;
+  isbn13?: string;
   title: string;
   author?: string | null;
   hasOverride: boolean;
 }
 
-/** Let the user override a book's cover: pick another edition's cover or paste a URL. */
-export function CoverPicker({ itemId, userId, title, author, hasOverride }: CoverPickerProps) {
+/** Let the user override a book's cover: deep-search candidates or paste a URL. */
+export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride }: CoverPickerProps) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState('');
   const update = useUpdateItem(itemId, userId);
-  const search = useBookSearch();
+  const search = useCoverSearch();
 
   const setCover = (value: string | null) => {
     update.mutate({ cover_override: value });
@@ -44,9 +44,7 @@ export function CoverPicker({ itemId, userId, title, author, hasOverride }: Cove
     setUrl('');
   };
 
-  const candidates = (search.data ?? [])
-    .map((r) => ({ isbn13: r.isbn13, title: r.title, cover: r.coverUrl ?? openLibraryCover(r.isbn13, 'M') }))
-    .slice(0, 12);
+  const candidates = search.data ?? [];
 
   return (
     <YStack gap="$2">
@@ -110,9 +108,9 @@ export function CoverPicker({ itemId, userId, title, author, hasOverride }: Cove
           </YStack>
 
           <YStack gap="$2">
-            <Label>Autres éditions</Label>
+            <Label>Recherche approfondie</Label>
             <Button
-              onPress={() => search.mutate({ title, author: author ?? undefined })}
+              onPress={() => search.mutate({ isbn13, title, author: author ?? undefined })}
               disabled={search.isPending}
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
@@ -123,26 +121,24 @@ export function CoverPicker({ itemId, userId, title, author, hasOverride }: Cove
               fontFamily="$body"
               fontWeight="600"
             >
-              {search.isPending ? <Spinner color="$accent" /> : 'Voir d’autres couvertures'}
+              {search.isPending ? <Spinner color="$accent" /> : 'Chercher des couvertures'}
             </Button>
             {candidates.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <XStack gap="$2" paddingVertical="$1">
-                  {candidates.map((c) => (
-                    <BookCover
-                      key={c.isbn13}
-                      title={c.title ?? ''}
-                      coverUrl={c.cover}
-                      isbn={c.isbn13}
-                      width={64}
-                      onPress={() => setCover(c.cover)}
-                    />
+                <XStack gap="$3" paddingVertical="$1">
+                  {candidates.map((c, i) => (
+                    <YStack key={`${c.url}-${i}`} gap={2} alignItems="center" width={72}>
+                      <BookCover title={title} coverUrl={c.url} width={72} onPress={() => setCover(c.url)} />
+                      <Text fontFamily="$body" fontSize={10} color="$colorMuted">
+                        {c.source}
+                      </Text>
+                    </YStack>
                   ))}
                 </XStack>
               </ScrollView>
             ) : search.isSuccess ? (
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                Aucune autre couverture trouvée — collez plutôt une URL d'image.
+                Aucune couverture trouvée — collez plutôt une URL d'image.
               </Text>
             ) : null}
           </YStack>
