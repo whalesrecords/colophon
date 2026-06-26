@@ -8,6 +8,7 @@ import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
 import { SearchPanel } from '@/components/scan/SearchPanel';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
+import { useLibrary } from '@/features/library/use-library';
 import { type ScanEntry, useScanSession } from '@/features/scan/use-scan-session';
 import { parseIsbnList } from '@/lib/isbn-list';
 import { composedPalette } from '@/theme/cover-palettes';
@@ -62,6 +63,18 @@ export default function ScanScreen() {
   const { session } = useAuth();
   const router = useRouter();
   const { entries, submit, submitMany, retry, addedCount, bulk } = useScanSession(session?.user.id);
+  const { data: library } = useLibrary(session?.user.id);
+  // Snapshot what's already owned when the screen opens, so scanning a book you
+  // already have flags it immediately (the in-store duplicate check).
+  const ownedAtOpen = useRef<Map<string, number> | null>(null);
+  if (library && ownedAtOpen.current === null) {
+    const counts = new Map<string, number>();
+    for (const i of library) {
+      const k = i.book?.isbn13;
+      if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    ownedAtOpen.current = counts;
+  }
   const [mode, setMode] = useState<Mode>('scan');
   const [value, setValue] = useState('');
   const [listText, setListText] = useState('');
@@ -226,7 +239,12 @@ export default function ScanScreen() {
           <YStack gap="$2" marginTop="$5">
             <Label>{`Cette session — ${addedCount} ajouté${addedCount > 1 ? 's' : ''}`}</Label>
             {entries.map((entry) => (
-              <EntryRow key={entry.key} entry={entry} onRetry={() => retry(entry.key)} />
+              <EntryRow
+                key={entry.key}
+                entry={entry}
+                onRetry={() => retry(entry.key)}
+                ownedBefore={entry.isbn13 ? (ownedAtOpen.current?.get(entry.isbn13) ?? 0) : 0}
+              />
             ))}
           </YStack>
         ) : null}
@@ -252,8 +270,17 @@ export default function ScanScreen() {
   );
 }
 
-function EntryRow({ entry, onRetry }: { entry: ScanEntry; onRetry: () => void }) {
+function EntryRow({
+  entry,
+  onRetry,
+  ownedBefore = 0,
+}: {
+  entry: ScanEntry;
+  onRetry: () => void;
+  ownedBefore?: number;
+}) {
   const { bg, fg } = composedPalette(entry.isbn13 ?? entry.key);
+  const dup = entry.status === 'added' && ownedBefore > 0;
   return (
     <XStack
       gap="$3"
@@ -294,6 +321,11 @@ function EntryRow({ entry, onRetry }: { entry: ScanEntry; onRetry: () => void })
             <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
               {entry.book.authors?.[0] ?? entry.isbn13}
             </Text>
+            {dup ? (
+              <Text fontFamily="$body" fontSize={12} fontWeight="600" color={palette.ochre}>
+                Déjà dans votre bibliothèque
+              </Text>
+            ) : null}
           </>
         ) : entry.status === 'looking' ? (
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
@@ -316,9 +348,23 @@ function EntryRow({ entry, onRetry }: { entry: ScanEntry; onRetry: () => void })
           Réessayer
         </Button>
       ) : entry.status === 'added' ? (
-        <Text color="$positive" fontFamily="$body" fontSize={18}>
-          ✓
-        </Text>
+        dup ? (
+          <XStack
+            backgroundColor={palette.ochre}
+            borderRadius={999}
+            paddingHorizontal={8}
+            height={20}
+            alignItems="center"
+          >
+            <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+              {`Déjà ×${ownedBefore + 1}`}
+            </Text>
+          </XStack>
+        ) : (
+          <Text color="$positive" fontFamily="$body" fontSize={18}>
+            ✓
+          </Text>
+        )
       ) : null}
     </XStack>
   );
