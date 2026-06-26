@@ -7,12 +7,14 @@ import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui'
 import { BookCover } from '@/components/BookCover';
 import { CoverPicker } from '@/components/book/CoverPicker';
 import { LoanSection } from '@/components/book/LoanSection';
+import { SeriesAddSheet } from '@/components/book/SeriesAddSheet';
 import { ReadingSection } from '@/components/book/ReadingSection';
 import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
 import { useCopyCount, useDeleteItem } from '@/features/library/use-delete-item';
 import { useUpdateItem } from '@/features/library/use-update-item';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
+import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
@@ -49,6 +51,7 @@ export default function BookDetailScreen() {
   const update = useUpdateItem(id, session?.user.id);
   const deleteItem = useDeleteItem(session?.user.id);
   const { data: copyCount } = useCopyCount(item?.book?.isbn13 ?? undefined);
+  const [seriesOpen, setSeriesOpen] = useState(false);
 
   const confirmDelete = () => {
     const run = async () => {
@@ -98,6 +101,7 @@ export default function BookDetailScreen() {
   }
 
   const book = item.book;
+  const seriesRef = book?.title ? parseSeries(book.title) : null;
   const { bg, fg } = composedPalette(book?.isbn13 ?? id);
   const meta = [book?.publisher, book?.published_date, book?.page_count ? `${book.page_count} pages` : null]
     .filter(Boolean)
@@ -161,6 +165,22 @@ export default function BookDetailScreen() {
             author={book?.authors?.[0]}
             hasOverride={!!item.cover_override}
           />
+
+          {seriesRef ? (
+            <Button
+              onPress={() => setSeriesOpen(true)}
+              backgroundColor="$backgroundStrong"
+              borderColor="$accent"
+              borderWidth={1}
+              color="$accent"
+              borderRadius={2}
+              height={44}
+              fontFamily="$body"
+              fontWeight="600"
+            >
+              {`Compléter la série « ${seriesRef.name} »`}
+            </Button>
+          ) : null}
 
           {/* duplicate notice */}
           {copyCount && copyCount > 1 ? (
@@ -331,6 +351,14 @@ export default function BookDetailScreen() {
           </Button>
         </YStack>
       </ScrollView>
+
+      {seriesOpen && seriesRef ? (
+        <SeriesAddSheet
+          seriesName={seriesRef.name}
+          userId={session?.user.id}
+          onClose={() => setSeriesOpen(false)}
+        />
+      ) : null}
 
       {/* back button */}
       <Pressable
