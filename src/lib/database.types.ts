@@ -158,6 +158,27 @@ export type Database = {
         }
         Relationships: []
       }
+      circle_event_rsvps: {
+        Row: {
+          event_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       circle_members: {
         Row: {
           circle_id: string

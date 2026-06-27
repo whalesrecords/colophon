@@ -315,3 +315,89 @@ export function useEventActions(circleId: string, userId: string | undefined) {
 
   return { createEvent, deleteEvent };
 }
+
+export type RsvpStatus = 'going' | 'maybe' | 'no';
+
+export interface EventRsvp {
+  going: number;
+  maybe: number;
+  no: number;
+  mine: RsvpStatus | null;
+}
+
+/** All RSVPs for the circle's events, aggregated per event (counts + my own). */
+export function useEventRsvps(circleId: string | undefined, userId: string | undefined) {
+  return useQuery({
+    queryKey: ['circle-rsvps', circleId],
+    enabled: !!circleId,
+    queryFn: async (): Promise<Map<string, EventRsvp>> => {
+      const { data, error } = await supabase
+        .from('circle_event_rsvps')
+        .select('event_id, user_id, status, circle_events!inner(circle_id)')
+        .eq('circle_events.circle_id', circleId as string);
+      if (error) throw error;
+      const map = new Map<string, EventRsvp>();
+      for (const r of (data ?? []) as unknown as {
+        event_id: string;
+        user_id: string;
+        status: RsvpStatus;
+      }[]) {
+        const e = map.get(r.event_id) ?? { going: 0, maybe: 0, no: 0, mine: null };
+        if (r.status === 'going') e.going += 1;
+        else if (r.status === 'maybe') e.maybe += 1;
+        else if (r.status === 'no') e.no += 1;
+        if (r.user_id === userId) e.mine = r.status;
+        map.set(r.event_id, e);
+      }
+      return map;
+    },
+  });
+}
+
+/** Set (or clear, when status is null) my RSVP for an event. */
+export function useSetRsvp(circleId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      eventId,
+      status,
+    }: {
+      eventId: string;
+      status: RsvpStatus | null;
+    }): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      if (status === null) {
+        const { error } = await supabase
+          .from('circle_event_rsvps')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', userId);
+        if (error) throw new Error(error.message);
+        return;
+      }
+      const { error } = await supabase
+        .from('circle_event_rsvps')
+        .upsert(
+          { event_id: eventId, user_id: userId, status, updated_at: new Date().toISOString() },
+          { onConflict: 'event_id,user_id' },
+        );
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circle-rsvps', circleId] }),
+  });
+}
+
+/** A Google Calendar "add event" template URL (no OAuth needed; opens in browser). */
+export function googleCalendarUrl(event: CircleEvent): string {
+  const start = new Date(event.starts_at);
+  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.title,
+    dates: `${fmt(start)}/${fmt(end)}`,
+  });
+  if (event.description) params.set('details', event.description);
+  if (event.location) params.set('location', event.location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}

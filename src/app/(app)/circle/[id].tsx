@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -16,16 +17,21 @@ import { CircleLibrarySection, CircleProposalsSection } from '@/components/circl
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type CircleEvent,
+  type EventRsvp,
+  googleCalendarUrl,
   type Message,
+  type RsvpStatus,
   useCircle,
   useCircleEvents,
   useCircleMembers,
   useBlockedUsers,
   useCircleMessages,
   useEventActions,
+  useEventRsvps,
   useLeaveCircle,
   useModeration,
   useSendMessage,
+  useSetRsvp,
 } from '@/features/circles/use-circles';
 import { palette } from '@/theme/tokens';
 
@@ -404,6 +410,8 @@ function fmtEvent(iso: string): string {
 function AgendaSection({ circleId, userId }: { circleId: string; userId: string | undefined }) {
   const { data: events } = useCircleEvents(circleId);
   const { createEvent, deleteEvent } = useEventActions(circleId, userId);
+  const { data: rsvps } = useEventRsvps(circleId, userId);
+  const setRsvp = useSetRsvp(circleId, userId);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -466,7 +474,7 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
           fontFamily="$body"
           fontWeight="600"
         >
-          Créer le rendez-vous
+          Proposer au cercle
         </Button>
         {error ? (
           <Text fontFamily="$body" fontSize={13} color="$signal">
@@ -481,7 +489,14 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
             À venir
           </Text>
           {upcoming.map((e) => (
-            <EventRow key={e.id} event={e} mine={e.created_by === userId} onDelete={() => deleteEvent.mutate(e.id)} />
+            <EventRow
+              key={e.id}
+              event={e}
+              mine={e.created_by === userId}
+              rsvp={rsvps?.get(e.id)}
+              onSetRsvp={(status) => setRsvp.mutate({ eventId: e.id, status })}
+              onDelete={() => deleteEvent.mutate(e.id)}
+            />
           ))}
         </YStack>
       ) : (
@@ -496,7 +511,15 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
             Passés
           </Text>
           {past.map((e) => (
-            <EventRow key={e.id} event={e} mine={e.created_by === userId} onDelete={() => deleteEvent.mutate(e.id)} />
+            <EventRow
+              key={e.id}
+              event={e}
+              mine={e.created_by === userId}
+              rsvp={rsvps?.get(e.id)}
+              onSetRsvp={(status) => setRsvp.mutate({ eventId: e.id, status })}
+              onDelete={() => deleteEvent.mutate(e.id)}
+              past
+            />
           ))}
         </YStack>
       ) : null}
@@ -504,52 +527,132 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
   );
 }
 
+function RsvpPill({
+  label,
+  active,
+  color,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  color: string;
+  onPress: () => void;
+}) {
+  return (
+    <Button
+      onPress={onPress}
+      height={30}
+      paddingHorizontal="$3"
+      borderRadius={999}
+      borderWidth={1}
+      borderColor={active ? color : '$borderColor'}
+      backgroundColor={active ? color : 'transparent'}
+      color={active ? palette.paper : '$colorSoft'}
+      fontFamily="$body"
+      fontSize={13}
+      fontWeight="600"
+      pressStyle={{ opacity: 0.8 }}
+    >
+      {label}
+    </Button>
+  );
+}
+
 function EventRow({
   event,
   mine,
+  rsvp,
+  onSetRsvp,
   onDelete,
+  past,
 }: {
   event: CircleEvent;
   mine: boolean;
+  rsvp: EventRsvp | undefined;
+  onSetRsvp: (status: RsvpStatus | null) => void;
   onDelete: () => void;
+  past?: boolean;
 }) {
+  const toggle = (s: RsvpStatus) => onSetRsvp(rsvp?.mine === s ? null : s);
+  const going = rsvp?.going ?? 0;
   return (
-    <XStack
+    <YStack
       gap="$2"
-      alignItems="center"
       padding="$3"
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
       borderRadius={12}
     >
-      <YStack flex={1} gap={2}>
-        <Text fontFamily="$heading" fontSize={16} color="$color" numberOfLines={1}>
-          {event.title}
-        </Text>
-        <Text fontFamily="$body" fontSize={13} color="$accent" fontWeight="600">
-          {fmtEvent(event.starts_at)}
-        </Text>
-        {event.location ? (
-          <Text fontFamily="$body" fontSize={13} color="$colorMuted" numberOfLines={1}>
-            {event.location}
+      <XStack gap="$2" alignItems="flex-start">
+        <YStack flex={1} gap={2}>
+          <Text fontFamily="$heading" fontSize={16} color="$color" numberOfLines={1}>
+            {event.title}
           </Text>
+          <Text fontFamily="$body" fontSize={13} color="$accent" fontWeight="600">
+            {fmtEvent(event.starts_at)}
+          </Text>
+          {event.location ? (
+            <Text fontFamily="$body" fontSize={13} color="$colorMuted" numberOfLines={1}>
+              {event.location}
+            </Text>
+          ) : null}
+          {going > 0 ? (
+            <Text fontFamily="$body" fontSize={12} color={palette.sage} fontWeight="600">
+              {going === 1 ? '1 participant' : `${going} participants`}
+            </Text>
+          ) : null}
+        </YStack>
+        {mine ? (
+          <Button
+            onPress={onDelete}
+            chromeless
+            height={28}
+            paddingHorizontal="$2"
+            color="$colorMuted"
+            fontFamily="$body"
+            fontSize={16}
+          >
+            ✕
+          </Button>
         ) : null}
-      </YStack>
-      {mine ? (
-        <Button
-          onPress={onDelete}
-          chromeless
-          height={28}
-          paddingHorizontal="$2"
-          color="$colorMuted"
-          fontFamily="$body"
-          fontSize={16}
-        >
-          ✕
-        </Button>
+      </XStack>
+
+      {!past ? (
+        <XStack gap="$2" flexWrap="wrap" alignItems="center">
+          <RsvpPill
+            label="Je viens"
+            active={rsvp?.mine === 'going'}
+            color={palette.sage}
+            onPress={() => toggle('going')}
+          />
+          <RsvpPill
+            label="Peut-être"
+            active={rsvp?.mine === 'maybe'}
+            color={palette.ochre}
+            onPress={() => toggle('maybe')}
+          />
+          <RsvpPill
+            label="Non"
+            active={rsvp?.mine === 'no'}
+            color={palette.concrete}
+            onPress={() => toggle('no')}
+          />
+          <Text
+            onPress={() => void Linking.openURL(googleCalendarUrl(event))}
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="600"
+            color="$accent"
+            paddingHorizontal="$2"
+            paddingVertical="$1"
+            pressStyle={{ opacity: 0.6 }}
+          >
+            ＋ Google Agenda
+          </Text>
+        </XStack>
       ) : null}
-    </XStack>
+    </YStack>
   );
 }
 
