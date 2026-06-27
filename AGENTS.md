@@ -160,7 +160,8 @@ identifiers: English.
   pg_net AFTER-INSERT trigger on `messages` calls it fire-and-forget. Verified:
   insert → trigger → 200 `{"sent":0}` until a native device registers a token.
   **Real delivery still needs a native EAS build + push credentials — APNs (iOS) /
-  FCM (Android).**).
+  FCM (Android).**); **"Trouver chez un libraire"** (book detail link → leslibraires.fr
+  search by ISBN/title — FR indie co-op, never Amazon; `bookshopUrl` helper).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
