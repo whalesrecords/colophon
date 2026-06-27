@@ -55,6 +55,8 @@ function RootNavigator() {
       {/* Public privacy policy + support (App Store / Google Play requirement). */}
       <Stack.Screen name="privacy" />
       <Stack.Screen name="support" />
+      {/* Public password-reset landing (email recovery link → set new password). */}
+      <Stack.Screen name="reset-password" />
     </Stack>
   );
 }

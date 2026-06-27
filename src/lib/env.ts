@@ -8,7 +8,11 @@
 const FALLBACK_SUPABASE_URL = 'https://bwmhbnozduuoyavqkaha.supabase.co';
 const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_iyTMZg2N9AsgKEKN-_Favw_prMbfshN';
 
+const FALLBACK_WEB_URL = 'https://colophon-three.vercel.app';
+
 export const env = {
   supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL ?? FALLBACK_SUPABASE_URL,
   supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? FALLBACK_SUPABASE_ANON_KEY,
+  // Base URL of the deployed web app — used for password-reset redirect links.
+  webUrl: process.env.EXPO_PUBLIC_WEB_URL ?? FALLBACK_WEB_URL,
 } as const;

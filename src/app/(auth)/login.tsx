@@ -11,20 +11,33 @@ import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, resetPassword } = useAuth();
   const { t } = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const onSubmit = async () => {
     if (loading) return;
     setError(null);
+    setNotice(null);
     setLoading(true);
     const { error: signInError } = await signIn(email, password);
     setLoading(false);
     if (signInError) setError(authErrorMessage(signInError.message));
+  };
+
+  const onForgot = async () => {
+    setError(null);
+    if (!email.trim()) {
+      setNotice(t('auth.resetNeedEmail'));
+      return;
+    }
+    // Always confirm (don't reveal whether the address has an account).
+    await resetPassword(email);
+    setNotice(t('auth.resetSent', { email: email.trim() }));
   };
 
   return (
@@ -68,11 +81,28 @@ export default function LoginScreen() {
             autoComplete="current-password"
             onSubmitEditing={onSubmit}
           />
+          <Text
+            onPress={onForgot}
+            alignSelf="flex-end"
+            color="$accent"
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="600"
+            paddingVertical="$1"
+            pressStyle={{ opacity: 0.6 }}
+          >
+            {t('auth.forgot')}
+          </Text>
         </YStack>
 
         {error ? (
           <Text color="$signal" fontFamily="$body" fontSize={14}>
             {error}
+          </Text>
+        ) : null}
+        {notice ? (
+          <Text color="$colorSoft" fontFamily="$body" fontSize={14}>
+            {notice}
           </Text>
         ) : null}
 

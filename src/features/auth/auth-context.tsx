@@ -1,6 +1,8 @@
 import type { Session } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 
 interface AuthState {
@@ -9,6 +11,24 @@ interface AuthState {
   signIn: (email: string, password: string) => ReturnType<typeof supabase.auth.signInWithPassword>;
   signUp: (email: string, password: string) => ReturnType<typeof supabase.auth.signUp>;
   signOut: () => Promise<void>;
+  /** Email a password-reset link (lands on the web /reset-password page). */
+  resetPassword: (email: string) => ReturnType<typeof supabase.auth.resetPasswordForEmail>;
+  /** Set a new password for the (recovery-)authenticated user. */
+  updatePassword: (password: string) => ReturnType<typeof supabase.auth.updateUser>;
+}
+
+function resetRedirectTo(): string {
+  // Always the stable web domain so there is a single URL to allow-list in
+  // Supabase Auth (preview deploys rotate their origin). On localhost dev, prefer
+  // the current origin so the link comes back to the running dev server.
+  if (
+    Platform.OS === 'web' &&
+    typeof window !== 'undefined' &&
+    /localhost|127\.0\.0\.1/.test(window.location.origin)
+  ) {
+    return `${window.location.origin}/reset-password`;
+  }
+  return `${env.webUrl}/reset-password`;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -43,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         await supabase.auth.signOut();
       },
+      resetPassword: (email) =>
+        supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: resetRedirectTo() }),
+      updatePassword: (password) => supabase.auth.updateUser({ password }),
     }),
     [session, initializing],
   );
