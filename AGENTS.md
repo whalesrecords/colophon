@@ -153,7 +153,14 @@ identifiers: English.
   Possession facet → covers rise above the fold; **prioritized reading queue**
   (`items.queue_position` + `use-reading-queue`; the to-read pile splits into an
   ordered "Ma file" — prioritise/reorder ↑↓/remove — and the unordered "Pile à
-  lire"; `/queue` screen reached from a library "À lire · N" chip).
+  lire"; `/queue` screen reached from a library "À lire · N" chip); **push
+  notifications foundation** (`push_tokens` table + RLS; `usePushRegistration`
+  native-only hook upserts the Expo token; `send-push` edge function — verify_jwt
+  off — resolves a circle's members + tokens and posts to the Expo Push API; a
+  pg_net AFTER-INSERT trigger on `messages` calls it fire-and-forget. Verified:
+  insert → trigger → 200 `{"sent":0}` until a native device registers a token.
+  **Real delivery still needs a native EAS build + push credentials — APNs (iOS) /
+  FCM (Android).**).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
