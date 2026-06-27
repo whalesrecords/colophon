@@ -118,7 +118,20 @@ identifiers: English.
   source+fallback, `t()` is type-checked so every used key must exist); **animated
   login** (`BookPageTurn`: flat-design open book, looping page-turn via SVG + a
   setInterval/state loop — rAF doesn't tick under RNW here; replaces the 40 MB .mov);
-  **profile bio editor**.
+  **profile bio editor**; **page-turning BookLoader** (the login book, shrunk, as
+  the loading/search indicator in place of the spinner — library load, À venir
+  scan, series-completion search, recap load, scan lookup); **editable reading
+  dates** (per-session started_on/finished_on, e.g. dating a read from years ago);
+  **bilan ratings/reviews** (avg stars, coups de cœur, least-liked, written
+  reviews from `items.notes`); **"Ça traîne"** (books reading >60 days via
+  started_on); **À venir made honest** (future-dated series volumes only, +
+  favourite-authors discovery, + a clearly-separated "Compléter ma collection" for
+  released gaps — open catalogues carry ~no forthcoming dates; a real release
+  calendar needs a dedicated FR trade source like **Dilicom FEL**, the pro book-
+  trade DB, since Google Books-with-key returns 0 future-dated manga volumes and
+  manga-news blocks scraping); **circle agenda RSVP** (`circle_event_rsvps` +
+  is_circle_member RLS, "Je viens/Peut-être/Non" + participant count) + **Google
+  Calendar** add-event links per rendez-vous.
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
