@@ -9,7 +9,10 @@ export interface SeriesGroup {
   items: LibraryItem[];
   /** Lowest-volume item, used for the stack cover. */
   cover: LibraryItem;
+  /** Physical copies in the stack. */
   count: number;
+  /** Distinct tomes owned (by tome number, else by ISBN) — the X in "X/Y". */
+  distinctCount: number;
 }
 
 /**
@@ -43,7 +46,15 @@ export function groupBySeries(items: LibraryItem[]): {
   const grouped = new Set<string>();
   const groups: SeriesGroup[] = [];
   for (const [key, entry] of map) {
-    if (entry.list.length < 2) continue;
+    const hasVolumeMarker = entry.list.some((x) => x.volume != null);
+    const distinctIsbns = new Set(
+      entry.list.map((x) => x.item.book?.isbn13).filter((x): x is string => !!x),
+    );
+    // A real series needs either explicit tome markers, or — for the bare-title
+    // fallback — 2+ DISTINCT editions. This stops duplicate copies of one book,
+    // or two unrelated books sharing a bare title, from forming a phantom series.
+    const isSeries = hasVolumeMarker ? entry.list.length >= 2 : distinctIsbns.size >= 2;
+    if (!isSeries) continue;
     entry.list.sort((a, b) => {
       if (a.volume != null && b.volume != null) return a.volume - b.volume;
       if (a.volume != null) return -1;
@@ -54,12 +65,16 @@ export function groupBySeries(items: LibraryItem[]): {
       if (ad !== bd) return ad.localeCompare(bd);
       return (a.item.book?.isbn13 ?? '').localeCompare(b.item.book?.isbn13 ?? '');
     });
+    const distinctTomes = new Set(
+      entry.list.map((x) => (x.volume != null ? `v${x.volume}` : `i${x.item.book?.isbn13 ?? x.item.id}`)),
+    );
     groups.push({
       key,
       name: entry.name,
       items: entry.list.map((x) => x.item),
       cover: entry.list[0].item,
       count: entry.list.length,
+      distinctCount: distinctTomes.size,
     });
     for (const x of entry.list) grouped.add(x.item.id);
   }

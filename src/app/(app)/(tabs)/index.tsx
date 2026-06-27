@@ -79,7 +79,10 @@ export default function LibraryScreen() {
     () => items.filter((i) => i.ownership === 'borrowed').length,
     [items],
   );
-  const copies = useMemo(() => copiesByIsbn(items), [items]);
+  const copies = useMemo(
+    () => copiesByIsbn(items.filter((i) => i.ownership === 'owned')),
+    [items],
+  );
   const copiesOf = (item: LibraryItem) =>
     item.book?.isbn13 ? (copies.get(item.book.isbn13) ?? 1) : 1;
   const facets = useMemo(() => computeFacets(items, filters), [items, filters]);
@@ -341,7 +344,7 @@ export default function LibraryScreen() {
                 {openSeries.name}
               </Text>
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                {`Série · ${openSeries.count} tomes`}
+                {`Série · ${openSeries.distinctCount} tomes`}
               </Text>
             </YStack>
             <Text
@@ -470,8 +473,9 @@ function SeriesCard({
   onPress: () => void;
 }) {
   const cover = group.cover;
-  const showTotal = total != null && total >= group.count;
-  const complete = showTotal && group.count >= (total as number);
+  const owned = group.distinctCount;
+  const showTotal = total != null && total >= owned;
+  const complete = showTotal && owned >= (total as number);
   const { bg, fg } = composedPalette(cover.book?.isbn13 ?? cover.id);
   return (
     <YStack width={width} gap="$2">
@@ -509,7 +513,7 @@ function SeriesCard({
             alignItems="center"
           >
             <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
-              {showTotal ? `${group.count}/${total}` : group.count}
+              {showTotal ? `${owned}/${total}` : owned}
             </Text>
           </XStack>
         </YStack>
@@ -520,8 +524,8 @@ function SeriesCard({
         </Text>
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">
           {showTotal
-            ? `Série · ${group.count}/${total} tomes${complete ? ' ✓' : ''}`
-            : `Série · ${group.count} tomes`}
+            ? `Série · ${owned}/${total} tomes${complete ? ' ✓' : ''}`
+            : `Série · ${owned} tomes`}
         </Text>
       </YStack>
     </YStack>

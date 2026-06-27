@@ -6,18 +6,24 @@ import { palette } from '@/theme/tokens';
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;
+  paused?: boolean;
 }
 
 /**
  * Web barcode scanner (Chrome/Safari/Firefox) using ZXing on a getUserMedia
  * video stream. The camera only starts on an explicit tap (user gesture).
  */
-export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
+export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
   const last = useRef<{ value: string; at: number }>({ value: '', at: 0 });
+  const pausedRef = useRef(paused);
   const [active, setActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
   useEffect(() => {
     if (!active || !videoRef.current) return;
@@ -25,7 +31,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
     const reader = new BrowserMultiFormatReader();
     reader
       .decodeFromVideoDevice(undefined, videoRef.current, (result) => {
-        if (!result) return;
+        if (!result || pausedRef.current) return; // ignore decodes while a sheet is open
         const value = result.getText();
         const now = Date.now();
         if (value === last.current.value && now - last.current.at < 2500) return;

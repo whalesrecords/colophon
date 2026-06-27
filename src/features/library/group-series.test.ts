@@ -62,4 +62,14 @@ describe('groupBySeries', () => {
     expect(groups[0].items.map((i) => i.id)).toEqual(['b1', 'b2', 'b3']);
     expect(singles.map((i) => i.id)).toEqual(['x']);
   });
+
+  it('does not stack duplicate copies of one bare-title book (same ISBN)', () => {
+    const a = item('a', 'Sapiens');
+    const b = item('b', 'Sapiens');
+    a.book!.isbn13 = '9780000000001';
+    b.book!.isbn13 = '9780000000001'; // two physical copies of the SAME book
+    const { groups, singles } = groupBySeries([a, b]);
+    expect(groups).toHaveLength(0);
+    expect(singles.map((i) => i.id).sort()).toEqual(['a', 'b']);
+  });
 });

@@ -61,6 +61,29 @@ export function useScanSession(userId: string | undefined) {
     [lookup, addItem, update],
   );
 
+  /** Add an already-resolved book (from the AddSheet) — skips the redundant lookup. */
+  const submitResolved = useCallback(
+    async (book: BookMetadata, opts?: AddOptions): Promise<boolean> => {
+      const isbn13 = book.isbn13;
+      if (!isbn13 || seen.current.has(isbn13)) return false;
+      seen.current.add(isbn13);
+      setEntries((prev) => [
+        { key: isbn13, isbn13, status: 'looking' },
+        ...prev.filter((e) => e.key !== isbn13),
+      ]);
+      try {
+        await addItem.mutateAsync({ isbn13, ...opts });
+        update(isbn13, { isbn13, status: 'added', book });
+        return true;
+      } catch (err) {
+        seen.current.delete(isbn13);
+        update(isbn13, { status: 'error', error: err instanceof Error ? err.message : 'Erreur' });
+        return false;
+      }
+    },
+    [addItem, update],
+  );
+
   const retry = useCallback(
     (key: string, opts?: AddOptions) => {
       const entry = entries.find((e) => e.key === key);
@@ -85,5 +108,5 @@ export function useScanSession(userId: string | undefined) {
 
   const addedCount = entries.filter((e) => e.status === 'added').length;
 
-  return { entries, submit, submitMany, retry, addedCount, bulk };
+  return { entries, submit, submitResolved, submitMany, retry, addedCount, bulk };
 }

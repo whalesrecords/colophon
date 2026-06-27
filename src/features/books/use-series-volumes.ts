@@ -30,10 +30,9 @@ export function useSeriesVolumes() {
       for (const r of results) {
         const ref = parseSeries(r.title);
         if (!ref) continue;
-        const rk = seriesKey(ref.name);
-        // Lenient: tolerate edition suffixes ("Gantz :E", "Gantz Omnibus") by
-        // matching when one series key is a prefix of the other.
-        if (!(rk === key || rk.startsWith(key) || key.startsWith(rk))) continue;
+        // Exact series-key match only: a lenient prefix match wrongly pulled
+        // spin-offs into the main series (e.g. "Naruto Gaiden" into "Naruto").
+        if (seriesKey(ref.name) !== key) continue;
         if (!byVolume.has(ref.volume)) {
           byVolume.set(ref.volume, {
             isbn13: r.isbn13,
@@ -43,21 +42,11 @@ export function useSeriesVolumes() {
           });
         }
       }
-      const result = [...byVolume.values()].sort((a, b) => a.volume - b.volume);
-      // Cache the series total (best-effort) for at-a-glance "X/Y" library badges.
-      if (result.length > 0) {
-        void supabase.from('series').upsert(
-          {
-            normalized_key: key,
-            name: seriesName,
-            total_volumes: result.length,
-            source: 'book-search',
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'normalized_key' },
-        );
-      }
-      return result;
+      // NB: we do NOT cache result.length as the series total — book-search rarely
+      // returns the full run (Berserk found 28/42), so a search-derived count would
+      // be a wrong, world-shared "X/Y". The total comes from the per-user override
+      // (useSetSeriesTotal) or a curated seed instead.
+      return [...byVolume.values()].sort((a, b) => a.volume - b.volume);
     },
   });
 }

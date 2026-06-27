@@ -7,7 +7,6 @@ export interface LibraryStats {
   total: number;
   byStatus: Record<ReadingStatus, number>;
   pagesRead: number;
-  pagesOwned: number;
   authors: number;
   readThisYear: number;
   year: number;
@@ -50,7 +49,6 @@ export function useStats(userId: string | undefined) {
         total: rows.length,
         byStatus: { to_read: 0, reading: 0, read: 0, abandoned: 0 },
         pagesRead: 0,
-        pagesOwned: 0,
         authors: 0,
         readThisYear: 0,
         year: new Date().getFullYear(),
@@ -59,7 +57,6 @@ export function useStats(userId: string | undefined) {
       const authorSet = new Set<string>();
       for (const row of rows) {
         const pages = row.book?.page_count ?? 0;
-        stats.pagesOwned += pages;
         if (row.status in stats.byStatus) stats.byStatus[row.status] += 1;
         if (row.status === 'read') stats.pagesRead += pages;
         for (const author of row.book?.authors ?? []) authorSet.add(author);

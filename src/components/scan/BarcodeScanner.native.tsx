@@ -8,10 +8,11 @@ import { palette } from '@/theme/tokens';
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;
+  paused?: boolean;
 }
 
 /** Native (iOS/Android) barcode scanner: expo-camera with EAN/UPC + haptics. */
-export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
+export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const last = useRef<{ value: string; at: number }>({ value: '', at: 0 });
 
@@ -73,7 +74,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
         style={StyleSheet.absoluteFill}
         facing="back"
         barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a'] }}
-        onBarcodeScanned={handle}
+        onBarcodeScanned={paused ? undefined : handle}
       />
       <View style={styles.frame} pointerEvents="none" />
     </View>

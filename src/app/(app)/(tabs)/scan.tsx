@@ -67,7 +67,9 @@ function ModeTab({
 export default function ScanScreen() {
   const { session } = useAuth();
   const router = useRouter();
-  const { entries, submit, submitMany, retry, addedCount, bulk } = useScanSession(session?.user.id);
+  const { entries, submitResolved, submitMany, retry, addedCount, bulk } = useScanSession(
+    session?.user.id,
+  );
   const { data: library } = useLibrary(session?.user.id);
   // Snapshot what's already owned when the screen opens, so scanning a book you
   // already have flags it immediately (the in-store duplicate check).
@@ -140,7 +142,7 @@ export default function ScanScreen() {
   const commitAdd = async (opts: { ownership: Ownership; status: ReadingStatus }) => {
     if (!pendingBook) return;
     setCommitting(true);
-    await submit(pendingBook.isbn13, opts);
+    await submitResolved(pendingBook, opts);
     setCommitting(false);
     setPendingBook(null);
     (inputRef.current as { focus?: () => void } | null)?.focus?.();
@@ -329,7 +331,10 @@ export default function ScanScreen() {
                 </Text>
               </YStack>
             ) : (
-              <BarcodeScanner onScan={(v) => void openAddSheet(v)} />
+              <BarcodeScanner
+                onScan={(v) => void openAddSheet(v)}
+                paused={!!pendingBook || lookup.isPending}
+              />
             )}
             <YStack gap="$2">
               <Label>ISBN — saisie ou douchette</Label>

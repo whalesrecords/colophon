@@ -49,8 +49,11 @@ export function SeriesCompletion({
   const totalKnown = override != null || volumes.length > 0;
   const effectiveTotal = override ?? Math.max(volumes.length, ownedCount);
   const isComplete = totalKnown && ownedCount >= effectiveTotal;
+  const ownedInList = volumes.filter((v) => ownedIsbns.has(v.isbn13)).length;
   const missingAll = volumes.filter((v) => !ownedIsbns.has(v.isbn13) && !added.has(v.isbn13));
-  const missing = isComplete ? [] : missingAll.slice(0, Math.max(0, effectiveTotal - ownedCount));
+  // Cap to the gap measured WITHIN the search list, so genuinely-missing tomes
+  // aren't hidden when the stack owns copies that the search didn't return.
+  const missing = isComplete ? [] : missingAll.slice(0, Math.max(0, effectiveTotal - ownedInList));
   const selectedMissing = missing.filter((v) => !excluded.has(v.isbn13));
 
   const toggle = (isbn: string) =>

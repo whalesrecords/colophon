@@ -8,6 +8,6 @@ create table if not exists public.series (
 );
 alter table public.series enable row level security;
 
+-- Read-only for clients; only the service role (curated seeds) writes, so a
+-- world-shared total can't be poisoned by any authenticated user.
 create policy series_read on public.series for select to authenticated using (true);
-create policy series_insert on public.series for insert to authenticated with check (true);
-create policy series_update on public.series for update to authenticated using (true) with check (true);
