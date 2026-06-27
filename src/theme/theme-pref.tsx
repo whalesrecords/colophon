@@ -8,7 +8,7 @@ export type ThemeScheme = 'light' | 'dark';
 const STORAGE_KEY = 'colophon.theme';
 
 /** Dark surface used where a concrete color is needed (status bar, nav background). */
-export const DARK_BG = '#15130E';
+export const DARK_BG = '#221B14';
 
 export const THEME_OPTIONS: ThemePref[] = ['system', 'light', 'dark'];
 

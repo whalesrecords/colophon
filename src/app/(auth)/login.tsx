@@ -2,17 +2,19 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
-import { BookPageTurn } from '@/components/BookPageTurn';
+import { ColophonMark } from '@/components/ColophonMark';
 import { TextField } from '@/components/Field';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import { authErrorMessage } from '@/features/auth/errors';
 import { useT } from '@/i18n';
+import { useThemePref } from '@/theme/theme-pref';
 import { palette } from '@/theme/tokens';
 
 export default function LoginScreen() {
   const { signIn, resetPassword } = useAuth();
   const { t } = useT();
+  const { effective } = useThemePref();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,7 @@ export default function LoginScreen() {
     <Screen alignItems="center" justifyContent="center" paddingHorizontal="$6">
       <YStack width="100%" maxWidth={420} gap="$6">
         <YStack alignItems="center" gap="$2">
-          <BookPageTurn />
+          <ColophonMark size={132} dark={effective === 'dark'} />
           <Text
             fontFamily="$heading"
             fontSize={44}

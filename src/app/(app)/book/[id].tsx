@@ -16,7 +16,7 @@ import { useCopyCount, useDeleteItem } from '@/features/library/use-delete-item'
 import { useUpdateItem } from '@/features/library/use-update-item';
 import { useMarkRead } from '@/features/reading/use-reading-sessions';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
-import { bookshopUrl } from '@/lib/bookshop';
+import { amazonUrl, bookshopUrl } from '@/lib/bookshop';
 import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
@@ -249,19 +249,34 @@ export default function BookDetailScreen() {
                 onSave={(v) => update.mutate({ borrowed_from: v || null })}
               />
             ) : null}
-            <Text
-              onPress={() =>
-                void Linking.openURL(bookshopUrl(book?.isbn13, book?.title, book?.authors?.[0]))
-              }
-              fontFamily="$body"
-              fontSize={14}
-              fontWeight="600"
-              color="$accent"
-              paddingVertical="$1"
-              pressStyle={{ opacity: 0.6 }}
-            >
-              Trouver chez un libraire ↗
-            </Text>
+            <XStack gap="$4" alignItems="center" flexWrap="wrap">
+              <Text
+                onPress={() =>
+                  void Linking.openURL(bookshopUrl(book?.isbn13, book?.title, book?.authors?.[0]))
+                }
+                fontFamily="$body"
+                fontSize={14}
+                fontWeight="600"
+                color="$accent"
+                paddingVertical="$1"
+                pressStyle={{ opacity: 0.6 }}
+              >
+                Chez un libraire ↗
+              </Text>
+              <Text
+                onPress={() =>
+                  void Linking.openURL(amazonUrl(book?.isbn13, book?.title, book?.authors?.[0]))
+                }
+                fontFamily="$body"
+                fontSize={14}
+                fontWeight="600"
+                color="$colorMuted"
+                paddingVertical="$1"
+                pressStyle={{ opacity: 0.6 }}
+              >
+                Amazon ↗
+              </Text>
+            </XStack>
           </YStack>
 
           {/* format */}

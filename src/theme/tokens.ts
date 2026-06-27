@@ -3,58 +3,71 @@
  * (design/design_handoff_colophon_mobile). Single source of truth for colors,
  * typography, spacing, radii and shadows; consumed by the Tamagui config.
  *
- * Direction: wabi-sabi / Japanese-Mediterranean — warm paper, ink, polished
- * concrete, light wood. The interface recedes so book covers are the heroes.
- * Default accent: indigo aizome.
+ * Direction: wabi-sabi — parchemin + espresso chrome; the colour comes from the
+ * book covers and the four "tranches". Brand identity: "Les tranches" — a pyramid
+ * of four book slices (brique/prusse/forêt/ocre) on an espresso shelf with a §
+ * medallion. Brand accent: Espresso.
  */
 
 export const palette = {
-  // Surfaces & paper
-  paper: '#F4F1EA', // app background
-  paperCard: '#FBFAF6', // cards / document surfaces
+  // Surfaces — parchemin (light) / nuit (dark)
+  paper: '#F4EEE2', // app background (parchemin)
+  parchment: '#F4EEE2',
+  nuit: '#221B14', // dark background
+  paperCard: '#FBF6EC', // cards / document surfaces
   white: '#FFFFFF', // bubbles, contrasted cards
-  surfaceWarm: '#F7F4EC',
-  surfaceWarmAlt: '#EDE7DA',
+  surfaceWarm: '#F2EBDC',
+  surfaceWarmAlt: '#EBE2D0',
 
-  // Hairlines
-  hairline: '#E4DFD4', // primary
-  hairlineLight: '#EFEADF',
-  hairlineOnPaper: '#E7E0D2',
-  hairlineStrong: '#DDD6C8',
+  // Hairlines (filet)
+  hairline: '#EAE2D1', // primary
+  hairlineLight: '#F0E9DA',
+  hairlineOnPaper: '#E7DECB',
+  hairlineStrong: '#DED4BF',
 
-  // Ink & polished concrete
-  ink: '#1C1A17', // primary text
+  // Ink — espresso
+  ink: '#2A1E15', // primary text (espresso)
   inkSoft: '#3A362F', // body
   concreteDark: '#6E6A62',
-  concrete: '#9B968C', // muted
-  concreteLight: '#B3AC9F',
+  concrete: '#8C8479', // muted
+  concreteLight: '#9B968C',
   concreteLighter: '#C3BCAC',
-  headerConcrete: '#8B8779', // Profile / Discussions headers (white text on top)
-  track: '#E0DACD', // progress rail
+  headerConcrete: '#8C8479',
+  track: '#E4DAC7', // progress rail
 
-  // Accent — aizome (default)
-  aizome: '#2B3A55',
-  aizomeDeep: '#1F2A40',
-  aizome08: 'rgba(43,58,85,0.08)',
-  aizome10: 'rgba(43,58,85,0.10)',
-  aizome16: 'rgba(43,58,85,0.16)',
+  // Brand accent — Espresso (the §, the nav, primary chrome)
+  espresso: '#2A1E15',
+  espressoDeep: '#1A120C',
+  // `aizome*` kept as the accent token name (now Espresso) so existing refs hold.
+  aizome: '#2A1E15',
+  aizomeDeep: '#1A120C',
+  aizome08: 'rgba(42,30,21,0.08)',
+  aizome10: 'rgba(42,30,21,0.10)',
+  aizome16: 'rgba(42,30,21,0.16)',
 
-  // Accent alt — Klein (documented for comparison; not used by default)
-  klein: '#2A3BFF',
+  // The four tranches — one colour per shelf / collection (light · on-dark).
+  brick: '#AE4133', // Romans · alertes douces
+  brickDark: '#C0533C',
+  prussian: '#225F77', // Essais · en cours
+  prussianDark: '#2E78A6',
+  forest: '#2D6B4E', // Séries · terminé
+  forestDark: '#3E9460',
+  gold: '#B5832E', // Mangas · BD · envies
+  goldDark: '#D8B36A',
 
-  // Signal (rare — statuses / alerts)
-  terracotta: '#B65D3C',
-  ochre: '#B0853A', // lending / on-loan accent
-  sage: '#7E8A6F', // trend up / positive
-  scanBeam: '#6E86C8', // scanner beam glow
+  // Legacy signal names, remapped to the tranches (kept so components don't break)
+  terracotta: '#AE4133', // → rouge brique
+  ochre: '#B5832E', // → ocre doré
+  sage: '#2D6B4E', // → vert forêt
+  scanBeam: '#C9A86F', // scanner beam glow (warm)
 } as const;
 
-/** Reading-status pill colors (dot + chip background + chip text). */
+/** Reading-status pill colours — mapped to the tranches. */
 export const statusColors = {
-  to_read: { dot: '#6E6A62', chipBg: 'rgba(110,106,98,0.10)', chipText: '#6E6A62' },
-  reading: { dot: '#2B3A55', chipBg: 'rgba(43,58,85,0.10)', chipText: '#2B3A55' },
-  read: { dot: '#1C1A17', chipBg: 'rgba(28,26,23,0.08)', chipText: '#1C1A17' },
-  abandoned: { dot: '#B65D3C', chipBg: 'rgba(182,93,60,0.12)', chipText: '#B65D3C' },
+  to_read: { dot: '#8C8479', chipBg: 'rgba(140,132,121,0.12)', chipText: '#6E6A62' },
+  reading: { dot: '#225F77', chipBg: 'rgba(34,95,119,0.10)', chipText: '#225F77' }, // bleu de Prusse
+  read: { dot: '#2D6B4E', chipBg: 'rgba(45,107,78,0.10)', chipText: '#2D6B4E' }, // vert forêt
+  abandoned: { dot: '#AE4133', chipBg: 'rgba(174,65,51,0.12)', chipText: '#AE4133' }, // rouge brique
 } as const;
 
 export const fonts = {

@@ -104,24 +104,24 @@ export const tamaguiConfig = createTamagui({
       positive: palette.sage,
       track: palette.track,
     },
-    // Warm "sumi ink" dark theme — same keys, dark values flip automatically.
+    // "Nuit" dark theme — espresso accent, lightened tranches for contrast.
     dark: {
-      background: '#15130E',
-      backgroundHover: '#1C1A14',
-      backgroundPress: '#221F17',
-      backgroundStrong: '#1F1B15',
-      backgroundCard: '#1F1B15',
-      color: '#ECE6D8',
+      background: '#221B14', // nuit
+      backgroundHover: '#2A2218',
+      backgroundPress: '#322818',
+      backgroundStrong: '#2A2218',
+      backgroundCard: '#2A2218',
+      color: '#F0E7D6',
       colorSoft: '#CAC3B3',
-      colorMuted: '#938C7D',
+      colorMuted: '#988F7F',
       colorFaint: '#6E685E',
-      borderColor: '#332F26',
-      borderColorStrong: '#423D31',
-      accent: '#5E76A8',
-      accentDeep: '#46598A',
-      signal: '#CB8163',
-      positive: '#93A07E',
-      track: '#2A271F',
+      borderColor: '#3A3026',
+      borderColorStrong: '#4A3D2E',
+      accent: '#6F5640', // espresso, lightened so paper text reads on nuit
+      accentDeep: '#54402F',
+      signal: '#C0533C', // brique (on dark)
+      positive: '#3E9460', // forêt (on dark)
+      track: '#2E2618',
     },
   },
   shorthands: {
