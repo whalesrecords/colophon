@@ -7,7 +7,7 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
 import { useAuth } from '@/features/auth/auth-context';
-import { type UpcomingItem, useUpcoming } from '@/features/books/use-upcoming';
+import { type AuthorBook, type UpcomingItem, useUpcoming } from '@/features/books/use-upcoming';
 import { useAddItem } from '@/features/library/use-add-item';
 import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
@@ -80,6 +80,50 @@ function Row({
   );
 }
 
+function AuthorRow({
+  book,
+  added,
+  busy,
+  onAdd,
+}: {
+  book: AuthorBook;
+  added: boolean;
+  busy: boolean;
+  onAdd: () => void;
+}) {
+  const { t } = useT();
+  const year = book.publishedDate?.slice(0, 4);
+  return (
+    <XStack gap="$3" alignItems="center" opacity={added ? 0.55 : 1}>
+      <BookCover title={book.title} coverUrl={book.coverUrl} isbn={book.isbn13} width={42} />
+      <YStack flex={1} gap={1}>
+        <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color" numberOfLines={1}>
+          {book.title}
+        </Text>
+        <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+          {year ? `${book.author} · ${year}` : book.author}
+        </Text>
+      </YStack>
+      <Button
+        onPress={onAdd}
+        disabled={added || busy}
+        height={34}
+        paddingHorizontal="$3"
+        borderRadius={999}
+        borderWidth={1}
+        borderColor={added ? '$borderColor' : '$accent'}
+        backgroundColor={added ? 'transparent' : '$accent'}
+        color={added ? '$colorMuted' : palette.paper}
+        fontFamily="$body"
+        fontSize={13}
+        fontWeight="600"
+      >
+        {added ? t('upcoming.added') : t('upcoming.want')}
+      </Button>
+    </XStack>
+  );
+}
+
 export default function UpcomingScreen() {
   const { t } = useT();
   const router = useRouter();
@@ -116,7 +160,9 @@ export default function UpcomingScreen() {
     }
   };
 
-  const nothing = !isLoading && !isError && !months.length && !bySeries.length;
+  const fromAuthors = data?.fromAuthors ?? [];
+  const nothing =
+    !isLoading && !isError && !months.length && !bySeries.length && !fromAuthors.length;
 
   return (
     <YStack flex={1} backgroundColor="$background">
@@ -179,10 +225,10 @@ export default function UpcomingScreen() {
           </YStack>
         ) : (
           <YStack gap="$6">
-            {months.length ? (
-              <YStack gap="$4">
-                <Section>{t('upcoming.sectionReleases')}</Section>
-                {months.map(([label, list]) => (
+            <YStack gap="$4">
+              <Section>{t('upcoming.sectionReleases')}</Section>
+              {months.length ? (
+                months.map(([label, list]) => (
                   <YStack key={label} gap="$3">
                     <Text fontFamily="$body" fontSize={13} fontWeight="700" color="$accent">
                       {label}
@@ -197,13 +243,33 @@ export default function UpcomingScreen() {
                       />
                     ))}
                   </YStack>
+                ))
+              ) : (
+                <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
+                  Aucune date de sortie future connue pour vos séries. Les bases ouvertes
+                  référencent peu les parutions à venir — on y travaille.
+                </Text>
+              )}
+            </YStack>
+
+            {fromAuthors.length ? (
+              <YStack gap="$3">
+                <Section>De vos auteurs favoris</Section>
+                {fromAuthors.map((b) => (
+                  <AuthorRow
+                    key={b.isbn13}
+                    book={b}
+                    added={added.has(b.isbn13)}
+                    busy={addItem.isPending}
+                    onAdd={() => void addToWishlist(b.isbn13)}
+                  />
                 ))}
               </YStack>
             ) : null}
 
             {bySeries.length ? (
               <YStack gap="$4">
-                <Section>{t('upcoming.sectionComplete')}</Section>
+                <Section>Compléter ma collection</Section>
                 {bySeries.map(([name, list]) => (
                   <YStack key={name} gap="$3">
                     <Text fontFamily="$body" fontSize={13} fontWeight="700" color="$colorSoft">
