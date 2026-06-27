@@ -20,6 +20,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider } from 'tamagui';
 
 import { AuthProvider, useAuth } from '@/features/auth/auth-context';
+import { usePushRegistration } from '@/features/notifications/use-push-registration';
 import { LocaleProvider } from '@/i18n';
 import { DARK_BG, ThemePrefProvider, useThemePref } from '@/theme/theme-pref';
 import { palette } from '@/theme/tokens';
@@ -34,6 +35,7 @@ const queryClient = new QueryClient({
 function RootNavigator() {
   const { session, initializing } = useAuth();
   const { effective } = useThemePref();
+  usePushRegistration(session?.user.id);
   if (initializing) return null;
   const signedIn = !!session;
 

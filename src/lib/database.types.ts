@@ -179,6 +179,27 @@ export type Database = {
         }
         Relationships: []
       }
+      push_tokens: {
+        Row: {
+          user_id: string
+          token: string
+          platform: string | null
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          token: string
+          platform?: string | null
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          token?: string
+          platform?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           requester: string
