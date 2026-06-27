@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Pressable } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { useT } from '@/i18n';
@@ -38,7 +40,7 @@ export function displayValue(key: FacetKey, value: string): string {
   return value;
 }
 
-const MAX_PER_FACET = 14;
+const MAX_PER_FACET = 24;
 
 interface FilterPanelProps {
   facets: Record<FacetKey, FacetValueCount[]>;
@@ -46,58 +48,96 @@ interface FilterPanelProps {
   onToggle: (key: FacetKey, value: string) => void;
 }
 
+/**
+ * Compact, accordion-style facets: each is a single collapsible row (with a
+ * selected-summary) so the panel stays short; tap one to reveal its chips. The
+ * facet that already has a selection starts open.
+ */
 export function FilterPanel({ facets, filters, onToggle }: FilterPanelProps) {
   const { t } = useT();
+  const visible = FACET_KEYS.filter(
+    (k) => facets[k].length >= 2 || filters.facets[k].length > 0,
+  );
+  const [open, setOpen] = useState<FacetKey | null>(
+    () => visible.find((k) => filters.facets[k].length > 0) ?? null,
+  );
+
   return (
     <YStack
-      gap="$4"
-      padding="$4"
+      paddingVertical="$1"
+      paddingHorizontal="$3"
       backgroundColor="$backgroundStrong"
       borderColor="$borderColor"
       borderWidth={1}
       borderRadius={12}
     >
-      {FACET_KEYS.map((key) => {
+      {visible.map((key, i) => {
         const selected = filters.facets[key];
-        const options = facets[key];
-        // Show a facet only when it discriminates (more than one value).
-        if (options.length < 2 && !selected.length) return null;
-        const shown = options.slice(0, MAX_PER_FACET);
+        const isOpen = open === key;
+        const summary =
+          selected.length > 0
+            ? selected.map((v) => displayValue(key, v)).join(', ')
+            : `${facets[key].length}`;
         return (
-          <YStack key={key} gap="$2">
-            <Text
-              fontFamily="$body"
-              fontSize={11}
-              fontWeight="600"
-              letterSpacing={2}
-              textTransform="uppercase"
-              color="$colorMuted"
-            >
-              {t(FACET_LABEL_KEYS[key])}
-            </Text>
-            <XStack gap="$2" flexWrap="wrap">
-              {shown.map((opt) => {
-                const active = selected.includes(opt.value);
-                return (
-                  <Button
-                    key={opt.value}
-                    onPress={() => onToggle(key, opt.value)}
-                    height={32}
-                    paddingHorizontal="$3"
-                    borderRadius={999}
-                    borderWidth={1}
-                    borderColor={active ? '$accent' : '$borderColor'}
-                    backgroundColor={active ? '$accent' : 'transparent'}
-                    color={active ? palette.paper : '$colorSoft'}
+          <YStack
+            key={key}
+            borderTopWidth={i === 0 ? 0 : 1}
+            borderTopColor="$borderColor"
+            paddingVertical="$2"
+          >
+            <Pressable onPress={() => setOpen(isOpen ? null : key)}>
+              <XStack alignItems="center" justifyContent="space-between" gap="$2">
+                <Text
+                  fontFamily="$body"
+                  fontSize={12}
+                  fontWeight="600"
+                  letterSpacing={1.5}
+                  textTransform="uppercase"
+                  color={selected.length ? '$accent' : '$colorMuted'}
+                >
+                  {t(FACET_LABEL_KEYS[key])}
+                </Text>
+                <XStack alignItems="center" gap="$2" flex={1} justifyContent="flex-end">
+                  <Text
                     fontFamily="$body"
-                    fontSize={13}
-                    fontWeight="500"
+                    fontSize={12}
+                    color={selected.length ? '$color' : '$colorMuted'}
+                    numberOfLines={1}
                   >
-                    {`${displayValue(key, opt.value)} · ${opt.count}`}
-                  </Button>
-                );
-              })}
-            </XStack>
+                    {summary}
+                  </Text>
+                  <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                    {isOpen ? '−' : '+'}
+                  </Text>
+                </XStack>
+              </XStack>
+            </Pressable>
+
+            {isOpen ? (
+              <XStack gap="$2" flexWrap="wrap" marginTop="$2">
+                {facets[key].slice(0, MAX_PER_FACET).map((opt) => {
+                  const active = selected.includes(opt.value);
+                  return (
+                    <Button
+                      key={opt.value}
+                      onPress={() => onToggle(key, opt.value)}
+                      height={28}
+                      paddingHorizontal="$2.5"
+                      borderRadius={999}
+                      borderWidth={1}
+                      borderColor={active ? '$accent' : '$borderColor'}
+                      backgroundColor={active ? '$accent' : 'transparent'}
+                      color={active ? palette.paper : '$colorSoft'}
+                      fontFamily="$body"
+                      fontSize={12}
+                      fontWeight="500"
+                    >
+                      {`${displayValue(key, opt.value)} · ${opt.count}`}
+                    </Button>
+                  );
+                })}
+              </XStack>
+            ) : null}
           </YStack>
         );
       })}

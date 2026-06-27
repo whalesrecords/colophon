@@ -10,12 +10,18 @@ export interface LibraryStats {
   authors: number;
   readThisYear: number;
   year: number;
+  collectionValue: number; // sum of purchase prices of OWNED items
+  pricedCount: number; // how many owned items have a price
+  acquiredThisYear: number; // owned items bought this year (by purchase_date)
+  spentThisYear: number; // total spent this year
 }
 
 interface ItemRow {
   id: string;
   status: ReadingStatus;
   ownership: string;
+  purchase_price: number | null;
+  purchase_date: string | null;
   book: { page_count: number | null; authors: string[] | null } | null;
 }
 
@@ -32,7 +38,11 @@ export function useStats(userId: string | undefined) {
     enabled: !!userId,
     queryFn: async (): Promise<LibraryStats> => {
       const [itemsRes, sessionsRes] = await Promise.all([
-        supabase.from('items').select('id, status, ownership, book:book_metadata(page_count, authors)'),
+        supabase
+          .from('items')
+          .select(
+            'id, status, ownership, purchase_price, purchase_date, book:book_metadata(page_count, authors)',
+          ),
         supabase.from('reading_sessions').select('item_id, status, finished_on'),
       ]);
       if (itemsRes.error) throw itemsRes.error;
@@ -52,18 +62,33 @@ export function useStats(userId: string | undefined) {
         authors: 0,
         readThisYear: 0,
         year: new Date().getFullYear(),
+        collectionValue: 0,
+        pricedCount: 0,
+        acquiredThisYear: 0,
+        spentThisYear: 0,
       };
 
+      const yearPrefix = String(stats.year);
       const authorSet = new Set<string>();
       for (const row of rows) {
         const pages = row.book?.page_count ?? 0;
         if (row.status in stats.byStatus) stats.byStatus[row.status] += 1;
         if (row.status === 'read') stats.pagesRead += pages;
         for (const author of row.book?.authors ?? []) authorSet.add(author);
+        // Collection value + acquisition rhythm count owned copies you bought.
+        if (row.ownership === 'owned') {
+          const price = row.purchase_price != null ? Number(row.purchase_price) : null;
+          if (price != null && Number.isFinite(price)) {
+            stats.collectionValue += price;
+            stats.pricedCount += 1;
+          }
+          if (row.purchase_date?.startsWith(yearPrefix)) {
+            stats.acquiredThisYear += 1;
+            if (price != null && Number.isFinite(price)) stats.spentThisYear += price;
+          }
+        }
       }
       stats.authors = authorSet.size;
-
-      const yearPrefix = String(stats.year);
       const finishedThisYear = new Set(
         sessions
           .filter(

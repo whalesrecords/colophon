@@ -426,6 +426,14 @@ function DangerZone({ onSignedOut }: { onSignedOut: () => void }) {
   );
 }
 
+function euro(n: number): string {
+  return n.toLocaleString('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: n % 1 === 0 ? 0 : 2,
+  });
+}
+
 function Stats({ stats }: { stats: LibraryStats }) {
   const { t } = useT();
   return (
@@ -449,6 +457,32 @@ function Stats({ stats }: { stats: LibraryStats }) {
         <YStack width={1} backgroundColor="$borderColor" />
         <StatBig value={formatCount(stats.pagesRead)} label={t('profile.pagesRead')} />
       </XStack>
+
+      {stats.pricedCount > 0 || stats.acquiredThisYear > 0 ? (
+        <YStack gap="$3">
+          <Label>Collection</Label>
+          <XStack
+            backgroundColor="$backgroundStrong"
+            borderColor="$borderColor"
+            borderWidth={1}
+            borderRadius={12}
+            paddingVertical="$5"
+          >
+            <StatBig
+              value={euro(stats.collectionValue)}
+              label={
+                stats.pricedCount < stats.total
+                  ? `Valeur · ${stats.pricedCount} chiffrés`
+                  : 'Valeur estimée'
+              }
+            />
+            <YStack width={1} backgroundColor="$borderColor" />
+            <StatBig value={formatCount(stats.acquiredThisYear)} label={`Achetés en ${stats.year}`} />
+            <YStack width={1} backgroundColor="$borderColor" />
+            <StatBig value={euro(stats.spentThisYear)} label={`Dépensé en ${stats.year}`} />
+          </XStack>
+        </YStack>
+      ) : null}
 
       <YStack gap="$3">
         <Label>{t('profile.byStatus')}</Label>
