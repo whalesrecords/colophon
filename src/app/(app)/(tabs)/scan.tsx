@@ -12,6 +12,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { type BookMetadata, useIsbnLookup } from '@/features/books/use-isbn-lookup';
 import { useCsvImport } from '@/features/library/use-csv-import';
 import { useLibrary } from '@/features/library/use-library';
+import { useT } from '@/i18n';
 import { type ScanEntry, useScanSession } from '@/features/scan/use-scan-session';
 import { parseBookCsv } from '@/lib/book-csv';
 import { parseIsbnList } from '@/lib/isbn-list';
@@ -65,6 +66,7 @@ function ModeTab({
 }
 
 export default function ScanScreen() {
+  const { t } = useT();
   const { session } = useAuth();
   const router = useRouter();
   const { entries, submitResolved, submitMany, retry, addedCount, bulk } = useScanSession(
@@ -135,7 +137,7 @@ export default function ScanScreen() {
       const book = await lookup.mutateAsync(raw);
       setPendingBook(book);
     } catch (e) {
-      setResolveError(e instanceof Error ? e.message : 'Livre introuvable.');
+      setResolveError(e instanceof Error ? e.message : t('scan.notFound'));
     }
   };
 
@@ -163,15 +165,15 @@ export default function ScanScreen() {
       >
         <YStack gap="$3" marginBottom="$4">
           <YStack gap="$1">
-            <Label>Ajouter des livres</Label>
+            <Label>{t('scan.addBooks')}</Label>
             <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
-              Ajouter
+              {t('scan.add')}
             </Text>
           </YStack>
           <XStack gap="$2" flexWrap="wrap">
-            <ModeTab label="Scanner / ISBN" active={mode === 'scan'} onPress={() => setMode('scan')} />
-            <ModeTab label="Rechercher" active={mode === 'search'} onPress={() => setMode('search')} />
-            <ModeTab label="Importer" active={mode === 'import'} onPress={() => setMode('import')} />
+            <ModeTab label={t('scan.modeScan')} active={mode === 'scan'} onPress={() => setMode('scan')} />
+            <ModeTab label={t('scan.modeSearch')} active={mode === 'search'} onPress={() => setMode('search')} />
+            <ModeTab label={t('scan.modeImport')} active={mode === 'import'} onPress={() => setMode('import')} />
           </XStack>
         </YStack>
 
@@ -179,12 +181,12 @@ export default function ScanScreen() {
           <YStack gap="$3">
             <XStack gap="$2">
               <ModeTab
-                label="Liste d'ISBN"
+                label={t('scan.importIsbnList')}
                 active={importKind === 'isbn'}
                 onPress={() => setImportKind('isbn')}
               />
               <ModeTab
-                label="CSV (Goodreads, Babelio)"
+                label={t('scan.importCsvTab')}
                 active={importKind === 'csv'}
                 onPress={() => setImportKind('csv')}
               />
@@ -192,12 +194,11 @@ export default function ScanScreen() {
 
             {importKind === 'isbn' ? (
               <>
-                <Label>Coller une liste d'ISBN</Label>
+                <Label>{t('scan.pasteIsbnList')}</Label>
                 <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
-                  Un ISBN par ligne (ou séparés par des virgules) — depuis un export Goodreads /
-                  Calibre, ou en scannant vos tomes.
+                  {t('scan.pasteIsbnHint')}
                   {isbnList.length > 0
-                    ? ` ${isbnList.length} ISBN détecté${isbnList.length > 1 ? 's' : ''}.`
+                    ? ` ${isbnList.length > 1 ? t('scan.isbnDetectedMany', { count: isbnList.length }) : t('scan.isbnDetectedOne', { count: isbnList.length })}`
                     : ''}
                 </Text>
                 <TextArea
@@ -230,22 +231,25 @@ export default function ScanScreen() {
                   opacity={!!bulk || isbnList.length === 0 ? 0.6 : 1}
                 >
                   {bulk
-                    ? `Import… ${bulk.done}/${bulk.total}`
-                    : `Importer ${isbnList.length} livre${isbnList.length > 1 ? 's' : ''}`}
+                    ? t('scan.importing', { done: bulk.done, total: bulk.total })
+                    : isbnList.length > 1
+                      ? t('scan.importNMany', { count: isbnList.length })
+                      : t('scan.importNOne', { count: isbnList.length })}
                 </Button>
               </>
             ) : (
               <>
-                <Label>Importer un fichier CSV</Label>
+                <Label>{t('scan.importCsvFile')}</Label>
                 <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
-                  Exportez votre bibliothèque depuis Goodreads (My Books → Import/Export → Export
-                  Library) ou Babelio, puis{' '}
-                  {Platform.OS === 'web' ? 'choisissez le fichier' : 'collez son contenu'} ci-dessous.
-                  La note, le statut de lecture et la critique sont repris.
+                  {t('scan.importCsvHint', {
+                    action: Platform.OS === 'web' ? t('scan.chooseFileVerb') : t('scan.pasteContentVerb'),
+                  })}
                   {parsedCsv.books.length > 0
-                    ? ` ${parsedCsv.books.length} livre${parsedCsv.books.length > 1 ? 's' : ''} détecté${parsedCsv.books.length > 1 ? 's' : ''}${
+                    ? ` ${parsedCsv.books.length > 1 ? t('scan.csvDetectedMany', { count: parsedCsv.books.length }) : t('scan.csvDetectedOne', { count: parsedCsv.books.length })}${
                         parsedCsv.skipped > 0
-                          ? `, ${parsedCsv.skipped} ignoré${parsedCsv.skipped > 1 ? 's' : ''} (sans ISBN)`
+                          ? parsedCsv.skipped > 1
+                            ? t('scan.csvSkippedMany', { count: parsedCsv.skipped })
+                            : t('scan.csvSkippedOne', { count: parsedCsv.skipped })
                           : ''
                       }.`
                     : ''}
@@ -262,7 +266,7 @@ export default function ScanScreen() {
                     fontFamily="$body"
                     fontWeight="600"
                   >
-                    Choisir un fichier .csv
+                    {t('scan.chooseCsvFile')}
                   </Button>
                 ) : null}
                 <TextArea
@@ -295,14 +299,21 @@ export default function ScanScreen() {
                   opacity={!!csvImport.progress || parsedCsv.books.length === 0 ? 0.6 : 1}
                 >
                   {csvImport.progress
-                    ? `Import… ${csvImport.progress.done}/${csvImport.progress.total}`
-                    : `Importer ${parsedCsv.books.length} livre${parsedCsv.books.length > 1 ? 's' : ''}`}
+                    ? t('scan.importing', {
+                        done: csvImport.progress.done,
+                        total: csvImport.progress.total,
+                      })
+                    : parsedCsv.books.length > 1
+                      ? t('scan.importNMany', { count: parsedCsv.books.length })
+                      : t('scan.importNOne', { count: parsedCsv.books.length })}
                 </Button>
                 {csvImport.result ? (
                   <Text fontFamily="$body" fontSize={13} color="$colorSoft">
-                    {`Importé : ${csvImport.result.added}${
+                    {`${t('scan.importedCount', { added: csvImport.result.added })}${
                       csvImport.result.failed > 0
-                        ? ` · ${csvImport.result.failed} échec${csvImport.result.failed > 1 ? 's' : ''}`
+                        ? csvImport.result.failed > 1
+                          ? t('scan.importFailedMany', { count: csvImport.result.failed })
+                          : t('scan.importFailedOne', { count: csvImport.result.failed })
                         : ''
                     }.`}
                   </Text>
@@ -324,10 +335,10 @@ export default function ScanScreen() {
                 borderRadius={12}
               >
                 <Text fontFamily="$heading" fontSize={15} color="$color">
-                  Caméra indisponible sur cet appareil
+                  {t('scan.noCameraTitle')}
                 </Text>
                 <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
-                  Saisissez l'ISBN ci-dessous (ou avec une douchette), ou utilisez « Rechercher ».
+                  {t('scan.noCameraBody')}
                 </Text>
               </YStack>
             ) : (
@@ -337,7 +348,7 @@ export default function ScanScreen() {
               />
             )}
             <YStack gap="$2">
-              <Label>ISBN — saisie ou douchette</Label>
+              <Label>{t('scan.isbnEntryLabel')}</Label>
               <XStack gap="$2">
                 <Input
                   ref={inputRef}
@@ -372,7 +383,7 @@ export default function ScanScreen() {
                   fontFamily="$body"
                   fontWeight="600"
                 >
-                  Ajouter
+                  {t('scan.add')}
                 </Button>
               </XStack>
             </YStack>
@@ -381,7 +392,11 @@ export default function ScanScreen() {
 
         {entries.length > 0 ? (
           <YStack gap="$2" marginTop="$5">
-            <Label>{`Cette session — ${addedCount} ajouté${addedCount > 1 ? 's' : ''}`}</Label>
+            <Label>
+              {addedCount > 1
+                ? t('scan.sessionAddedMany', { count: addedCount })
+                : t('scan.sessionAddedOne', { count: addedCount })}
+            </Label>
             {entries.map((entry) => (
               <EntryRow
                 key={entry.key}
@@ -406,7 +421,9 @@ export default function ScanScreen() {
             fontWeight="600"
             fontSize={16}
           >
-            {`Terminer · ${addedCount} livre${addedCount > 1 ? 's' : ''}`}
+            {addedCount > 1
+              ? t('scan.finishMany', { count: addedCount })
+              : t('scan.finishOne', { count: addedCount })}
           </Button>
         </YStack>
       ) : null}
@@ -426,7 +443,7 @@ export default function ScanScreen() {
           <XStack gap="$2" alignItems="center">
             <Spinner color="$accent" />
             <Text fontFamily="$body" fontSize={14} color="$colorMuted">
-              Recherche du livre…
+              {t('scan.lookingUpBook')}
             </Text>
           </XStack>
         </YStack>
@@ -470,6 +487,7 @@ function EntryRow({
   onRetry: () => void;
   ownedBefore?: number;
 }) {
+  const { t } = useT();
   const { bg, fg } = composedPalette(entry.isbn13 ?? entry.key);
   const dup = entry.status === 'added' && ownedBefore > 0;
   return (
@@ -484,7 +502,7 @@ function EntryRow({
     >
       {entry.status === 'added' && entry.book ? (
         <BookCover
-          title={entry.book.title ?? 'Sans titre'}
+          title={entry.book.title ?? t('scan.untitled')}
           author={entry.book.authors?.[0]}
           coverUrl={entry.book.cover_url}
           bg={bg}
@@ -507,20 +525,20 @@ function EntryRow({
         {entry.status === 'added' && entry.book ? (
           <>
             <Text fontFamily="$heading" fontSize={14} color="$color" numberOfLines={1}>
-              {entry.book.title ?? 'Sans titre'}
+              {entry.book.title ?? t('scan.untitled')}
             </Text>
             <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
               {entry.book.authors?.[0] ?? entry.isbn13}
             </Text>
             {dup ? (
               <Text fontFamily="$body" fontSize={12} fontWeight="600" color={palette.ochre}>
-                Déjà dans votre bibliothèque
+                {t('scan.alreadyInLibrary')}
               </Text>
             ) : null}
           </>
         ) : entry.status === 'looking' ? (
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-            {`Recherche… ${entry.isbn13 ?? entry.key}`}
+            {t('scan.looking', { ref: entry.isbn13 ?? entry.key })}
           </Text>
         ) : (
           <>
@@ -536,7 +554,7 @@ function EntryRow({
 
       {entry.status === 'error' ? (
         <Button onPress={onRetry} chromeless height={32} color="$accent" fontFamily="$body" fontWeight="600">
-          Réessayer
+          {t('scan.retry')}
         </Button>
       ) : entry.status === 'added' ? (
         dup ? (
@@ -548,7 +566,7 @@ function EntryRow({
             alignItems="center"
           >
             <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
-              {`Déjà ×${ownedBefore + 1}`}
+              {t('scan.alreadyTimes', { count: ownedBefore + 1 })}
             </Text>
           </XStack>
         ) : (

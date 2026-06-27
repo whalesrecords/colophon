@@ -7,6 +7,7 @@ import { BookCover } from '@/components/BookCover';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
 import { useSeriesTotals } from '@/features/books/use-series-volumes';
+import { useT } from '@/i18n';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
 import {
@@ -28,12 +29,12 @@ import { OWNERSHIP_LABELS, palette, statusColors } from '@/theme/tokens';
 
 const H_PADDING = 20;
 const GAP = 16;
-const SORTS: { key: SortKey; label: string }[] = [
-  { key: 'added', label: 'Ajout' },
-  { key: 'title', label: 'Titre' },
-  { key: 'author', label: 'Auteur' },
-  { key: 'year', label: 'Année' },
-  { key: 'rating', label: 'Note' },
+const SORTS: { key: SortKey; labelKey: 'library.sortAdded' | 'library.sortTitle' | 'library.sortAuthor' | 'library.sortYear' | 'library.sortRating' }[] = [
+  { key: 'added', labelKey: 'library.sortAdded' },
+  { key: 'title', labelKey: 'library.sortTitle' },
+  { key: 'author', labelKey: 'library.sortAuthor' },
+  { key: 'year', labelKey: 'library.sortYear' },
+  { key: 'rating', labelKey: 'library.sortRating' },
 ];
 
 type GridSize = 'S' | 'M' | 'L';
@@ -56,6 +57,7 @@ function Label({ children }: { children: string }) {
 }
 
 export default function LibraryScreen() {
+  const { t } = useT();
   const { session } = useAuth();
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -112,10 +114,10 @@ export default function LibraryScreen() {
     <Screen>
       <YStack paddingHorizontal={H_PADDING} paddingTop="$4" gap="$3">
         <YStack gap="$1">
-          <Label>Ma bibliothèque</Label>
+          <Label>{t('library.myLibrary')}</Label>
           <XStack alignItems="flex-end" justifyContent="space-between">
             <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
-              Bibliothèque
+              {t('tabs.library')}
             </Text>
             <YStack alignItems="flex-end" gap="$1" marginBottom={4}>
               <Button
@@ -132,12 +134,14 @@ export default function LibraryScreen() {
                 fontWeight="600"
                 pressStyle={{ opacity: 0.7 }}
               >
-                À venir
+                {t('library.upcoming')}
               </Button>
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
                 {filtered.length === items.length
-                  ? `${items.length} ${items.length > 1 ? 'livres' : 'livre'}`
-                  : `${filtered.length} / ${items.length}`}
+                  ? items.length > 1
+                    ? t('library.bookMany', { count: items.length })
+                    : t('library.bookOne', { count: items.length })
+                  : t('library.countOf', { shown: filtered.length, total: items.length })}
               </Text>
             </YStack>
           </XStack>
@@ -148,7 +152,7 @@ export default function LibraryScreen() {
             <Input
               value={filters.search}
               onChangeText={(search) => setFilters((f) => ({ ...f, search }))}
-              placeholder="Rechercher un titre, un auteur, un ISBN…"
+              placeholder={t('library.searchPlaceholder')}
               autoCapitalize="none"
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
@@ -177,15 +181,15 @@ export default function LibraryScreen() {
                 fontSize={14}
                 fontWeight="600"
               >
-                {nFilters ? `Filtres · ${nFilters}` : 'Filtres'}
+                {nFilters ? t('library.filtersCount', { count: nFilters }) : t('library.filters')}
               </Button>
               <XStack gap="$2" alignItems="center" flexWrap="wrap">
                 {view === 'grid' ? (
-                  <ViewToggle label="Séries" active={group} onPress={() => setGroup((g) => !g)} />
+                  <ViewToggle label={t('library.series')} active={group} onPress={() => setGroup((g) => !g)} />
                 ) : null}
                 <SizeControl size={size} onSize={setSize} />
-                <ViewToggle label="Grille" active={view === 'grid'} onPress={() => setView('grid')} />
-                <ViewToggle label="Liste" active={view === 'list'} onPress={() => setView('list')} />
+                <ViewToggle label={t('library.viewGrid')} active={view === 'grid'} onPress={() => setView('grid')} />
+                <ViewToggle label={t('library.viewList')} active={view === 'list'} onPress={() => setView('list')} />
               </XStack>
             </XStack>
 
@@ -193,7 +197,7 @@ export default function LibraryScreen() {
               <XStack gap="$2" flexWrap="wrap">
                 {wishlistCount > 0 ? (
                   <OwnershipChip
-                    label={`♡ Envies · ${wishlistCount}`}
+                    label={t('library.wishlistChip', { count: wishlistCount })}
                     color={palette.sage}
                     active={filters.facets.ownership.includes('wishlist')}
                     onPress={() => toggleFacet('ownership', 'wishlist')}
@@ -201,7 +205,7 @@ export default function LibraryScreen() {
                 ) : null}
                 {borrowedCount > 0 ? (
                   <OwnershipChip
-                    label={`Empruntés · ${borrowedCount}`}
+                    label={t('library.borrowedChip', { count: borrowedCount })}
                     color={palette.aizome}
                     active={filters.facets.ownership.includes('borrowed')}
                     onPress={() => toggleFacet('ownership', 'borrowed')}
@@ -213,7 +217,7 @@ export default function LibraryScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <XStack gap="$2" alignItems="center" paddingRight="$4">
                 <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                  Trier :
+                  {t('library.sortLabel')}
                 </Text>
                 {SORTS.map((s) => (
                   <Button
@@ -230,7 +234,7 @@ export default function LibraryScreen() {
                     fontSize={13}
                     fontWeight="500"
                   >
-                    {s.label}
+                    {t(s.labelKey)}
                   </Button>
                 ))}
               </XStack>
@@ -240,7 +244,7 @@ export default function LibraryScreen() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <XStack gap="$2" alignItems="center" paddingRight="$4">
                   <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                    Étagères :
+                    {t('library.shelvesLabel')}
                   </Text>
                   {shelves.map((sh) => {
                     const active = filters.facets.shelf.includes(sh.name);
@@ -304,7 +308,7 @@ export default function LibraryScreen() {
       ) : error ? (
         <YStack flex={1} alignItems="center" justifyContent="center" paddingHorizontal="$8">
           <Text color="$signal" fontFamily="$body" textAlign="center">
-            Impossible de charger la bibliothèque.
+            {t('library.loadError')}
           </Text>
         </YStack>
       ) : items.length === 0 ? (
@@ -312,7 +316,7 @@ export default function LibraryScreen() {
       ) : filtered.length === 0 ? (
         <YStack flex={1} alignItems="center" justifyContent="center" paddingHorizontal="$8" paddingTop="$8">
           <Text color="$colorMuted" fontFamily="$body" textAlign="center">
-            Aucun livre ne correspond à ces filtres.
+            {t('library.noMatch')}
           </Text>
         </YStack>
       ) : (
@@ -363,7 +367,7 @@ export default function LibraryScreen() {
                 {openSeries.name}
               </Text>
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                {`Série · ${openSeries.distinctCount} tomes`}
+                {t('library.seriesVolumes', { count: openSeries.distinctCount })}
               </Text>
             </YStack>
             <Text
@@ -376,7 +380,7 @@ export default function LibraryScreen() {
               paddingHorizontal="$2"
               pressStyle={{ opacity: 0.6 }}
             >
-              Fermer
+              {t('recap.close')}
             </Text>
           </XStack>
           <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
@@ -491,6 +495,7 @@ function SeriesCard({
   width: number;
   onPress: () => void;
 }) {
+  const { t } = useT();
   const cover = group.cover;
   const owned = group.distinctCount;
   const showTotal = total != null && total >= owned;
@@ -513,7 +518,7 @@ function SeriesCard({
             borderRadius={12}
           />
           <BookCover
-            title={cover.book?.title ?? 'Sans titre'}
+            title={cover.book?.title ?? t('library.untitled')}
             author={cover.book?.authors?.[0]}
             coverUrl={cover.coverOverride ?? cover.book?.cover_url}
             isbn={cover.book?.isbn13}
@@ -543,8 +548,8 @@ function SeriesCard({
         </Text>
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">
           {showTotal
-            ? `Série · ${owned}/${total} tomes${complete ? ' ✓' : ''}`
-            : `Série · ${owned} tomes`}
+            ? `${t('library.seriesProgress', { owned, total: total as number })}${complete ? ' ✓' : ''}`
+            : t('library.seriesVolumes', { count: owned })}
         </Text>
       </YStack>
     </YStack>
@@ -572,6 +577,7 @@ function DuplicateBadge({ copies }: { copies: number }) {
 }
 
 function LentBadge() {
+  const { t } = useT();
   return (
     <XStack
       position="absolute"
@@ -584,7 +590,7 @@ function LentBadge() {
       alignItems="center"
     >
       <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
-        Prêté
+        {t('profile.badgeLent')}
       </Text>
     </XStack>
   );
@@ -612,13 +618,14 @@ function OwnershipBadge({ ownership }: { ownership: LibraryItem['ownership'] }) 
 }
 
 function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number; copies: number }) {
+  const { t } = useT();
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
   return (
     <YStack width={width} gap="$2">
       <YStack position="relative" opacity={item.ownership === 'wishlist' ? 0.82 : 1}>
         <BookCover
-          title={item.book?.title ?? 'Sans titre'}
+          title={item.book?.title ?? t('library.untitled')}
           author={item.book?.authors?.[0]}
           coverUrl={item.coverOverride ?? item.book?.cover_url}
           isbn={item.book?.isbn13}
@@ -633,7 +640,7 @@ function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number
       </YStack>
       <YStack gap={2}>
         <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
-          {item.book?.title ?? 'Sans titre'}
+          {item.book?.title ?? t('library.untitled')}
         </Text>
         {item.book?.authors?.[0] ? (
           <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
@@ -654,6 +661,7 @@ function LibraryRow({
   copies: number;
   coverWidth?: number;
 }) {
+  const { t } = useT();
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
   return (
@@ -668,7 +676,7 @@ function LibraryRow({
         borderRadius={12}
       >
         <BookCover
-          title={item.book?.title ?? 'Sans titre'}
+          title={item.book?.title ?? t('library.untitled')}
           author={item.book?.authors?.[0]}
           coverUrl={item.coverOverride ?? item.book?.cover_url}
           isbn={item.book?.isbn13}
@@ -678,10 +686,10 @@ function LibraryRow({
         />
         <YStack flex={1} gap={2}>
           <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
-            {item.book?.title ?? 'Sans titre'}
+            {item.book?.title ?? t('library.untitled')}
           </Text>
           <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
-            {item.book?.authors?.[0] ?? 'Auteur inconnu'}
+            {item.book?.authors?.[0] ?? t('library.unknownAuthor')}
           </Text>
         </YStack>
         {copies > 1 ? (
@@ -706,7 +714,7 @@ function LibraryRow({
             alignItems="center"
           >
             <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.paper}>
-              Prêté
+              {t('profile.badgeLent')}
             </Text>
           </XStack>
         ) : null}
@@ -722,6 +730,7 @@ function LibraryRow({
 }
 
 function EmptyLibrary({ coverWidth }: { coverWidth: number }) {
+  const { t } = useT();
   const router = useRouter();
   const demo = [
     { title: "Éloge de l'ombre", author: 'Tanizaki', seed: 'a' },
@@ -738,11 +747,10 @@ function EmptyLibrary({ coverWidth }: { coverWidth: number }) {
       </XStack>
       <YStack alignItems="center" gap="$2" maxWidth={320}>
         <Text fontFamily="$heading" fontSize={24} fontWeight="500" color="$color" textAlign="center">
-          Votre bibliothèque vous attend
+          {t('library.emptyTitle')}
         </Text>
         <Text fontFamily="$body" fontSize={15} color="$colorMuted" textAlign="center" lineHeight={22}>
-          Scannez ou recherchez un livre pour l'ajouter. Ses informations sont récupérées
-          automatiquement.
+          {t('library.emptyBody')}
         </Text>
       </YStack>
       <Button
@@ -756,7 +764,7 @@ function EmptyLibrary({ coverWidth }: { coverWidth: number }) {
         fontWeight="600"
         pressStyle={{ opacity: 0.9, backgroundColor: '$accentDeep' }}
       >
-        Ajouter un livre
+        {t('library.addBook')}
       </Button>
     </YStack>
   );

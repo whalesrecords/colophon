@@ -9,6 +9,7 @@ import { CoverPicker } from '@/components/book/CoverPicker';
 import { LoanSection } from '@/components/book/LoanSection';
 import { SeriesAddSheet } from '@/components/book/SeriesAddSheet';
 import { ReadingSection } from '@/components/book/ReadingSection';
+import { useT } from '@/i18n';
 import { useAuth } from '@/features/auth/auth-context';
 import { useBookDetail } from '@/features/library/use-book-detail';
 import { useCopyCount, useDeleteItem } from '@/features/library/use-delete-item';
@@ -28,11 +29,11 @@ import {
   statusColors,
 } from '@/theme/tokens';
 
-const STATUS_LABELS: Record<ReadingStatus, string> = {
-  to_read: 'À lire',
-  reading: 'En cours',
-  read: 'Lu',
-  abandoned: 'Abandonné',
+const STATUS_KEYS: Record<ReadingStatus, 'status.to_read' | 'status.reading' | 'status.read' | 'status.abandoned'> = {
+  to_read: 'status.to_read',
+  reading: 'status.reading',
+  read: 'status.read',
+  abandoned: 'status.abandoned',
 };
 const STATUS_ORDER: ReadingStatus[] = ['to_read', 'reading', 'read', 'abandoned'];
 
@@ -52,6 +53,7 @@ function Label({ children }: { children: string }) {
 }
 
 export default function BookDetailScreen() {
+  const { t } = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -72,13 +74,13 @@ export default function BookDetailScreen() {
         // ignore
       }
     };
-    const message = 'Retirer ce livre de votre bibliothèque ? Vos notes et sessions de lecture associées seront supprimées.';
+    const message = t('book.deleteConfirmBody');
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined' && window.confirm(message)) void run();
     } else {
-      Alert.alert('Supprimer le livre', message, [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Supprimer', style: 'destructive', onPress: () => void run() },
+      Alert.alert(t('book.deleteConfirmTitle'), message, [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: () => void run() },
       ]);
     }
   };
@@ -101,10 +103,10 @@ export default function BookDetailScreen() {
         padding="$6"
       >
         <Text fontFamily="$body" color="$signal" textAlign="center">
-          Livre introuvable.
+          {t('book.notFound')}
         </Text>
         <Button onPress={() => router.back()} chromeless color="$accent" fontFamily="$body">
-          Retour
+          {t('book.back')}
         </Button>
       </YStack>
     );
@@ -113,7 +115,11 @@ export default function BookDetailScreen() {
   const book = item.book;
   const seriesRef = book?.title ? parseSeries(book.title) : null;
   const { bg, fg } = composedPalette(book?.isbn13 ?? id);
-  const meta = [book?.publisher, book?.published_date, book?.page_count ? `${book.page_count} pages` : null]
+  const meta = [
+    book?.publisher,
+    book?.published_date,
+    book?.page_count ? t('book.pageCount', { count: book.page_count }) : null,
+  ]
     .filter(Boolean)
     .join(' · ');
 
@@ -128,7 +134,7 @@ export default function BookDetailScreen() {
           paddingBottom="$8"
         >
           <BookCover
-            title={book?.title ?? 'Sans titre'}
+            title={book?.title ?? t('book.untitled')}
             author={book?.authors?.[0]}
             coverUrl={item.cover_override ?? book?.cover_url}
             isbn={book?.isbn13}
@@ -152,7 +158,7 @@ export default function BookDetailScreen() {
         >
           <YStack gap="$1">
             <Text fontFamily="$heading" fontSize={25} fontWeight="500" color="$color">
-              {book?.title ?? 'Sans titre'}
+              {book?.title ?? t('book.untitled')}
             </Text>
             {book?.authors?.length ? (
               <Text fontFamily="$heading" fontSize={16} fontStyle="italic" color="$colorSoft">
@@ -188,7 +194,7 @@ export default function BookDetailScreen() {
               fontFamily="$body"
               fontWeight="600"
             >
-              {`Compléter la série « ${seriesRef.name} »`}
+              {t('book.completeSeries', { name: seriesRef.name })}
             </Button>
           ) : null}
 
@@ -203,14 +209,14 @@ export default function BookDetailScreen() {
               backgroundColor="$backgroundStrong"
             >
               <Text fontFamily="$body" fontSize={13} color="$color">
-                {`Doublon — vous possédez ${copyCount} exemplaires de ce livre.`}
+                {t('book.duplicateNotice', { count: copyCount })}
               </Text>
             </XStack>
           ) : null}
 
           {/* possession */}
           <YStack gap="$2">
-            <Label>Possession</Label>
+            <Label>{t('book.possession')}</Label>
             <XStack gap="$2" flexWrap="wrap">
               {OWNERSHIP_ORDER.map((o) => {
                 const active = item.ownership === o;
@@ -236,9 +242,9 @@ export default function BookDetailScreen() {
             </XStack>
             {item.ownership === 'borrowed' ? (
               <EditableText
-                label="Emprunté à"
+                label={t('book.borrowedFrom')}
                 value={item.borrowed_from ?? ''}
-                placeholder="Nom (facultatif)"
+                placeholder={t('book.borrowedFromPlaceholder')}
                 onSave={(v) => update.mutate({ borrowed_from: v || null })}
               />
             ) : null}
@@ -246,7 +252,7 @@ export default function BookDetailScreen() {
 
           {/* format */}
           <YStack gap="$2">
-            <Label>Format</Label>
+            <Label>{t('book.format')}</Label>
             <XStack gap="$2" flexWrap="wrap">
               {FORMAT_ORDER.map((f) => {
                 const active = item.format === f;
@@ -274,7 +280,7 @@ export default function BookDetailScreen() {
 
           {/* status */}
           <YStack gap="$2">
-            <Label>Statut de lecture</Label>
+            <Label>{t('book.readingStatus')}</Label>
             <XStack gap="$2" flexWrap="wrap">
               {STATUS_ORDER.map((status) => {
                 const active = item.status === status;
@@ -295,7 +301,7 @@ export default function BookDetailScreen() {
                     fontWeight="600"
                     color={active ? statusColors[status].chipText : '$colorMuted'}
                   >
-                    {STATUS_LABELS[status]}
+                    {t(STATUS_KEYS[status])}
                   </Button>
                 );
               })}
@@ -304,7 +310,7 @@ export default function BookDetailScreen() {
 
           {/* rating */}
           <YStack gap="$2">
-            <Label>Votre note</Label>
+            <Label>{t('book.yourRating')}</Label>
             <XStack gap="$2" alignItems="center">
               {[1, 2, 3, 4, 5].map((n) => {
                 const filled = (item.rating ?? 0) >= n;
@@ -337,32 +343,32 @@ export default function BookDetailScreen() {
 
           {/* review */}
           <EditableText
-            label="Votre fiche / avis"
+            label={t('book.review')}
             value={item.notes}
-            placeholder="Vos impressions, citations, contexte de lecture…"
+            placeholder={t('book.reviewPlaceholder')}
             multiline
             onSave={(v) => update.mutate({ notes: v || null })}
           />
 
           {/* exemplaire */}
           <YStack gap="$3">
-            <Label>Cet exemplaire</Label>
+            <Label>{t('book.thisCopy')}</Label>
             <EditableText
-              label="Emplacement"
+              label={t('book.location')}
               value={item.location}
-              placeholder="Étagère salon, boîte 3…"
+              placeholder={t('book.locationPlaceholder')}
               onSave={(v) => update.mutate({ location: v || null })}
             />
             <EditableText
-              label="État"
+              label={t('book.condition')}
               value={item.condition}
-              placeholder="Neuf, bon, abîmé…"
+              placeholder={t('book.conditionPlaceholder')}
               onSave={(v) => update.mutate({ condition: v || null })}
             />
             <XStack gap="$3">
               <YStack flex={1}>
                 <EditableText
-                  label="Prix d'achat"
+                  label={t('book.purchasePrice')}
                   value={item.purchase_price != null ? String(item.purchase_price) : null}
                   placeholder="0,00"
                   numeric
@@ -374,17 +380,17 @@ export default function BookDetailScreen() {
               </YStack>
               <YStack flex={1}>
                 <EditableText
-                  label="Date d'achat"
+                  label={t('book.purchaseDate')}
                   value={item.purchase_date}
-                  placeholder="AAAA-MM-JJ"
+                  placeholder={t('book.purchaseDatePlaceholder')}
                   onSave={(v) => update.mutate({ purchase_date: v || null })}
                 />
               </YStack>
             </XStack>
             <EditableText
-              label="Lieu d'achat"
+              label={t('book.purchaseStore')}
               value={item.purchase_store}
-              placeholder="Librairie, en ligne…"
+              placeholder={t('book.purchaseStorePlaceholder')}
               onSave={(v) => update.mutate({ purchase_store: v || null })}
             />
           </YStack>
@@ -401,7 +407,7 @@ export default function BookDetailScreen() {
           {/* description */}
           {book?.description ? (
             <YStack gap="$2">
-              <Label>Résumé</Label>
+              <Label>{t('book.summary')}</Label>
               <Text fontFamily="$body" fontSize={14} color="$colorSoft" lineHeight={21}>
                 {book.description}
               </Text>
@@ -423,7 +429,7 @@ export default function BookDetailScreen() {
             fontWeight="600"
             pressStyle={{ opacity: 0.85 }}
           >
-            {deleteItem.isPending ? 'Suppression…' : 'Supprimer ce livre'}
+            {deleteItem.isPending ? t('profile.deleting') : t('book.deleteThisBook')}
           </Button>
         </YStack>
       </ScrollView>
@@ -526,6 +532,7 @@ function ShelvesSection({
   userId: string | undefined;
   shelfIds: string[];
 }) {
+  const { t } = useT();
   const { data: shelves } = useShelves(userId);
   const { createShelf, addToShelf, removeFromShelf } = useShelfActions(userId);
   const [newName, setNewName] = useState('');
@@ -550,7 +557,7 @@ function ShelvesSection({
 
   return (
     <YStack gap="$2">
-      <Label>Étagères</Label>
+      <Label>{t('facet.shelf')}</Label>
       {shelves && shelves.length > 0 ? (
         <XStack gap="$2" flexWrap="wrap">
           {shelves.map((shelf) => {
@@ -582,7 +589,7 @@ function ShelvesSection({
           value={newName}
           onChangeText={setNewName}
           onSubmitEditing={onCreate}
-          placeholder="Nouvelle étagère…"
+          placeholder={t('book.newShelfPlaceholder')}
           placeholderTextColor="$concreteLight"
           backgroundColor="$background"
           borderColor="$borderColor"
@@ -606,7 +613,7 @@ function ShelvesSection({
           fontFamily="$body"
           fontWeight="600"
         >
-          Créer
+          {t('book.create')}
         </Button>
       </XStack>
     </YStack>
@@ -622,6 +629,7 @@ function TagsSection({
   userId: string | undefined;
   tagIds: string[];
 }) {
+  const { t } = useT();
   const { data: tags } = useTags(userId);
   const { createTag, addTag, removeTag } = useTagActions(userId);
   const [newName, setNewName] = useState('');
@@ -646,7 +654,7 @@ function TagsSection({
 
   return (
     <YStack gap="$2">
-      <Label>Tags</Label>
+      <Label>{t('facet.tag')}</Label>
       {tags && tags.length > 0 ? (
         <XStack gap="$2" flexWrap="wrap">
           {tags.map((tag) => {
@@ -679,7 +687,7 @@ function TagsSection({
           onChangeText={setNewName}
           onSubmitEditing={onCreate}
           autoCapitalize="none"
-          placeholder="Nouveau tag…"
+          placeholder={t('book.newTagPlaceholder')}
           placeholderTextColor="$concreteLight"
           backgroundColor="$background"
           borderColor="$borderColor"
@@ -703,7 +711,7 @@ function TagsSection({
           fontFamily="$body"
           fontWeight="600"
         >
-          Créer
+          {t('book.create')}
         </Button>
       </XStack>
     </YStack>

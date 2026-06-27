@@ -161,7 +161,7 @@ export default function ProfileScreen() {
       </ScrollView>
 
       {recapOpen && stats ? (
-        <YearRecap items={items} stats={stats} onClose={() => setRecapOpen(false)} />
+        <YearRecap userId={session?.user.id} year={stats.year} onClose={() => setRecapOpen(false)} />
       ) : null}
     </Screen>
   );

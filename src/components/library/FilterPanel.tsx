@@ -1,5 +1,7 @@
 import { Button, Text, XStack, YStack } from 'tamagui';
 
+import { useT } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import {
   type FacetKey,
   FACET_KEYS,
@@ -8,17 +10,17 @@ import {
 } from '@/features/library/faceting';
 import { FORMAT_LABELS, OWNERSHIP_LABELS, palette, STATUS_LABELS } from '@/theme/tokens';
 
-const FACET_LABELS: Record<FacetKey, string> = {
-  status: 'Statut',
-  ownership: 'Possession',
-  format: 'Format',
-  shelf: 'Étagère',
-  tag: 'Tag',
-  genre: 'Genre',
-  author: 'Auteur',
-  publisher: 'Éditeur',
-  language: 'Langue',
-  decade: 'Décennie',
+const FACET_LABEL_KEYS: Record<FacetKey, TranslationKey> = {
+  status: 'filter.status',
+  ownership: 'filter.ownership',
+  format: 'filter.format',
+  shelf: 'filter.shelf',
+  tag: 'filter.tag',
+  genre: 'filter.genre',
+  author: 'filter.author',
+  publisher: 'filter.publisher',
+  language: 'filter.language',
+  decade: 'filter.decade',
 };
 
 const LANG_VALUE: Record<string, string> = {
@@ -45,6 +47,7 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ facets, filters, onToggle }: FilterPanelProps) {
+  const { t } = useT();
   return (
     <YStack
       gap="$4"
@@ -70,7 +73,7 @@ export function FilterPanel({ facets, filters, onToggle }: FilterPanelProps) {
               textTransform="uppercase"
               color="$colorMuted"
             >
-              {FACET_LABELS[key]}
+              {t(FACET_LABEL_KEYS[key])}
             </Text>
             <XStack gap="$2" flexWrap="wrap">
               {shown.map((opt) => {

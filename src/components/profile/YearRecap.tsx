@@ -1,26 +1,22 @@
-import { useMemo } from 'react';
-import { Platform, ScrollView, Share as RNShare, View } from 'react-native';
-import { Button, Text, XStack, YStack } from 'tamagui';
+import { Modal, Platform, ScrollView, Share as RNShare, View } from 'react-native';
+import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
-import { displayValue } from '@/components/library/FilterPanel';
-import { computeFacets, EMPTY_FILTERS } from '@/features/library/faceting';
-import type { LibraryItem } from '@/features/library/use-library';
-import type { LibraryStats } from '@/features/stats/use-stats';
+import { type RecapBook, useYearRecap } from '@/features/stats/use-year-recap';
 import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
 /** A fanned-out spread of the year's book covers, like a hand of cards. */
-function CoverFan({ items }: { items: LibraryItem[] }) {
-  const books = items.slice(0, 5);
-  const mid = (books.length - 1) / 2;
+function CoverFan({ books }: { books: RecapBook[] }) {
+  const shown = books.slice(0, 5);
+  const mid = (shown.length - 1) / 2;
   return (
     <YStack height={210} width="100%" alignItems="center" justifyContent="center">
-      {books.map((item, i) => {
+      {shown.map((b, i) => {
         const off = i - mid;
         return (
           <View
-            key={item.id}
+            key={b.itemId}
             style={{
               position: 'absolute',
               transform: [
@@ -33,16 +29,9 @@ function CoverFan({ items }: { items: LibraryItem[] }) {
               shadowOpacity: 0.2,
               shadowRadius: 12,
               shadowOffset: { width: 0, height: 8 },
-              elevation: 8,
             }}
           >
-            <BookCover
-              title={item.book?.title ?? ''}
-              author={item.book?.authors?.[0]}
-              coverUrl={item.coverOverride ?? item.book?.cover_url}
-              isbn={item.book?.isbn13}
-              width={98}
-            />
+            <BookCover title={b.title} coverUrl={b.coverUrl} isbn={b.isbn13 ?? undefined} width={98} />
           </View>
         );
       })}
@@ -53,79 +42,84 @@ function CoverFan({ items }: { items: LibraryItem[] }) {
 function StatBig({ value, label, color }: { value: string; label: string; color: string }) {
   return (
     <YStack flex={1} alignItems="center" gap={2}>
-      <Text fontFamily="$heading" fontSize={52} fontWeight="500" color={color} lineHeight={56}>
+      <Text fontFamily="$heading" fontSize={50} fontWeight="500" color={color} lineHeight={54}>
         {value}
       </Text>
-      <Text fontFamily="$body" fontSize={14} color="$colorMuted">
+      <Text fontFamily="$body" fontSize={14} color="$colorMuted" textAlign="center">
         {label}
       </Text>
     </YStack>
   );
 }
 
-function FactRow({ dot, label, value }: { dot: string; label: string; value: string }) {
+function SectionTitle({ children }: { children: string }) {
   return (
-    <XStack
-      alignItems="center"
-      gap="$3"
-      paddingVertical="$3"
-      paddingHorizontal="$4"
-      backgroundColor="$backgroundStrong"
-      borderRadius={16}
+    <Text
+      fontFamily="$body"
+      fontSize={11}
+      fontWeight="600"
+      letterSpacing={2}
+      textTransform="uppercase"
+      color="$colorMuted"
     >
-      <YStack width={9} height={9} borderRadius={999} backgroundColor={dot} />
-      <Text
-        fontFamily="$body"
-        fontSize={11}
-        fontWeight="600"
-        letterSpacing={1.6}
-        textTransform="uppercase"
-        color="$colorMuted"
-      >
-        {label}
-      </Text>
-      <Text
-        fontFamily="$heading"
-        fontSize={17}
-        color="$color"
-        flex={1}
-        textAlign="right"
-        numberOfLines={1}
-      >
-        {value}
-      </Text>
+      {children}
+    </Text>
+  );
+}
+
+/** A slim 12-month rhythm chart of when the books were finished. */
+function MonthRhythm({ byMonth }: { byMonth: { label: string; count: number; month: number }[] }) {
+  const max = Math.max(1, ...byMonth.map((m) => m.count));
+  return (
+    <XStack height={72} alignItems="flex-end" gap={4} width="100%">
+      {byMonth.map((m) => (
+        <YStack key={m.month} flex={1} alignItems="center" gap={4}>
+          <YStack
+            width="100%"
+            height={Math.max(3, Math.round((m.count / max) * 52))}
+            borderRadius={3}
+            backgroundColor={m.count > 0 ? palette.aizome : '$borderColor'}
+            opacity={m.count > 0 ? 1 : 0.5}
+          />
+          <Text fontFamily="$body" fontSize={8} color="$colorMuted">
+            {m.label.slice(0, 1)}
+          </Text>
+        </YStack>
+      ))}
     </XStack>
   );
 }
 
-/** A shareable "year in reading" recap — fanned covers + the year's highlights. */
+/**
+ * A shareable "year in reading" recap — fanned covers, the year's headline
+ * numbers, the themes you explored, your reading rhythm, and the dated list of
+ * what you read. Rendered in a Modal so it sits above the tab bar everywhere.
+ */
 export function YearRecap({
-  items,
-  stats,
+  userId,
+  year,
   onClose,
 }: {
-  items: LibraryItem[];
-  stats: LibraryStats;
+  userId: string | undefined;
+  year: number;
   onClose: () => void;
 }) {
   const { t } = useT();
-  const facets = useMemo(() => computeFacets(items, EMPTY_FILTERS), [items]);
-  const topAuthor = facets.author[0] ? displayValue('author', facets.author[0].value) : null;
-  const topGenre = facets.genre[0] ? displayValue('genre', facets.genre[0].value) : null;
+  const { data, isLoading } = useYearRecap(userId, year);
 
-  // Prefer read (owned/borrowed) books for the fan, newest-first; fall back to any owned.
-  const fanItems = useMemo(() => {
-    const present = items.filter((i) => i.ownership !== 'wishlist');
-    const read = present.filter((i) => i.status === 'read');
-    return (read.length >= 3 ? read : present).slice(0, 5);
-  }, [items]);
+  const monthFmt = (iso: string) => {
+    const d = new Date(`${iso}T00:00:00`);
+    const s = d.toLocaleDateString('fr-FR', { month: 'long' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
 
   const onShare = () => {
-    const msg = t('recap.shareText', {
-      year: stats.year,
-      books: stats.readThisYear,
-      pages: stats.pagesRead,
-    });
+    const theme = data?.themes[0]?.value;
+    const msg =
+      `Mon année lecture ${year} sur Colophon : ${data?.booksRead ?? 0} livres, ` +
+      `${data?.pagesApproximate ? '~' : ''}${(data?.pages ?? 0).toLocaleString('fr-FR')} pages lues` +
+      (theme ? ` · thème phare : ${theme}` : '') +
+      '. 📚';
     if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(msg).catch(() => undefined);
     } else {
@@ -133,105 +127,242 @@ export function YearRecap({
     }
   };
 
+  const empty = !isLoading && (!data || data.booksRead === 0);
+
   return (
-    <YStack position="absolute" top={0} left={0} right={0} bottom={0} backgroundColor="$background">
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingHorizontal: 24,
-          paddingTop: 56,
-          paddingBottom: 16,
-          alignItems: 'center',
-        }}
-      >
-        <Text
-          fontFamily="$body"
-          fontSize={12}
-          fontWeight="600"
-          letterSpacing={3}
-          textTransform="uppercase"
-          color="$colorMuted"
+    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+      <YStack flex={1} backgroundColor="$background">
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 56,
+            paddingBottom: 24,
+            alignItems: 'center',
+          }}
         >
-          Colophon
-        </Text>
-        <Text
-          fontFamily="$heading"
-          fontSize={34}
-          fontWeight="500"
-          color="$color"
-          marginTop="$2"
-          textAlign="center"
-        >
-          {t('recap.title', { year: stats.year })}
-        </Text>
-        <Text
-          fontFamily="$heading"
-          fontSize={17}
-          fontStyle="italic"
-          color={palette.terracotta}
-          marginTop="$2"
-        >
-          {t('recap.subtitle')}
-        </Text>
-
-        <YStack width="100%" marginTop="$6" marginBottom="$5">
-          <CoverFan items={fanItems} />
-        </YStack>
-
-        <XStack width="100%" maxWidth={420} alignItems="center">
-          <StatBig
-            value={String(stats.readThisYear)}
-            label={stats.readThisYear === 1 ? t('recap.bookOne') : t('recap.books')}
+          <Text
+            fontFamily="$body"
+            fontSize={12}
+            fontWeight="600"
+            letterSpacing={3}
+            textTransform="uppercase"
+            color="$colorMuted"
+          >
+            Colophon
+          </Text>
+          <Text
+            fontFamily="$heading"
+            fontSize={34}
+            fontWeight="500"
+            color="$color"
+            marginTop="$2"
+            textAlign="center"
+          >
+            {t('recap.title', { year })}
+          </Text>
+          <Text
+            fontFamily="$heading"
+            fontSize={17}
+            fontStyle="italic"
             color={palette.terracotta}
-          />
-          <YStack width={1} height={56} backgroundColor="$borderColor" />
-          <StatBig value={String(stats.pagesRead)} label={t('recap.pages')} color={palette.aizome} />
+            marginTop="$2"
+          >
+            {t('recap.subtitle')}
+          </Text>
+
+          {isLoading ? (
+            <YStack flex={1} justifyContent="center" paddingVertical="$10">
+              <Spinner color="$accent" size="large" />
+            </YStack>
+          ) : empty ? (
+            <Text
+              fontFamily="$body"
+              fontSize={15}
+              color="$colorSoft"
+              textAlign="center"
+              marginTop="$8"
+              lineHeight={22}
+            >
+              Aucune lecture terminée cette année pour l'instant. Marquez un livre « Lu » et il
+              apparaîtra dans votre bilan.
+            </Text>
+          ) : (
+            data && (
+              <>
+                <YStack width="100%" marginTop="$6" marginBottom="$5">
+                  <CoverFan books={data.books} />
+                </YStack>
+
+                <XStack width="100%" maxWidth={440} alignItems="center">
+                  <StatBig
+                    value={String(data.booksRead)}
+                    label={data.booksRead === 1 ? t('recap.bookOne') : t('recap.books')}
+                    color={palette.terracotta}
+                  />
+                  <YStack width={1} height={56} backgroundColor="$borderColor" />
+                  <StatBig
+                    value={`${data.pagesApproximate ? '~' : ''}${data.pages.toLocaleString('fr-FR')}`}
+                    label={t('recap.pages')}
+                    color={palette.aizome}
+                  />
+                </XStack>
+
+                {data.themes.length ? (
+                  <YStack width="100%" maxWidth={440} gap="$3" marginTop="$7">
+                    <SectionTitle>Vos thématiques</SectionTitle>
+                    <XStack flexWrap="wrap" gap="$2">
+                      {data.themes.map((th) => (
+                        <XStack
+                          key={th.value}
+                          paddingHorizontal="$3"
+                          paddingVertical="$2"
+                          borderRadius={999}
+                          backgroundColor="$backgroundStrong"
+                          borderWidth={1}
+                          borderColor="$borderColor"
+                        >
+                          <Text fontFamily="$body" fontSize={13} color="$color">
+                            {th.value}
+                          </Text>
+                        </XStack>
+                      ))}
+                    </XStack>
+                  </YStack>
+                ) : null}
+
+                {data.topAuthor || data.busiestMonth ? (
+                  <YStack width="100%" maxWidth={440} gap="$2" marginTop="$6">
+                    {data.topAuthor ? (
+                      <XStack
+                        alignItems="center"
+                        gap="$3"
+                        paddingVertical="$3"
+                        paddingHorizontal="$4"
+                        backgroundColor="$backgroundStrong"
+                        borderRadius={16}
+                      >
+                        <YStack width={9} height={9} borderRadius={999} backgroundColor={palette.sage} />
+                        <Text
+                          fontFamily="$body"
+                          fontSize={11}
+                          fontWeight="600"
+                          letterSpacing={1.4}
+                          textTransform="uppercase"
+                          color="$colorMuted"
+                        >
+                          {t('recap.topAuthor')}
+                        </Text>
+                        <Text
+                          fontFamily="$heading"
+                          fontSize={17}
+                          color="$color"
+                          flex={1}
+                          textAlign="right"
+                          numberOfLines={1}
+                        >
+                          {data.topAuthor}
+                        </Text>
+                      </XStack>
+                    ) : null}
+                    {data.busiestMonth && data.busiestMonth.count > 1 ? (
+                      <XStack
+                        alignItems="center"
+                        gap="$3"
+                        paddingVertical="$3"
+                        paddingHorizontal="$4"
+                        backgroundColor="$backgroundStrong"
+                        borderRadius={16}
+                      >
+                        <YStack width={9} height={9} borderRadius={999} backgroundColor={palette.ochre} />
+                        <Text
+                          fontFamily="$body"
+                          fontSize={11}
+                          fontWeight="600"
+                          letterSpacing={1.4}
+                          textTransform="uppercase"
+                          color="$colorMuted"
+                        >
+                          Mois le plus actif
+                        </Text>
+                        <Text
+                          fontFamily="$heading"
+                          fontSize={17}
+                          color="$color"
+                          flex={1}
+                          textAlign="right"
+                          numberOfLines={1}
+                        >
+                          {`${data.busiestMonth.label} · ${data.busiestMonth.count}`}
+                        </Text>
+                      </XStack>
+                    ) : null}
+                  </YStack>
+                ) : null}
+
+                <YStack width="100%" maxWidth={440} gap="$3" marginTop="$7">
+                  <SectionTitle>Votre rythme</SectionTitle>
+                  <MonthRhythm byMonth={data.byMonth} />
+                </YStack>
+
+                <YStack width="100%" maxWidth={440} gap="$3" marginTop="$7">
+                  <SectionTitle>Vos lectures</SectionTitle>
+                  <YStack gap="$3">
+                    {data.books.map((b) => (
+                      <XStack key={b.itemId} gap="$3" alignItems="center">
+                        <BookCover title={b.title} coverUrl={b.coverUrl} isbn={b.isbn13 ?? undefined} width={34} />
+                        <Text
+                          fontFamily="$body"
+                          fontSize={14}
+                          color="$color"
+                          flex={1}
+                          numberOfLines={1}
+                        >
+                          {b.title}
+                        </Text>
+                        <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+                          {monthFmt(b.finishedOn)}
+                        </Text>
+                      </XStack>
+                    ))}
+                  </YStack>
+                </YStack>
+              </>
+            )
+          )}
+        </ScrollView>
+
+        <XStack paddingHorizontal="$5" paddingBottom="$7" paddingTop="$3" gap="$3" alignItems="center">
+          <Button
+            onPress={onShare}
+            disabled={empty}
+            backgroundColor={palette.terracotta}
+            color={palette.paper}
+            borderRadius={999}
+            height={54}
+            flex={1}
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={16}
+            opacity={empty ? 0.5 : 1}
+            pressStyle={{ opacity: 0.9 }}
+          >
+            {`↗  ${t('recap.share')}`}
+          </Button>
+          <Button
+            onPress={onClose}
+            chromeless
+            height={54}
+            paddingHorizontal="$4"
+            color="$colorMuted"
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={16}
+          >
+            {t('recap.close')}
+          </Button>
         </XStack>
-
-        <YStack width="100%" maxWidth={420} gap="$2" marginTop="$6">
-          {topAuthor ? (
-            <FactRow dot={palette.sage} label={t('recap.topAuthor')} value={topAuthor} />
-          ) : null}
-          {topGenre ? (
-            <FactRow dot={palette.ochre} label={t('recap.topGenre')} value={topGenre} />
-          ) : null}
-        </YStack>
-      </ScrollView>
-
-      <XStack
-        paddingHorizontal="$5"
-        paddingBottom="$7"
-        paddingTop="$3"
-        gap="$3"
-        alignItems="center"
-      >
-        <Button
-          onPress={onShare}
-          backgroundColor={palette.terracotta}
-          color={palette.paper}
-          borderRadius={999}
-          height={54}
-          flex={1}
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize={16}
-          pressStyle={{ opacity: 0.9 }}
-        >
-          {`↗  ${t('recap.share')}`}
-        </Button>
-        <Button
-          onPress={onClose}
-          chromeless
-          height={54}
-          paddingHorizontal="$4"
-          color="$colorMuted"
-          fontFamily="$body"
-          fontWeight="600"
-          fontSize={16}
-        >
-          {t('recap.close')}
-        </Button>
-      </XStack>
-    </YStack>
+      </YStack>
+    </Modal>
   );
 }

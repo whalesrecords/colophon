@@ -3,6 +3,7 @@ import { Pressable } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { useT } from '@/i18n';
 import {
   useSeriesTotals,
   useSeriesVolumes,
@@ -28,6 +29,7 @@ export function SeriesCompletion({
   userId: string | undefined;
   coverWidth: number;
 }) {
+  const { t } = useT();
   const fetchVols = useSeriesVolumes();
   const { submitMany, bulk } = useScanSession(userId);
   const { data: totals } = useSeriesTotals(userId);
@@ -89,29 +91,38 @@ export function SeriesCompletion({
         textTransform="uppercase"
         color="$colorMuted"
       >
-        Complétion
+        {t('series.completion')}
       </Text>
 
       {fetchVols.isPending ? (
         <XStack gap="$2" alignItems="center">
           <Spinner color="$accent" />
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-            Recherche des tomes…
+            {t('series.searching')}
           </Text>
         </XStack>
       ) : (
         <YStack gap="$3">
           {!totalKnown ? (
             <Text fontFamily="$body" fontSize={14} color="$colorSoft">
-              {`Vous possédez ${ownedCount} tome${ownedCount > 1 ? 's' : ''}. Total inconnu — corrigez-le ci-dessous.`}
+              {ownedCount > 1
+                ? t('series.unknownTotalMany', { count: ownedCount })
+                : t('series.unknownTotalOne', { count: ownedCount })}
             </Text>
           ) : isComplete ? (
             <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$positive">
-              {`Série complète · ${Math.min(ownedCount, effectiveTotal)} / ${effectiveTotal} ✓`}
+              {t('series.complete', {
+                owned: Math.min(ownedCount, effectiveTotal),
+                total: effectiveTotal,
+              })}
             </Text>
           ) : (
             <Text fontFamily="$body" fontSize={14} color="$colorSoft">
-              {`${ownedCount} / ${effectiveTotal} tomes · il manque ${effectiveTotal - ownedCount}`}
+              {t('series.progress', {
+                owned: ownedCount,
+                total: effectiveTotal,
+                missing: effectiveTotal - ownedCount,
+              })}
             </Text>
           )}
 
@@ -119,7 +130,15 @@ export function SeriesCompletion({
             <>
               <XStack justifyContent="space-between" alignItems="center">
                 <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-                  {`${selectedMissing.length}/${missing.length} sélectionné${selectedMissing.length > 1 ? 's' : ''}`}
+                  {selectedMissing.length > 1
+                    ? t('series.selectedMany', {
+                        selected: selectedMissing.length,
+                        total: missing.length,
+                      })
+                    : t('series.selectedOne', {
+                        selected: selectedMissing.length,
+                        total: missing.length,
+                      })}
                 </Text>
                 <XStack gap="$3">
                   <Button
@@ -132,7 +151,7 @@ export function SeriesCompletion({
                     fontSize={13}
                     fontWeight="600"
                   >
-                    Tout
+                    {t('series.selectAll')}
                   </Button>
                   <Button
                     onPress={selectNone}
@@ -143,7 +162,7 @@ export function SeriesCompletion({
                     fontFamily="$body"
                     fontSize={13}
                   >
-                    Aucun
+                    {t('series.selectNone')}
                   </Button>
                 </XStack>
               </XStack>
@@ -175,7 +194,7 @@ export function SeriesCompletion({
                           ) : null}
                         </YStack>
                         <Text fontFamily="$body" fontSize={11} color="$colorMuted">
-                          {`T${v.volume}`}
+                          {t('series.tome', { volume: v.volume })}
                         </Text>
                       </YStack>
                     </Pressable>
@@ -195,8 +214,10 @@ export function SeriesCompletion({
                 opacity={!!bulk || selectedMissing.length === 0 ? 0.6 : 1}
               >
                 {bulk
-                  ? `Ajout… ${bulk.done}/${bulk.total}`
-                  : `Ajouter ${selectedMissing.length} tome${selectedMissing.length > 1 ? 's' : ''}`}
+                  ? t('series.adding', { done: bulk.done, total: bulk.total })
+                  : selectedMissing.length > 1
+                    ? t('series.addMany', { count: selectedMissing.length })
+                    : t('series.addOne', { count: selectedMissing.length })}
               </Button>
             </>
           ) : null}
@@ -209,7 +230,7 @@ export function SeriesCompletion({
                 onChangeText={setCustomTotal}
                 keyboardType="number-pad"
                 inputMode="numeric"
-                placeholder={`Nombre de tomes (ex. ${effectiveTotal})`}
+                placeholder={t('series.totalPlaceholder', { example: effectiveTotal })}
                 placeholderTextColor="$concreteLight"
                 backgroundColor="$backgroundStrong"
                 borderColor="$borderColor"
@@ -236,7 +257,7 @@ export function SeriesCompletion({
                 fontWeight="600"
                 opacity={customTotal.trim() ? 1 : 0.6}
               >
-                OK
+                {t('series.ok')}
               </Button>
             </XStack>
           ) : (
@@ -252,7 +273,7 @@ export function SeriesCompletion({
                   fontSize={13}
                   fontWeight="600"
                 >
-                  Marquer complète
+                  {t('series.markComplete')}
                 </Button>
               ) : null}
               <Button
@@ -264,7 +285,7 @@ export function SeriesCompletion({
                 fontFamily="$body"
                 fontSize={13}
               >
-                Corriger le total…
+                {t('series.editTotal')}
               </Button>
               {override != null ? (
                 <Button
@@ -276,7 +297,7 @@ export function SeriesCompletion({
                   fontFamily="$body"
                   fontSize={13}
                 >
-                  Réinitialiser
+                  {t('series.reset')}
                 </Button>
               ) : null}
             </XStack>

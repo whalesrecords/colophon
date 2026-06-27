@@ -4,6 +4,7 @@ import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import type { BookMetadata } from '@/features/books/use-isbn-lookup';
+import { useT } from '@/i18n';
 import {
   OWNERSHIP_LABELS,
   OWNERSHIP_ORDER,
@@ -32,6 +33,7 @@ export function AddSheet({
   onConfirm: (opts: { ownership: Ownership; status: ReadingStatus }) => void;
   onCancel: () => void;
 }) {
+  const { t } = useT();
   const [status, setStatus] = useState<ReadingStatus>('to_read');
   const meta = [book.authors?.[0], book.publisher, book.published_date?.slice(0, 4)]
     .filter(Boolean)
@@ -63,7 +65,7 @@ export function AddSheet({
           />
           <YStack flex={1} gap={2}>
             <Text fontFamily="$heading" fontSize={18} color="$color" numberOfLines={2}>
-              {book.title ?? 'Sans titre'}
+              {book.title ?? t('add.untitled')}
             </Text>
             {meta ? (
               <Text fontFamily="$body" fontSize={13} color="$colorMuted" numberOfLines={1}>
@@ -82,7 +84,7 @@ export function AddSheet({
             textTransform="uppercase"
             color="$colorMuted"
           >
-            Je l'ajoute comme…
+            {t('add.addAs')}
           </Text>
           <XStack gap="$2">
             {OWNERSHIP_ORDER.map((o) => {
@@ -113,7 +115,7 @@ export function AddSheet({
 
         <XStack alignItems="center" gap="$2" flexWrap="wrap">
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-            Statut de lecture :
+            {t('add.readingStatus')}
           </Text>
           {STATUS_ORDER.map((s) => {
             const active = s === status;

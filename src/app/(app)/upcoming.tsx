@@ -8,6 +8,7 @@ import { BookCover } from '@/components/BookCover';
 import { useAuth } from '@/features/auth/auth-context';
 import { type UpcomingItem, useUpcoming } from '@/features/books/use-upcoming';
 import { useAddItem } from '@/features/library/use-add-item';
+import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
 function monthLabel(raw: string | null): string {
@@ -45,6 +46,7 @@ function Row({
   busy: boolean;
   onAdd: () => void;
 }) {
+  const { t } = useT();
   const v = item.volume;
   return (
     <XStack gap="$3" alignItems="center" opacity={added ? 0.55 : 1}>
@@ -54,7 +56,7 @@ function Row({
           {item.seriesName}
         </Text>
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-          {`Tome ${v.volume}`}
+          {t('upcoming.tome', { volume: v.volume })}
         </Text>
       </YStack>
       <Button
@@ -71,13 +73,14 @@ function Row({
         fontSize={13}
         fontWeight="600"
       >
-        {added ? 'Ajouté ✓' : '♡ Envie'}
+        {added ? t('upcoming.added') : t('upcoming.want')}
       </Button>
     </XStack>
   );
 }
 
 export default function UpcomingScreen() {
+  const { t } = useT();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { session } = useAuth();
@@ -132,17 +135,17 @@ export default function UpcomingScreen() {
           paddingVertical="$2"
           pressStyle={{ opacity: 0.6 }}
         >
-          ‹ Retour
+          {t('upcoming.back')}
         </Text>
       </XStack>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 48 }}>
         <YStack gap="$2" marginBottom="$4">
           <Text fontFamily="$heading" fontSize={28} fontWeight="500" color="$color">
-            À venir
+            {t('upcoming.title')}
           </Text>
           <Text fontFamily="$body" fontSize={14} color="$colorSoft" lineHeight={20}>
-            Les prochaines sorties et les tomes qu'il vous manque, d'après vos séries.
+            {t('upcoming.subtitle')}
           </Text>
         </YStack>
 
@@ -150,12 +153,12 @@ export default function UpcomingScreen() {
           <XStack gap="$2" alignItems="center" paddingVertical="$4">
             <Spinner color="$accent" />
             <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-              On parcourt vos séries…
+              {t('upcoming.loading')}
             </Text>
           </XStack>
         ) : isError ? (
           <Text fontFamily="$body" fontSize={14} color="$signal">
-            Recherche impossible pour le moment. Réessayez plus tard.
+            {t('upcoming.error')}
           </Text>
         ) : nothing ? (
           <YStack
@@ -167,18 +170,17 @@ export default function UpcomingScreen() {
             backgroundColor="$backgroundStrong"
           >
             <Text fontFamily="$heading" fontSize={17} color="$color">
-              Rien à l'horizon ✓
+              {t('upcoming.emptyTitle')}
             </Text>
             <Text fontFamily="$body" fontSize={13} color="$colorSoft" lineHeight={19}>
-              Vos séries connues sont à jour, ou aucune date de sortie n'est encore annoncée.
-              Ajoutez quelques tomes d'une série pour suivre ses parutions.
+              {t('upcoming.emptyBody')}
             </Text>
           </YStack>
         ) : (
           <YStack gap="$6">
             {months.length ? (
               <YStack gap="$4">
-                <Section>Sorties à venir</Section>
+                <Section>{t('upcoming.sectionReleases')}</Section>
                 {months.map(([label, list]) => (
                   <YStack key={label} gap="$3">
                     <Text fontFamily="$body" fontSize={13} fontWeight="700" color="$accent">
@@ -200,11 +202,13 @@ export default function UpcomingScreen() {
 
             {bySeries.length ? (
               <YStack gap="$4">
-                <Section>À compléter</Section>
+                <Section>{t('upcoming.sectionComplete')}</Section>
                 {bySeries.map(([name, list]) => (
                   <YStack key={name} gap="$3">
                     <Text fontFamily="$body" fontSize={13} fontWeight="700" color="$colorSoft">
-                      {`${name} · il manque ${list.length} tome${list.length > 1 ? 's' : ''}`}
+                      {list.length > 1
+                        ? t('upcoming.missingMany', { name, count: list.length })
+                        : t('upcoming.missingOne', { name })}
                     </Text>
                     {list.map((it) => (
                       <Row
@@ -222,7 +226,10 @@ export default function UpcomingScreen() {
 
             {data && data.skippedSeries > 0 ? (
               <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-                {`${data.scannedSeries} séries analysées (les plus fournies). ${data.skippedSeries} de plus non analysées.`}
+                {t('upcoming.scanNote', {
+                  scanned: data.scannedSeries,
+                  skipped: data.skippedSeries,
+                })}
               </Text>
             ) : null}
           </YStack>
