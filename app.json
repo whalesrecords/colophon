@@ -21,7 +21,7 @@
     "android": {
       "package": "com.colophon.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F4F1EA",
+        "backgroundColor": "#F4EEE2",
         "foregroundImage": "./assets/images/icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false
@@ -48,7 +48,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#F4EEE2",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
