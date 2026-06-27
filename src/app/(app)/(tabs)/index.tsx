@@ -57,6 +57,7 @@ function Label({ children }: { children: string }) {
 
 export default function LibraryScreen() {
   const { session } = useAuth();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const { data, isLoading, error } = useLibrary(session?.user.id);
 
@@ -116,11 +117,29 @@ export default function LibraryScreen() {
             <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
               Bibliothèque
             </Text>
-            <Text fontFamily="$body" fontSize={13} color="$colorMuted" marginBottom={6}>
-              {filtered.length === items.length
-                ? `${items.length} ${items.length > 1 ? 'livres' : 'livre'}`
-                : `${filtered.length} / ${items.length}`}
-            </Text>
+            <YStack alignItems="flex-end" gap="$1" marginBottom={4}>
+              <Button
+                onPress={() => router.push('/upcoming')}
+                height={30}
+                paddingHorizontal="$3"
+                borderRadius={999}
+                borderWidth={1}
+                borderColor="$accent"
+                backgroundColor="transparent"
+                color="$accent"
+                fontFamily="$body"
+                fontSize={13}
+                fontWeight="600"
+                pressStyle={{ opacity: 0.7 }}
+              >
+                À venir
+              </Button>
+              <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                {filtered.length === items.length
+                  ? `${items.length} ${items.length > 1 ? 'livres' : 'livre'}`
+                  : `${filtered.length} / ${items.length}`}
+              </Text>
+            </YStack>
           </XStack>
         </YStack>
 

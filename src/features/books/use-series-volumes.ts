@@ -9,44 +9,57 @@ export interface SeriesVolume {
   title: string;
   volume: number;
   coverUrl: string | null;
+  publishedDate: string | null;
+}
+
+/** Run the deep book-search for a series title and return the raw results. */
+export async function fetchSeriesResults(seriesName: string): Promise<BookSearchResult[]> {
+  const { data, error } = await supabase.functions.invoke('book-search', {
+    body: { title: seriesName, deep: true },
+  });
+  if (error) throw new Error('Recherche impossible. Réessayez.');
+  return (data as { results?: BookSearchResult[] } | null)?.results ?? [];
 }
 
 /**
- * Assemble a series' volume list by searching the series title and keeping the
- * results that belong to the same series (via the Tome/Vol heuristic), one per
- * volume number, ordered. Reuses the merged Google+Open Library book-search.
+ * Keep the search results that belong to the same series (via the Tome/Vol
+ * heuristic), one per volume number, ordered. Exact series-key match only — a
+ * lenient prefix match wrongly pulled spin-offs in (e.g. "Naruto Gaiden").
+ */
+export function volumesFromResults(
+  results: BookSearchResult[],
+  seriesName: string,
+): SeriesVolume[] {
+  const key = seriesKey(seriesName);
+  const byVolume = new Map<number, SeriesVolume>();
+  for (const r of results) {
+    const ref = parseSeries(r.title);
+    if (!ref || seriesKey(ref.name) !== key) continue;
+    if (!byVolume.has(ref.volume)) {
+      byVolume.set(ref.volume, {
+        isbn13: r.isbn13,
+        title: r.title ?? '',
+        volume: ref.volume,
+        coverUrl: r.coverUrl,
+        publishedDate: r.publishedDate,
+      });
+    }
+  }
+  return [...byVolume.values()].sort((a, b) => a.volume - b.volume);
+}
+
+/**
+ * Assemble a series' volume list by searching the series title. Reuses the
+ * merged Google + Open Library book-search.
  */
 export function useSeriesVolumes() {
   return useMutation({
     mutationFn: async (seriesName: string): Promise<SeriesVolume[]> => {
-      const { data, error } = await supabase.functions.invoke('book-search', {
-        body: { title: seriesName, deep: true },
-      });
-      if (error) throw new Error('Recherche impossible. Réessayez.');
-      const results = ((data as { results?: BookSearchResult[] } | null)?.results ?? []);
-      const key = seriesKey(seriesName);
-
-      const byVolume = new Map<number, SeriesVolume>();
-      for (const r of results) {
-        const ref = parseSeries(r.title);
-        if (!ref) continue;
-        // Exact series-key match only: a lenient prefix match wrongly pulled
-        // spin-offs into the main series (e.g. "Naruto Gaiden" into "Naruto").
-        if (seriesKey(ref.name) !== key) continue;
-        if (!byVolume.has(ref.volume)) {
-          byVolume.set(ref.volume, {
-            isbn13: r.isbn13,
-            title: r.title ?? '',
-            volume: ref.volume,
-            coverUrl: r.coverUrl,
-          });
-        }
-      }
       // NB: we do NOT cache result.length as the series total — book-search rarely
       // returns the full run (Berserk found 28/42), so a search-derived count would
       // be a wrong, world-shared "X/Y". The total comes from the per-user override
       // (useSetSeriesTotal) or a curated seed instead.
-      return [...byVolume.values()].sort((a, b) => a.volume - b.volume);
+      return volumesFromResults(await fetchSeriesResults(seriesName), seriesName);
     },
   });
 }
