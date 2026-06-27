@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
-import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { BookLoader } from '@/components/BookLoader';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
 import { useSeriesTotals } from '@/features/books/use-series-volumes';
@@ -303,7 +304,7 @@ export default function LibraryScreen() {
 
       {isLoading ? (
         <YStack flex={1} alignItems="center" justifyContent="center">
-          <Spinner color="$accent" size="large" />
+          <BookLoader size={56} />
         </YStack>
       ) : error ? (
         <YStack flex={1} alignItems="center" justifyContent="center" paddingHorizontal="$8">

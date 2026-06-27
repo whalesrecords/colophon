@@ -1,7 +1,8 @@
 import { Modal, Platform, ScrollView, Share as RNShare, View } from 'react-native';
-import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { BookLoader } from '@/components/BookLoader';
 import { type RecapBook, useYearRecap } from '@/features/stats/use-year-recap';
 import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
@@ -172,8 +173,8 @@ export function YearRecap({
           </Text>
 
           {isLoading ? (
-            <YStack flex={1} justifyContent="center" paddingVertical="$10">
-              <Spinner color="$accent" size="large" />
+            <YStack flex={1} alignItems="center" justifyContent="center" paddingVertical="$10">
+              <BookLoader size={58} />
             </YStack>
           ) : empty ? (
             <Text

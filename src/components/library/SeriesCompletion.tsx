@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
-import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { BookLoader } from '@/components/BookLoader';
 import { useT } from '@/i18n';
 import {
   useSeriesTotals,
@@ -96,7 +97,7 @@ export function SeriesCompletion({
 
       {fetchVols.isPending ? (
         <XStack gap="$2" alignItems="center">
-          <Spinner color="$accent" />
+          <BookLoader size={40} />
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
             {t('series.searching')}
           </Text>

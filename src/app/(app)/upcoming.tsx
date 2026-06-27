@@ -2,9 +2,10 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { BookLoader } from '@/components/BookLoader';
 import { useAuth } from '@/features/auth/auth-context';
 import { type UpcomingItem, useUpcoming } from '@/features/books/use-upcoming';
 import { useAddItem } from '@/features/library/use-add-item';
@@ -151,7 +152,7 @@ export default function UpcomingScreen() {
 
         {isLoading ? (
           <XStack gap="$2" alignItems="center" paddingVertical="$4">
-            <Spinner color="$accent" />
+            <BookLoader size={40} />
             <Text fontFamily="$body" fontSize={13} color="$colorMuted">
               {t('upcoming.loading')}
             </Text>

@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { Platform, ScrollView, useWindowDimensions } from 'react-native';
-import { Button, Input, Spinner, type TamaguiElement, Text, TextArea, XStack, YStack } from 'tamagui';
+import { Button, Input, type TamaguiElement, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { BookLoader } from '@/components/BookLoader';
 import { AddSheet } from '@/components/scan/AddSheet';
 import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
 import { SearchPanel } from '@/components/scan/SearchPanel';
@@ -441,7 +442,7 @@ export default function ScanScreen() {
           alignItems="center"
         >
           <XStack gap="$2" alignItems="center">
-            <Spinner color="$accent" />
+            <BookLoader size={30} />
             <Text fontFamily="$body" fontSize={14} color="$colorMuted">
               {t('scan.lookingUpBook')}
             </Text>
@@ -512,7 +513,7 @@ function EntryRow({
       ) : (
         <YStack width={38} height={57} alignItems="center" justifyContent="center">
           {entry.status === 'looking' ? (
-            <Spinner color="$accent" />
+            <BookLoader size={30} />
           ) : (
             <Text color="$signal" fontFamily="$heading" fontSize={22}>
               !
