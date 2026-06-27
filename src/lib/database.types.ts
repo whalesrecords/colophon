@@ -734,6 +734,14 @@ export type Database = {
     }
     Functions: {
       community_trends: { Args: Record<PropertyKey, never>; Returns: Json }
+      circle_unread_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: { circle_id: string; unread: number }[]
+      }
+      mark_circle_read: {
+        Args: { p_circle: string }
+        Returns: undefined
+      }
       create_circle: {
         Args: { p_name: string }
         Returns: {

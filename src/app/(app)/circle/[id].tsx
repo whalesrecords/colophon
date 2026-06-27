@@ -29,6 +29,7 @@ import {
   useEventActions,
   useEventRsvps,
   useLeaveCircle,
+  useMarkCircleRead,
   useModeration,
   useSendMessage,
   useSetRsvp,
@@ -45,6 +46,7 @@ export default function CircleScreen() {
   const { data: members } = useCircleMembers(id);
   const { data: messages, isLoading } = useCircleMessages(id);
   const send = useSendMessage(id, userId);
+  const markRead = useMarkCircleRead(userId);
   const leave = useLeaveCircle(userId);
   const { data: blocked } = useBlockedUsers(userId);
   const { report, block, unblock } = useModeration(userId);
@@ -52,6 +54,13 @@ export default function CircleScreen() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [section, setSection] = useState<'chat' | 'library' | 'proposals' | 'agenda'>('chat');
   const scrollRef = useRef<ScrollView>(null);
+
+  // Mark the discussion read while it's open (clears the unread badge), and again
+  // when new messages arrive as you watch.
+  useEffect(() => {
+    if (section === 'chat' && id) markRead.mutate(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section, id, messages?.length]);
   const { width } = useWindowDimensions();
   const padH = Math.max(16, (width - 800) / 2);
 

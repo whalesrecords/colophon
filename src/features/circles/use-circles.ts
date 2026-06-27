@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -47,6 +47,55 @@ export function useCircles(userId: string | undefined) {
         memberCount: (c.members as unknown as { count: number }[])?.[0]?.count ?? 0,
       }));
     },
+  });
+}
+
+/**
+ * Unread message counts per circle (messages newer than my last read, not mine).
+ * Subscribes to message inserts so the badge updates live.
+ */
+export function useUnreadCounts(userId: string | undefined) {
+  const queryClient = useQueryClient();
+  // Unique per hook instance — this hook is mounted in more than one place.
+  const channelName = useRef(`unread-${Math.random().toString(36).slice(2)}`);
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(channelName.current)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        () => queryClient.invalidateQueries({ queryKey: ['unread', userId] }),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
+
+  return useQuery({
+    queryKey: ['unread', userId],
+    enabled: !!userId,
+    staleTime: 15_000,
+    queryFn: async (): Promise<Map<string, number>> => {
+      const { data, error } = await supabase.rpc('circle_unread_counts');
+      if (error) throw error;
+      const map = new Map<string, number>();
+      for (const r of data ?? []) if (r.unread > 0) map.set(r.circle_id, r.unread);
+      return map;
+    },
+  });
+}
+
+/** Mark a circle's discussion as read up to now (clears its unread badge). */
+export function useMarkCircleRead(userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (circleId: string): Promise<void> => {
+      const { error } = await supabase.rpc('mark_circle_read', { p_circle: circleId });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['unread', userId] }),
   });
 }
 

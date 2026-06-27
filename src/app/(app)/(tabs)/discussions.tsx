@@ -5,7 +5,12 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/features/auth/auth-context';
-import { useCircles, useCreateCircle, useJoinCircle } from '@/features/circles/use-circles';
+import {
+  useCircles,
+  useCreateCircle,
+  useJoinCircle,
+  useUnreadCounts,
+} from '@/features/circles/use-circles';
 import { palette } from '@/theme/tokens';
 
 function Label({ children }: { children: string }) {
@@ -41,6 +46,7 @@ export default function DiscussionsScreen() {
   const { session } = useAuth();
   const userId = session?.user.id;
   const { data: circles, isLoading } = useCircles(userId);
+  const { data: unread } = useUnreadCounts(userId);
   const createCircle = useCreateCircle(userId);
   const joinCircle = useJoinCircle(userId);
   const [name, setName] = useState('');
@@ -168,6 +174,21 @@ export default function DiscussionsScreen() {
                       {circle.invite_code}
                     </Text>
                   </YStack>
+                  {(unread?.get(circle.id) ?? 0) > 0 ? (
+                    <XStack
+                      minWidth={22}
+                      height={22}
+                      paddingHorizontal={6}
+                      borderRadius={999}
+                      backgroundColor={palette.terracotta}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Text fontFamily="$body" fontSize={12} fontWeight="700" color={palette.paper}>
+                        {unread?.get(circle.id)}
+                      </Text>
+                    </XStack>
+                  ) : null}
                   <Text fontFamily="$heading" fontSize={22} color="$colorMuted">
                     ›
                   </Text>

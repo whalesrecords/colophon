@@ -3,6 +3,8 @@ import { Platform, View, type ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icons';
+import { useAuth } from '@/features/auth/auth-context';
+import { useUnreadCounts } from '@/features/circles/use-circles';
 import { useT } from '@/i18n';
 import { useThemePref } from '@/theme/theme-pref';
 import { palette } from '@/theme/tokens';
@@ -36,6 +38,9 @@ export default function AppTabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useT();
   const { effective } = useThemePref();
+  const { session } = useAuth();
+  const { data: unread } = useUnreadCounts(session?.user.id);
+  const totalUnread = unread ? [...unread.values()].reduce((a, b) => a + b, 0) : 0;
   const dark = effective === 'dark';
   return (
     <Tabs
@@ -65,7 +70,12 @@ export default function AppTabsLayout() {
       />
       <Tabs.Screen
         name="discussions"
-        options={{ title: t('tabs.exchanges'), tabBarIcon: tabIcon('discussions') }}
+        options={{
+          title: t('tabs.exchanges'),
+          tabBarIcon: tabIcon('discussions'),
+          tabBarBadge: totalUnread > 0 ? totalUnread : undefined,
+          tabBarBadgeStyle: { backgroundColor: palette.terracotta, color: palette.paper },
+        }}
       />
       <Tabs.Screen name="profile" options={{ title: t('tabs.profile'), tabBarIcon: tabIcon('profile') }} />
     </Tabs>
