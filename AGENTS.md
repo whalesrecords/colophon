@@ -40,11 +40,17 @@ design/                 the high-fidelity handoff (reference, not shipped)
 ```
 
 ## Design
-Direction: **wabi-sabi / Japanese-Mediterranean** — warm paper, ink, polished
-concrete, indigo **aizome** accent. The UI recedes so **book covers are the
-heroes**. All tokens (colours, Spectral + Schibsted Grotesk type, spacing, radii,
-shadows) live in `src/theme/tokens.ts`, transcribed from
-`design/design_handoff_colophon_mobile/README.md`. UI language: French; code &
+Brand: **"Les tranches"** (wabi-sabi). Calm chrome — **parchemin** `#F4EEE2` /
+**nuit** `#221B14` surfaces, **Espresso** `#2A1E15` brand accent (nav, §, the
+primary buttons) — and colour comes from the book covers + the four **tranches**:
+brique `#AE4133` (romans/alertes), prusse `#225F77` (essais/en cours), forêt
+`#2D6B4E` (séries/terminé), ocre `#B5832E` (mangas/BD/envies), each with on-dark
+variants. The UI recedes so **book covers are the heroes**. Logo = `ColophonMark`
+(SVG: pyramid of 4 slices on an espresso shelf + § medallion) — on login + the app
+icon. Type: **Spectral** (serif, brand/titles) + **Schibsted Grotesk** (UI). All
+tokens in `src/theme/tokens.ts` + the dark theme in `tamagui.config.ts`; legacy
+token names are kept (`aizome`→espresso, `sage`→forêt, `terracotta`→brique,
+`ochre`→gold) so components reskin without edits. UI language: French; code &
 identifiers: English.
 
 ## Non-obvious facts (read before changing related code)
