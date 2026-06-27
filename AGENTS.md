@@ -187,5 +187,8 @@ only fills for manga. Prioritized, grounded against what already ships:
 - **Share links** use `EXPO_PUBLIC_WEB_URL` as the base, falling back to
   `window.location.origin` on web. Set it to the Vercel domain for native shares.
 - **Pending (dashboard toggles, not code):** enable Auth "leaked password
-  protection" (HaveIBeenPwned); set `GOOGLE_BOOKS_KEY` to raise lookup quota.
+  protection" (HaveIBeenPwned); set `GOOGLE_BOOKS_KEY` to raise lookup quota;
+  **add `https://colophon-three.vercel.app/reset-password` (or `…/**`) to Auth →
+  URL Configuration → Redirect URLs** so the password-reset email link lands on the
+  recovery page instead of falling back to the Site URL root.
 - **Phase 6 (later)** offline-first via expo-sqlite + PowerSync.
