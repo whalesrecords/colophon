@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
@@ -16,6 +16,7 @@ import { useCopyCount, useDeleteItem } from '@/features/library/use-delete-item'
 import { useUpdateItem } from '@/features/library/use-update-item';
 import { useMarkRead } from '@/features/reading/use-reading-sessions';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
+import { bookshopUrl } from '@/lib/bookshop';
 import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
@@ -248,6 +249,19 @@ export default function BookDetailScreen() {
                 onSave={(v) => update.mutate({ borrowed_from: v || null })}
               />
             ) : null}
+            <Text
+              onPress={() =>
+                void Linking.openURL(bookshopUrl(book?.isbn13, book?.title, book?.authors?.[0]))
+              }
+              fontFamily="$body"
+              fontSize={14}
+              fontWeight="600"
+              color="$accent"
+              paddingVertical="$1"
+              pressStyle={{ opacity: 0.6 }}
+            >
+              Trouver chez un libraire ↗
+            </Text>
           </YStack>
 
           {/* format */}
