@@ -379,6 +379,7 @@ export type Database = {
           purchase_date: string | null
           purchase_price: number | null
           purchase_store: string | null
+          queue_position: number | null
           rating: number | null
           status: string
           updated_at: string
@@ -398,6 +399,7 @@ export type Database = {
           purchase_date?: string | null
           purchase_price?: number | null
           purchase_store?: string | null
+          queue_position?: number | null
           rating?: number | null
           status?: string
           updated_at?: string
@@ -417,6 +419,7 @@ export type Database = {
           purchase_date?: string | null
           purchase_price?: number | null
           purchase_store?: string | null
+          queue_position?: number | null
           rating?: number | null
           status?: string
           updated_at?: string

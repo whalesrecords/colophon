@@ -80,6 +80,10 @@ export default function LibraryScreen() {
     () => items.filter((i) => i.ownership === 'wishlist').length,
     [items],
   );
+  const toReadCount = useMemo(
+    () => items.filter((i) => i.status === 'to_read' && i.ownership !== 'wishlist').length,
+    [items],
+  );
   const copies = useMemo(
     () => copiesByIsbn(items.filter((i) => i.ownership === 'owned')),
     [items],
@@ -210,14 +214,34 @@ export default function LibraryScreen() {
               </XStack>
             ) : null}
 
-            {wishlistCount > 0 ? (
+            {toReadCount > 0 || wishlistCount > 0 ? (
               <XStack gap="$2" flexWrap="wrap">
-                <OwnershipChip
-                  label={t('library.wishlistChip', { count: wishlistCount })}
-                  color={palette.sage}
-                  active={filters.facets.ownership.includes('wishlist')}
-                  onPress={() => toggleFacet('ownership', 'wishlist')}
-                />
+                {toReadCount > 0 ? (
+                  <Button
+                    onPress={() => router.push('/queue')}
+                    height={30}
+                    paddingHorizontal="$3"
+                    borderRadius={999}
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    backgroundColor="transparent"
+                    color="$colorSoft"
+                    fontFamily="$body"
+                    fontSize={13}
+                    fontWeight="600"
+                    pressStyle={{ opacity: 0.7 }}
+                  >
+                    {`À lire · ${toReadCount}`}
+                  </Button>
+                ) : null}
+                {wishlistCount > 0 ? (
+                  <OwnershipChip
+                    label={t('library.wishlistChip', { count: wishlistCount })}
+                    color={palette.sage}
+                    active={filters.facets.ownership.includes('wishlist')}
+                    onPress={() => toggleFacet('ownership', 'wishlist')}
+                  />
+                ) : null}
               </XStack>
             ) : null}
 
