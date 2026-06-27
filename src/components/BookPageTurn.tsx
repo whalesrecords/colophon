@@ -1,53 +1,53 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import Animated, {
-  Easing,
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
 import Svg, { G, Line, Rect } from 'react-native-svg';
 
 import { palette } from '@/theme/tokens';
 
+const DURATION = 2800;
+
+/** Piecewise-linear interpolation over (input→output) breakpoints. */
+function lerp(x: number, xs: number[], ys: number[]): number {
+  if (x <= xs[0]) return ys[0];
+  for (let i = 1; i < xs.length; i++) {
+    if (x <= xs[i]) {
+      const f = (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
+      return ys[i - 1] + f * (ys[i] - ys[i - 1]);
+    }
+  }
+  return ys[ys.length - 1];
+}
+
 /**
  * Auth-screen hero: a flat-design open book whose right page turns over on a
- * gentle loop. Built from SVG + reanimated (a couple of KB, crisp at any size,
- * works on web + native) rather than a heavy video. Replaces the static art.
+ * gentle loop. SVG + a plain requestAnimationFrame loop (a couple of KB, crisp at
+ * any size, animates reliably on web + native with no animation runtime) — rather
+ * than shipping a heavy video.
  */
 export function BookPageTurn({ width = 208 }: { width?: number }) {
   const W = width;
   const H = W * 0.75;
-  const t = useSharedValue(0);
+  const [p, setP] = useState(0);
 
   useEffect(() => {
-    t.value = withRepeat(
-      withTiming(1, { duration: 2800, easing: Easing.inOut(Easing.cubic) }),
-      -1,
-      false,
-    );
-  }, [t]);
+    const start = Date.now();
+    const id = setInterval(() => {
+      setP(((Date.now() - start) % DURATION) / DURATION);
+    }, 1000 / 30);
+    return () => clearInterval(id);
+  }, []);
 
   // Right-page geometry, in screen px, mapped from the 0..200 / 0..150 viewBox.
   const sx = W / 200;
   const sy = H / 150;
   const spineX = 100 * sx;
   const pageTop = 24 * sy;
-  const pageW = 80 * sx; // 100 -> 180
+  const pageW = 80 * sx;
   const pageH = 104 * sy;
 
-  const pageStyle = useAnimatedStyle(() => {
-    const deg = interpolate(t.value, [0, 0.55, 1], [0, -180, -180], Extrapolation.CLAMP);
-    const opacity = interpolate(t.value, [0, 0.86, 0.96, 1], [1, 1, 0, 0], Extrapolation.CLAMP);
-    const lift = interpolate(t.value, [0, 0.275, 0.55, 1], [0, -7, 0, 0], Extrapolation.CLAMP);
-    return {
-      opacity,
-      transform: [{ perspective: 700 }, { translateY: lift }, { rotateY: `${deg}deg` }],
-    };
-  });
+  const deg = lerp(p, [0, 0.55, 1], [0, -180, -180]);
+  const opacity = lerp(p, [0, 0.86, 0.96, 1], [1, 1, 0, 0]);
+  const translateY = lerp(p, [0, 0.275, 0.55, 1], [0, -7, 0, 0]);
 
   const ink = palette.ink;
   const paper = '#FBF8F1';
@@ -76,35 +76,34 @@ export function BookPageTurn({ width = 208 }: { width?: number }) {
       </Svg>
 
       {/* The turning page, anchored at the spine. */}
-      <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            left: spineX,
-            top: pageTop,
-            width: pageW,
-            height: pageH,
-            transformOrigin: '0% 50%',
-            backgroundColor: paper,
-            borderTopRightRadius: 6,
-            borderBottomRightRadius: 6,
-            borderWidth: 1,
-            borderColor: 'rgba(28,26,23,0.08)',
-            paddingVertical: pageH * 0.12,
-            paddingHorizontal: pageW * 0.14,
-            justifyContent: 'space-between',
-            shadowColor: ink,
-            shadowOpacity: 0.16,
-            shadowRadius: 10,
-            shadowOffset: { width: -6, height: 4 },
-          },
-          pageStyle,
-        ]}
+      <View
+        style={{
+          position: 'absolute',
+          left: spineX,
+          top: pageTop,
+          width: pageW,
+          height: pageH,
+          transformOrigin: '0% 50%',
+          backgroundColor: paper,
+          borderTopRightRadius: 6,
+          borderBottomRightRadius: 6,
+          borderWidth: 1,
+          borderColor: 'rgba(28,26,23,0.08)',
+          paddingVertical: pageH * 0.12,
+          paddingHorizontal: pageW * 0.14,
+          justifyContent: 'space-between',
+          shadowColor: ink,
+          shadowOpacity: 0.16,
+          shadowRadius: 10,
+          shadowOffset: { width: -6, height: 4 },
+          opacity,
+          transform: [{ perspective: 700 }, { translateY }, { rotateY: `${deg}deg` }],
+        }}
       >
         {[0, 1, 2, 3, 4].map((i) => (
           <View key={i} style={{ height: 3, borderRadius: 2, backgroundColor: line }} />
         ))}
-      </Animated.View>
+      </View>
     </View>
   );
 }
