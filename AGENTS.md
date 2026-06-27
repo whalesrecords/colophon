@@ -108,7 +108,17 @@ identifiers: English.
   shared `series` cache is read-only RLS, only service-role seeds it; scan AddSheet
   commits via a resolved path — no double lookup; BarcodeScanner `paused` while the
   sheet is open; owned-scoped duplicate badge; add-as-"Lu" no longer fabricates a
-  today-dated finish).
+  today-dated finish); **"À venir" release calendar** (`useUpcoming` fans the deep
+  book-search over owned series → future-dated volumes grouped by month + interior
+  gaps in numbered series, 1-tap add to Envies; library-header entry point);
+  **bilan rebuilt** (`useYearRecap`: books + approx pages + themes chips + top
+  author + busiest month + 12-month rhythm + dated reading list; in a `<Modal>` —
+  the old absolute overlay didn't display reliably); **EN i18n on the core screens**
+  (147 keys across library/scan/book/upcoming/AddSheet/Filter/SeriesCompletion; FR
+  source+fallback, `t()` is type-checked so every used key must exist); **animated
+  login** (`BookPageTurn`: flat-design open book, looping page-turn via SVG + a
+  setInterval/state loop — rAF doesn't tick under RNW here; replaces the 40 MB .mov);
+  **profile bio editor**.
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
