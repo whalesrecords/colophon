@@ -136,7 +136,13 @@ identifiers: English.
   unread badge on the Échanges tab + per circle, live via a message-insert realtime
   sub, cleared on opening a circle's chat — real OS push still needs a native build
   + APNs/FCM); **password reset** ("Mot de passe oublié ?" + public `/reset-password`
-  recovery page).
+  recovery page); **reader discovery + friends** (`friendships` directed-request
+  table + RLS; profiles now authenticated-SELECTable; `suggested_readers()` ranks
+  other readers by shared-genre overlap, `reader_profile()` returns basics +
+  aggregates + recent reads with no private notes; `/readers` discovery screen
+  (from the Échanges header, incoming-request badge) + `/u/[id]` reader profile
+  with an add/accept/friends friend-action button); **Tendances top-3** (Genres &
+  Auteurs collapse to 3 with a "… voir N de plus" expander).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
