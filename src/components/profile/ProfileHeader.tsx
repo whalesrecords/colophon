@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { Button, Input, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, TextArea, Text, XStack, YStack } from 'tamagui';
 
 import { avatarUrl, useProfile, useUpdateProfile, useUploadAvatar } from '@/features/profile/use-profile';
 import { palette } from '@/theme/tokens';
@@ -58,13 +58,15 @@ export function ProfileHeader({
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [pseudo, setPseudo] = useState('');
+  const [bio, setBio] = useState('');
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setName(profile?.display_name ?? '');
     setPseudo(profile?.pseudo ?? '');
-  }, [profile?.display_name, profile?.pseudo]);
+    setBio(profile?.bio ?? '');
+  }, [profile?.display_name, profile?.pseudo, profile?.bio]);
 
   const displayName = profile?.display_name || email?.split('@')[0] || 'Lecteur';
   const avatar = avatarUrl(profile?.avatar_path, profile?.updated_at);
@@ -107,6 +109,12 @@ export function ProfileHeader({
           {editing ? 'Fermer' : 'Modifier'}
         </Text>
       </XStack>
+
+      {!editing && profile?.bio ? (
+        <Text fontFamily="$body" fontSize={14} color="$colorSoft" lineHeight={20}>
+          {profile.bio}
+        </Text>
+      ) : null}
 
       {editing ? (
         <YStack
@@ -167,12 +175,21 @@ export function ProfileHeader({
             autoCapitalize="none"
             placeholder="Pseudo (unique, optionnel)"
           />
+          <TextArea
+            {...field}
+            height={74}
+            paddingVertical="$2"
+            value={bio}
+            onChangeText={setBio}
+            placeholder="Bio (optionnel)"
+          />
           <Button
             onPress={() =>
               guard(async () => {
                 await update.mutateAsync({
                   display_name: name.trim() || null,
                   pseudo: pseudo.trim() || null,
+                  bio: bio.trim() || null,
                 });
                 setEditing(false);
               })
