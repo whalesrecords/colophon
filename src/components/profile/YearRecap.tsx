@@ -91,6 +91,29 @@ function MonthRhythm({ byMonth }: { byMonth: { label: string; count: number; mon
   );
 }
 
+/** A 0–5 rating as ★ glyphs (½ shown when the half-step is set). */
+function stars(rating: number): string {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half ? 1 : 0));
+}
+
+function RatedRow({ book }: { book: RecapBook }) {
+  return (
+    <XStack gap="$3" alignItems="center">
+      <BookCover title={book.title} coverUrl={book.coverUrl} isbn={book.isbn13 ?? undefined} width={30} />
+      <Text fontFamily="$body" fontSize={14} color="$color" flex={1} numberOfLines={1}>
+        {book.title}
+      </Text>
+      {book.rating != null ? (
+        <Text fontFamily="$body" fontSize={13} color={palette.ochre}>
+          {stars(book.rating)}
+        </Text>
+      ) : null}
+    </XStack>
+  );
+}
+
 /**
  * A shareable "year in reading" recap — fanned covers, the year's headline
  * numbers, the themes you explored, your reading rhythm, and the dated list of
@@ -208,6 +231,85 @@ export function YearRecap({
                     color={palette.aizome}
                   />
                 </XStack>
+
+                {data.ratedCount > 0 ? (
+                  <YStack width="100%" maxWidth={440} gap="$3" marginTop="$7">
+                    <SectionTitle>Vos notes</SectionTitle>
+                    {data.avgRating != null ? (
+                      <XStack alignItems="baseline" gap="$2">
+                        <Text fontFamily="$heading" fontSize={30} color={palette.ochre}>
+                          {data.avgRating.toFixed(1)}
+                        </Text>
+                        <Text fontFamily="$body" fontSize={16} color={palette.ochre}>
+                          {stars(data.avgRating)}
+                        </Text>
+                        <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                          {`de moyenne · ${data.ratedCount} noté${data.ratedCount > 1 ? 's' : ''}`}
+                        </Text>
+                      </XStack>
+                    ) : null}
+                    {data.loved.length ? (
+                      <YStack gap="$2" marginTop="$2">
+                        <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+                          Vos coups de cœur
+                        </Text>
+                        {data.loved.map((b) => (
+                          <RatedRow key={b.itemId} book={b} />
+                        ))}
+                      </YStack>
+                    ) : null}
+                    {data.leastLiked ? (
+                      <YStack gap="$2" marginTop="$2">
+                        <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+                          Le moins emballé
+                        </Text>
+                        <RatedRow book={data.leastLiked} />
+                      </YStack>
+                    ) : null}
+                  </YStack>
+                ) : null}
+
+                {data.reviews.length ? (
+                  <YStack width="100%" maxWidth={440} gap="$3" marginTop="$7">
+                    <SectionTitle>Vos critiques</SectionTitle>
+                    {data.reviews.map((b) => (
+                      <YStack
+                        key={b.itemId}
+                        gap="$1"
+                        padding="$3"
+                        backgroundColor="$backgroundStrong"
+                        borderRadius={14}
+                      >
+                        <XStack gap="$2" alignItems="center">
+                          <Text
+                            fontFamily="$body"
+                            fontSize={14}
+                            fontWeight="600"
+                            color="$color"
+                            flex={1}
+                            numberOfLines={1}
+                          >
+                            {b.title}
+                          </Text>
+                          {b.rating != null ? (
+                            <Text fontFamily="$body" fontSize={12} color={palette.ochre}>
+                              {stars(b.rating)}
+                            </Text>
+                          ) : null}
+                        </XStack>
+                        <Text
+                          fontFamily="$heading"
+                          fontSize={14}
+                          fontStyle="italic"
+                          color="$colorSoft"
+                          numberOfLines={4}
+                        >
+                          {`« ${b.review} »`}
+                        </Text>
+                      </YStack>
+                    ))}
+                  </YStack>
+                ) : null}
 
                 {data.themes.length ? (
                   <YStack width="100%" maxWidth={440} gap="$3" marginTop="$7">

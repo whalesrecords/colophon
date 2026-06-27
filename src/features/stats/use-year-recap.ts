@@ -9,6 +9,8 @@ export interface RecapBook {
   coverUrl: string | null;
   pages: number | null;
   finishedOn: string; // YYYY-MM-DD
+  rating: number | null; // 0–5 (half-steps), null if unrated
+  review: string | null; // the note/review you wrote, if any
 }
 
 export interface RecapMonth {
@@ -29,12 +31,19 @@ export interface YearRecapData {
   books: RecapBook[]; // chronological
   firstFinish: string | null;
   lastFinish: string | null;
+  avgRating: number | null; // average stars given this year, over rated books
+  ratedCount: number;
+  loved: RecapBook[]; // highest-rated (your favourites)
+  leastLiked: RecapBook | null; // the lowest-rated, if genuinely low
+  reviews: RecapBook[]; // books you wrote a note/review about
 }
 
 interface SessionRow {
   finished_on: string | null;
   item: {
     id: string;
+    rating: number | null;
+    notes: string | null;
     book: {
       title: string | null;
       isbn13: string | null;
@@ -62,7 +71,7 @@ export function useYearRecap(userId: string | undefined, year: number) {
       const { data, error } = await supabase
         .from('reading_sessions')
         .select(
-          'finished_on, item:items(id, book:book_metadata(title, isbn13, page_count, genres, authors, cover_url))',
+          'finished_on, item:items(id, rating, notes, book:book_metadata(title, isbn13, page_count, genres, authors, cover_url))',
         )
         .eq('status', 'finished')
         .gte('finished_on', `${year}-01-01`)
@@ -84,6 +93,7 @@ export function useYearRecap(userId: string | undefined, year: number) {
         const month = Number(r.finished_on.slice(5, 7)) - 1;
         if (month >= 0 && month < 12) monthCount[month] += 1;
         if (!byItem.has(r.item.id)) {
+          const review = r.item.notes?.trim();
           byItem.set(r.item.id, {
             itemId: r.item.id,
             isbn13: b?.isbn13 ?? null,
@@ -91,6 +101,8 @@ export function useYearRecap(userId: string | undefined, year: number) {
             coverUrl: b?.cover_url ?? null,
             pages: b?.page_count ?? null,
             finishedOn: r.finished_on,
+            rating: r.item.rating ?? null,
+            review: review ? review : null,
           });
           for (const g of b?.genres ?? []) genreCount.set(g, (genreCount.get(g) ?? 0) + 1);
           for (const a of b?.authors ?? []) authorCount.set(a, (authorCount.get(a) ?? 0) + 1);
@@ -119,6 +131,16 @@ export function useYearRecap(userId: string | undefined, year: number) {
           null,
         ) ?? null;
 
+      const rated = books.filter((b) => b.rating != null);
+      const avgRating = rated.length
+        ? rated.reduce((s, b) => s + (b.rating ?? 0), 0) / rated.length
+        : null;
+      const byRating = [...rated].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+      const loved = byRating.filter((b) => (b.rating ?? 0) >= 4).slice(0, 3);
+      const lowest = byRating[byRating.length - 1] ?? null;
+      const leastLiked = lowest && (lowest.rating ?? 5) <= 2.5 ? lowest : null;
+      const reviews = books.filter((b) => b.review);
+
       return {
         year,
         booksRead: books.length,
@@ -131,6 +153,11 @@ export function useYearRecap(userId: string | undefined, year: number) {
         books,
         firstFinish: books[0]?.finishedOn ?? null,
         lastFinish: books[books.length - 1]?.finishedOn ?? null,
+        avgRating,
+        ratedCount: rated.length,
+        loved,
+        leastLiked,
+        reviews,
       };
     },
   });

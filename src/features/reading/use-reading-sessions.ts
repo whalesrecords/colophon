@@ -32,6 +32,8 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
     queryClient.invalidateQueries({ queryKey: ['book-detail', itemId] });
     queryClient.invalidateQueries({ queryKey: ['library'] });
     queryClient.invalidateQueries({ queryKey: ['stats', userId] });
+    // A date edit can move a read into/out of a year — clear all year recaps.
+    queryClient.invalidateQueries({ queryKey: ['year-recap'] });
   };
 
   const start = useMutation({
@@ -80,7 +82,27 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
     onSuccess: invalidate,
   });
 
-  return { start, setPage, finish, remove };
+  /** Edit a session's dates — e.g. mark a book as read years ago, not today. */
+  const updateDates = useMutation({
+    mutationFn: async ({
+      sessionId,
+      startedOn,
+      finishedOn,
+    }: {
+      sessionId: string;
+      startedOn?: string | null;
+      finishedOn?: string | null;
+    }): Promise<void> => {
+      const patch: { started_on?: string | null; finished_on?: string | null } = {};
+      if (startedOn !== undefined) patch.started_on = startedOn;
+      if (finishedOn !== undefined) patch.finished_on = finishedOn;
+      const { error } = await supabase.from('reading_sessions').update(patch).eq('id', sessionId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  return { start, setPage, finish, remove, updateDates };
 }
 
 /**
