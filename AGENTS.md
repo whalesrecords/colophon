@@ -101,7 +101,14 @@ identifiers: English.
   CSV import** (rating + status + review); **annual reading goal**
   (`profiles.annual_goal`, progress bar in Profil); **shareable year recap**
   ("Wrapped"-style YearRecap — books/pages/top author+genre); **series completion
-  view** (missing tomes + bulk-add in the library series overlay).
+  view** (missing tomes + bulk-add in the library series overlay); **profile bio**;
+  **adversarial-review hardening** (series grouping requires 2+ distinct ISBNs so
+  duplicate copies / same-title books don't form phantom series; X/Y counts
+  distinct tomes not physical copies; exact series-key match — no spin-off bleed;
+  shared `series` cache is read-only RLS, only service-role seeds it; scan AddSheet
+  commits via a resolved path — no double lookup; BarcodeScanner `paused` while the
+  sheet is open; owned-scoped duplicate badge; add-as-"Lu" no longer fabricates a
+  today-dated finish).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
