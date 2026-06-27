@@ -13,6 +13,7 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 import { displayValue } from '@/components/library/FilterPanel';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { YearRecap } from '@/components/profile/YearRecap';
+import { useLanguishing } from '@/features/reading/use-languishing';
 import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
@@ -121,6 +122,7 @@ export default function ProfileScreen() {
           <SuggestedShelvesSection items={items} userId={session?.user.id} />
         ) : null}
         {items.length > 0 ? <LoansSection items={items} /> : null}
+        <LanguishingSection userId={session?.user.id} />
         {items.length > 0 ? <DuplicatesSection items={items} /> : null}
 
         <ShareSection userId={session?.user.id} />
@@ -659,6 +661,54 @@ function LoansSection({ items }: { items: LibraryItem[] }) {
               >
                 <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
                   {t('profile.badgeLent')}
+                </Text>
+              </XStack>
+            </XStack>
+          </Pressable>
+        ))}
+      </YStack>
+    </YStack>
+  );
+}
+
+function LanguishingSection({ userId }: { userId: string | undefined }) {
+  const router = useRouter();
+  const { data: stuck } = useLanguishing(userId);
+  if (!stuck || stuck.length === 0) return null;
+  const duration = (days: number) =>
+    days >= 60 ? `depuis ${Math.round(days / 30)} mois` : `depuis ${days} j`;
+  return (
+    <YStack gap="$3" marginTop="$7">
+      <Label>Ça traîne</Label>
+      <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+        {stuck.length === 1
+          ? '1 lecture commencée il y a longtemps, jamais terminée'
+          : `${stuck.length} lectures commencées il y a longtemps, jamais terminées`}
+      </Text>
+      <YStack gap="$2">
+        {stuck.map((b) => (
+          <Pressable key={b.itemId} onPress={() => router.push(`/book/${b.itemId}`)}>
+            <XStack
+              alignItems="center"
+              gap="$2"
+              padding="$3"
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={12}
+            >
+              <Text fontFamily="$heading" fontSize={15} color="$color" flex={1} numberOfLines={1}>
+                {b.title}
+              </Text>
+              <XStack
+                backgroundColor={palette.terracotta}
+                borderRadius={999}
+                paddingHorizontal={8}
+                height={20}
+                alignItems="center"
+              >
+                <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                  {duration(b.days)}
                 </Text>
               </XStack>
             </XStack>
