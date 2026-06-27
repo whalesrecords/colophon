@@ -10,14 +10,14 @@
  */
 
 export const palette = {
-  // Surfaces — parchemin (light) / nuit (dark)
-  paper: '#F4EEE2', // app background (parchemin)
-  parchment: '#F4EEE2',
+  // Surfaces — parchemin (light) / nuit (dark). Warm canvas, lighter cards on top.
+  paper: '#EFE6D3', // app background (warm parchemin)
+  parchment: '#EFE6D3',
   nuit: '#221B14', // dark background
-  paperCard: '#FBF6EC', // cards / document surfaces
+  paperCard: '#FBF6EC', // cards / document surfaces (lighter, so they pop)
   white: '#FFFFFF', // bubbles, contrasted cards
-  surfaceWarm: '#F2EBDC',
-  surfaceWarmAlt: '#EBE2D0',
+  surfaceWarm: '#F1E9D9',
+  surfaceWarmAlt: '#E8DECB',
 
   // Hairlines (filet)
   hairline: '#EAE2D1', // primary

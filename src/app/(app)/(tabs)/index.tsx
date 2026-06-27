@@ -38,9 +38,18 @@ const SORTS: { key: SortKey; labelKey: 'library.sortAdded' | 'library.sortTitle'
   { key: 'rating', labelKey: 'library.sortRating' },
 ];
 
-type GridSize = 'S' | 'M' | 'L';
-const GRID_BASE: Record<GridSize, number> = { S: 84, M: 112, L: 150 };
-const ROW_COVER: Record<GridSize, number> = { S: 30, M: 40, L: 56 };
+type GridSize = 'XXS' | 'XS' | 'S' | 'M' | 'L';
+const GRID_SIZES: GridSize[] = ['XXS', 'XS', 'S', 'M', 'L'];
+const GRID_BASE: Record<GridSize, number> = { XXS: 50, XS: 66, S: 84, M: 112, L: 150 };
+const ROW_COVER: Record<GridSize, number> = { XXS: 20, XS: 26, S: 30, M: 40, L: 56 };
+
+// Colour-code shelves/genres by the four brand "tranches" (deterministic by name).
+const TRANCHES = [palette.brick, palette.prussian, palette.forest, palette.gold];
+function trancheColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return TRANCHES[h % TRANCHES.length];
+}
 
 function Label({ children }: { children: string }) {
   return (
@@ -237,7 +246,7 @@ export default function LibraryScreen() {
                 {wishlistCount > 0 ? (
                   <OwnershipChip
                     label={t('library.wishlistChip', { count: wishlistCount })}
-                    color={palette.sage}
+                    color={palette.gold}
                     active={filters.facets.ownership.includes('wishlist')}
                     onPress={() => toggleFacet('ownership', 'wishlist')}
                   />
@@ -268,6 +277,13 @@ export default function LibraryScreen() {
                         fontSize={13}
                         fontWeight="500"
                       >
+                        <YStack
+                          width={7}
+                          height={7}
+                          borderRadius={999}
+                          marginRight={6}
+                          backgroundColor={active ? palette.paper : trancheColor(sh.name)}
+                        />
                         {sh.name}
                       </Button>
                     );
@@ -495,18 +511,19 @@ function OwnershipChip({
 function SizeControl({ size, onSize }: { size: GridSize; onSize: (s: GridSize) => void }) {
   return (
     <XStack borderWidth={1} borderColor="$borderColor" borderRadius={12} overflow="hidden">
-      {(['S', 'M', 'L'] as GridSize[]).map((s) => (
+      {GRID_SIZES.map((s) => (
         <Button
           key={s}
           onPress={() => onSize(s)}
           height={36}
-          width={30}
+          paddingHorizontal="$2"
+          minWidth={30}
           padding={0}
           borderRadius={0}
           backgroundColor={size === s ? '$accent' : 'transparent'}
           color={size === s ? palette.paper : '$colorMuted'}
           fontFamily="$body"
-          fontSize={13}
+          fontSize={11}
           fontWeight="600"
         >
           {s}
