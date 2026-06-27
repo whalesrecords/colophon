@@ -71,16 +71,13 @@ export default function LibraryScreen() {
   const [group, setGroup] = useState(false);
   const [openSeries, setOpenSeries] = useState<SeriesGroup | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showView, setShowView] = useState(false);
   const { data: shelves } = useShelves(session?.user.id);
   const { data: seriesTotals } = useSeriesTotals(session?.user.id);
 
   const items = useMemo(() => data ?? [], [data]);
   const wishlistCount = useMemo(
     () => items.filter((i) => i.ownership === 'wishlist').length,
-    [items],
-  );
-  const borrowedCount = useMemo(
-    () => items.filter((i) => i.ownership === 'borrowed').length,
     [items],
   );
   const copies = useMemo(
@@ -168,22 +165,41 @@ export default function LibraryScreen() {
               focusStyle={{ borderColor: '$accent' }}
             />
 
-            <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
+            <XStack alignItems="center" gap="$2">
               <Button
                 onPress={() => setShowFilters((s) => !s)}
+                flex={1}
                 height={36}
                 paddingHorizontal="$3"
                 borderRadius={12}
                 borderWidth={1}
-                borderColor={nFilters ? '$accent' : '$borderColor'}
+                borderColor={nFilters || showFilters ? '$accent' : '$borderColor'}
                 backgroundColor="transparent"
-                color={nFilters ? '$accent' : '$colorSoft'}
+                color={nFilters || showFilters ? '$accent' : '$colorSoft'}
                 fontFamily="$body"
                 fontSize={14}
                 fontWeight="600"
               >
-                {nFilters ? t('library.filtersCount', { count: nFilters }) : t('library.filters')}
+                {nFilters ? `Filtres et tri · ${nFilters}` : 'Filtres et tri'}
               </Button>
+              <Button
+                onPress={() => setShowView((s) => !s)}
+                height={36}
+                paddingHorizontal="$3"
+                borderRadius={12}
+                borderWidth={1}
+                borderColor={showView ? '$accent' : '$borderColor'}
+                backgroundColor="transparent"
+                color={showView ? '$accent' : '$colorSoft'}
+                fontFamily="$body"
+                fontSize={14}
+                fontWeight="600"
+              >
+                Affichage
+              </Button>
+            </XStack>
+
+            {showView ? (
               <XStack gap="$2" alignItems="center" flexWrap="wrap">
                 {view === 'grid' ? (
                   <ViewToggle label={t('library.series')} active={group} onPress={() => setGroup((g) => !g)} />
@@ -192,54 +208,18 @@ export default function LibraryScreen() {
                 <ViewToggle label={t('library.viewGrid')} active={view === 'grid'} onPress={() => setView('grid')} />
                 <ViewToggle label={t('library.viewList')} active={view === 'list'} onPress={() => setView('list')} />
               </XStack>
-            </XStack>
-
-            {wishlistCount > 0 || borrowedCount > 0 ? (
-              <XStack gap="$2" flexWrap="wrap">
-                {wishlistCount > 0 ? (
-                  <OwnershipChip
-                    label={t('library.wishlistChip', { count: wishlistCount })}
-                    color={palette.sage}
-                    active={filters.facets.ownership.includes('wishlist')}
-                    onPress={() => toggleFacet('ownership', 'wishlist')}
-                  />
-                ) : null}
-                {borrowedCount > 0 ? (
-                  <OwnershipChip
-                    label={t('library.borrowedChip', { count: borrowedCount })}
-                    color={palette.aizome}
-                    active={filters.facets.ownership.includes('borrowed')}
-                    onPress={() => toggleFacet('ownership', 'borrowed')}
-                  />
-                ) : null}
-              </XStack>
             ) : null}
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <XStack gap="$2" alignItems="center" paddingRight="$4">
-                <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                  {t('library.sortLabel')}
-                </Text>
-                {SORTS.map((s) => (
-                  <Button
-                    key={s.key}
-                    onPress={() => setSort(s.key)}
-                    height={32}
-                    paddingHorizontal="$3"
-                    borderRadius={999}
-                    borderWidth={1}
-                    borderColor={sort === s.key ? '$accent' : '$borderColor'}
-                    backgroundColor={sort === s.key ? '$accent' : 'transparent'}
-                    color={sort === s.key ? palette.paper : '$colorMuted'}
-                    fontFamily="$body"
-                    fontSize={13}
-                    fontWeight="500"
-                  >
-                    {t(s.labelKey)}
-                  </Button>
-                ))}
+            {wishlistCount > 0 ? (
+              <XStack gap="$2" flexWrap="wrap">
+                <OwnershipChip
+                  label={t('library.wishlistChip', { count: wishlistCount })}
+                  color={palette.sage}
+                  active={filters.facets.ownership.includes('wishlist')}
+                  onPress={() => toggleFacet('ownership', 'wishlist')}
+                />
               </XStack>
-            </ScrollView>
+            ) : null}
 
             {shelves && shelves.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -296,7 +276,34 @@ export default function LibraryScreen() {
             ) : null}
 
             {showFilters ? (
-              <FilterPanel facets={facets} filters={filters} onToggle={toggleFacet} />
+              <YStack gap="$3">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <XStack gap="$2" alignItems="center" paddingRight="$4">
+                    <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                      {t('library.sortLabel')}
+                    </Text>
+                    {SORTS.map((s) => (
+                      <Button
+                        key={s.key}
+                        onPress={() => setSort(s.key)}
+                        height={32}
+                        paddingHorizontal="$3"
+                        borderRadius={999}
+                        borderWidth={1}
+                        borderColor={sort === s.key ? '$accent' : '$borderColor'}
+                        backgroundColor={sort === s.key ? '$accent' : 'transparent'}
+                        color={sort === s.key ? palette.paper : '$colorMuted'}
+                        fontFamily="$body"
+                        fontSize={13}
+                        fontWeight="500"
+                      >
+                        {t(s.labelKey)}
+                      </Button>
+                    ))}
+                  </XStack>
+                </ScrollView>
+                <FilterPanel facets={facets} filters={filters} onToggle={toggleFacet} />
+              </YStack>
             ) : null}
           </>
         ) : null}
