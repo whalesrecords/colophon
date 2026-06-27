@@ -131,7 +131,12 @@ identifiers: English.
   trade DB, since Google Books-with-key returns 0 future-dated manga volumes and
   manga-news blocks scraping); **circle agenda RSVP** (`circle_event_rsvps` +
   is_circle_member RLS, "Je viens/Peut-être/Non" + participant count) + **Google
-  Calendar** add-event links per rendez-vous.
+  Calendar** add-event links per rendez-vous; **in-app message notifications**
+  (`circle_members.last_read_at` + `circle_unread_counts`/`mark_circle_read` RPCs;
+  unread badge on the Échanges tab + per circle, live via a message-insert realtime
+  sub, cleared on opening a circle's chat — real OS push still needs a native build
+  + APNs/FCM); **password reset** ("Mot de passe oublié ?" + public `/reset-password`
+  recovery page).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
