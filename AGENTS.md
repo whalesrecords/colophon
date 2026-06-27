@@ -150,7 +150,10 @@ identifiers: English.
   (`ux-ergonomie` skill): FilterPanel → compact accordion (one collapsible row per
   facet); header consolidated to "Filtres et tri" (sort moved into the sheet) +
   "Affichage" (Séries/size/grille-liste collapsible), Empruntés folded into the
-  Possession facet → covers rise above the fold.
+  Possession facet → covers rise above the fold; **prioritized reading queue**
+  (`items.queue_position` + `use-reading-queue`; the to-read pile splits into an
+  ordered "Ma file" — prioritise/reorder ↑↓/remove — and the unordered "Pile à
+  lire"; `/queue` screen reached from a library "À lire · N" chip).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
