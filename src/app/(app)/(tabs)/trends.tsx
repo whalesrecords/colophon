@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ScrollView, useWindowDimensions } from 'react-native';
 import { Spinner, Text, XStack, YStack } from 'tamagui';
 
@@ -19,11 +20,14 @@ function Label({ children }: { children: string }) {
   );
 }
 
-function BarList({ entries }: { entries: TrendEntry[] }) {
+function BarList({ entries, collapse = 3 }: { entries: TrendEntry[]; collapse?: number }) {
+  const [expanded, setExpanded] = useState(false);
   const max = Math.max(1, ...entries.map((e) => e.count));
+  const shown = expanded ? entries : entries.slice(0, collapse);
+  const hidden = entries.length - collapse;
   return (
     <YStack gap="$3">
-      {entries.map((e) => (
+      {shown.map((e) => (
         <YStack key={e.label} gap="$1">
           <XStack justifyContent="space-between" alignItems="baseline">
             <Text fontFamily="$body" fontSize={14} color="$color" numberOfLines={1} flex={1}>
@@ -38,6 +42,19 @@ function BarList({ entries }: { entries: TrendEntry[] }) {
           </YStack>
         </YStack>
       ))}
+      {hidden > 0 ? (
+        <Text
+          onPress={() => setExpanded((v) => !v)}
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+          color="$accent"
+          paddingVertical="$1"
+          pressStyle={{ opacity: 0.6 }}
+        >
+          {expanded ? 'Réduire' : `… voir ${hidden} de plus`}
+        </Text>
+      ) : null}
     </YStack>
   );
 }

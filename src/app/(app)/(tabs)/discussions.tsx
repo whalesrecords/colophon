@@ -11,6 +11,7 @@ import {
   useJoinCircle,
   useUnreadCounts,
 } from '@/features/circles/use-circles';
+import { useFriendships } from '@/features/social/use-friends';
 import { palette } from '@/theme/tokens';
 
 function Label({ children }: { children: string }) {
@@ -47,6 +48,8 @@ export default function DiscussionsScreen() {
   const userId = session?.user.id;
   const { data: circles, isLoading } = useCircles(userId);
   const { data: unread } = useUnreadCounts(userId);
+  const { data: friendships } = useFriendships(userId);
+  const incomingCount = friendships?.incoming.length ?? 0;
   const createCircle = useCreateCircle(userId);
   const joinCircle = useJoinCircle(userId);
   const [name, setName] = useState('');
@@ -84,12 +87,30 @@ export default function DiscussionsScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
-        <YStack gap="$1" marginBottom="$5">
-          <Label>Échanges</Label>
-          <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
-            Cercles de lecture
-          </Text>
-        </YStack>
+        <XStack gap="$1" marginBottom="$5" alignItems="flex-end" justifyContent="space-between">
+          <YStack gap="$1">
+            <Label>Échanges</Label>
+            <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
+              Cercles de lecture
+            </Text>
+          </YStack>
+          <Button
+            onPress={() => router.push('/readers')}
+            height={34}
+            paddingHorizontal="$3"
+            borderRadius={999}
+            borderWidth={1}
+            borderColor="$accent"
+            backgroundColor="transparent"
+            color="$accent"
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="600"
+            pressStyle={{ opacity: 0.7 }}
+          >
+            {incomingCount > 0 ? `Lecteurs · ${incomingCount}` : 'Lecteurs'}
+          </Button>
+        </XStack>
 
         <YStack gap="$3" marginBottom="$6">
           <XStack gap="$2">

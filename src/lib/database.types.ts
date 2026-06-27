@@ -179,6 +179,27 @@ export type Database = {
         }
         Relationships: []
       }
+      friendships: {
+        Row: {
+          requester: string
+          addressee: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          requester: string
+          addressee: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          requester?: string
+          addressee?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       circle_members: {
         Row: {
           circle_id: string
@@ -738,6 +759,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: { circle_id: string; unread: number }[]
       }
+      are_friends: { Args: { a: string; b: string }; Returns: boolean }
+      suggested_readers: {
+        Args: { p_limit?: number }
+        Returns: {
+          user_id: string
+          display_name: string | null
+          pseudo: string | null
+          avatar_path: string | null
+          shared: number
+          sample_genres: string[] | null
+        }[]
+      }
+      reader_profile: { Args: { p_user: string }; Returns: Json }
       mark_circle_read: {
         Args: { p_circle: string }
         Returns: undefined
