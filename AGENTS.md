@@ -142,7 +142,15 @@ identifiers: English.
   aggregates + recent reads with no private notes; `/readers` discovery screen
   (from the Échanges header, incoming-request badge) + `/u/[id]` reader profile
   with an add/accept/friends friend-action button); **Tendances top-3** (Genres &
-  Auteurs collapse to 3 with a "… voir N de plus" expander).
+  Auteurs collapse to 3 with a "… voir N de plus" expander); **collection stats**
+  (sum of owned `purchase_price` = collection value, # priced, books bought this
+  year + amount spent — the MangaCollec-requested acquisition rhythm; columns
+  purchase_price/date/store already existed + wired in book detail, now surfaced in
+  a Profil "Collection" card shown only when prices are entered); **library UX pass**
+  (`ux-ergonomie` skill): FilterPanel → compact accordion (one collapsible row per
+  facet); header consolidated to "Filtres et tri" (sort moved into the sheet) +
+  "Affichage" (Séries/size/grille-liste collapsible), Empruntés folded into the
+  Possession facet → covers rise above the fold.
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL
