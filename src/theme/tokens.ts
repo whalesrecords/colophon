@@ -35,15 +35,16 @@ export const palette = {
   headerConcrete: '#8C8479',
   track: '#E4DAC7', // progress rail
 
-  // Brand accent — Espresso (the §, the nav, primary chrome)
-  espresso: '#2A1E15',
+  // Brand: deep Espresso for ink / § / logo; a warmer espresso for the interactive
+  // accent (buttons, active states) so it reads clearly as coffee-brown, not black.
+  espresso: '#2A1E15', // ink, §, logo, nav chrome
   espressoDeep: '#1A120C',
-  // `aizome*` kept as the accent token name (now Espresso) so existing refs hold.
-  aizome: '#2A1E15',
-  aizomeDeep: '#1A120C',
-  aizome08: 'rgba(42,30,21,0.08)',
-  aizome10: 'rgba(42,30,21,0.10)',
-  aizome16: 'rgba(42,30,21,0.16)',
+  // `aizome*` kept as the accent token name (now warm Espresso) so existing refs hold.
+  aizome: '#44301E', // interactive accent — warm espresso
+  aizomeDeep: '#2A1E15',
+  aizome08: 'rgba(68,48,30,0.08)',
+  aizome10: 'rgba(68,48,30,0.10)',
+  aizome16: 'rgba(68,48,30,0.16)',
 
   // The four tranches — one colour per shelf / collection (light · on-dark).
   brick: '#AE4133', // Romans · alertes douces
