@@ -776,6 +776,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_places: {
+        Row: {
+          favorite: boolean;
+          note: string | null;
+          place_city: string | null;
+          place_id: string;
+          place_name: string | null;
+          place_type: string | null;
+          rating: number | null;
+          updated_at: string;
+          user_id: string;
+          visited: boolean;
+        };
+        Insert: {
+          favorite?: boolean;
+          note?: string | null;
+          place_city?: string | null;
+          place_id: string;
+          place_name?: string | null;
+          place_type?: string | null;
+          rating?: number | null;
+          updated_at?: string;
+          user_id: string;
+          visited?: boolean;
+        };
+        Update: {
+          favorite?: boolean;
+          note?: string | null;
+          place_city?: string | null;
+          place_id?: string;
+          place_name?: string | null;
+          place_type?: string | null;
+          rating?: number | null;
+          updated_at?: string;
+          user_id?: string;
+          visited?: boolean;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
