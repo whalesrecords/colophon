@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
@@ -195,6 +195,21 @@ export default function MesLieuxScreen() {
   const { data: places, isLoading } = useMyPlaces(userId);
   const { setNote, remove } = useUserPlaceActions(userId);
 
+  const confirmRemove = (p: MyPlace) => {
+    const name = p.place_name ?? 'ce lieu';
+    const msg = p.note
+      ? `Retirer « ${name} » de vos lieux ? Votre anecdote sera aussi supprimée.`
+      : `Retirer « ${name} » de vos lieux ?`;
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm(msg)) remove.mutate(p.place_id);
+    } else {
+      Alert.alert('Retirer ce lieu', msg, [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Retirer', style: 'destructive', onPress: () => remove.mutate(p.place_id) },
+      ]);
+    }
+  };
+
   const favorites = (places ?? []).filter((p) => p.favorite);
   const visited = (places ?? []).filter((p) => p.visited && !p.favorite);
 
@@ -213,7 +228,7 @@ export default function MesLieuxScreen() {
           note,
         })
       }
-      onRemove={() => remove.mutate(p.place_id)}
+      onRemove={() => confirmRemove(p)}
     />
   );
 

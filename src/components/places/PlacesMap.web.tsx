@@ -346,17 +346,27 @@ function DetailSheet({
               </XStack>
             </YStack>
           ) : note ? (
-            <Text
-              onPress={() => setEditingNote(true)}
-              fontFamily="$body"
-              fontSize={13.5}
-              color="$colorSoft"
-              lineHeight={19}
-              fontStyle="italic"
-              {...({ style: { cursor: 'pointer' } } as any)}
-            >
-              « {note} » ✎
-            </Text>
+            <YStack gap="$1">
+              <Text
+                fontFamily="$body"
+                fontSize={13.5}
+                color="$colorSoft"
+                lineHeight={19}
+                fontStyle="italic"
+              >
+                « {note} »
+              </Text>
+              <Text
+                onPress={() => setEditingNote(true)}
+                fontFamily="$body"
+                fontSize={13}
+                fontWeight="600"
+                color="$accent"
+                {...({ style: { cursor: 'pointer' } } as any)}
+              >
+                Modifier l’anecdote
+              </Text>
+            </YStack>
           ) : (
             <Text
               onPress={() => setEditingNote(true)}
@@ -640,6 +650,40 @@ export function PlacesMap() {
             <Text fontFamily="$body" color="$colorMuted">
               {error}
             </Text>
+          </YStack>
+        ) : null}
+
+        {!error && (mineFav || mineVisited) && count === 0 ? (
+          <YStack
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            alignItems="center"
+            justifyContent="center"
+            paddingHorizontal="$6"
+            {...({ style: { zIndex: 500, pointerEvents: 'none' } } as any)}
+          >
+            <YStack
+              backgroundColor="$background"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={14}
+              padding="$4"
+              maxWidth={320}
+            >
+              <Text
+                fontFamily="$body"
+                fontSize={14}
+                color="$colorSoft"
+                textAlign="center"
+                lineHeight={20}
+              >
+                Aucun lieu ici dans votre sélection. Touchez un lieu sur la carte pour l’ajouter à
+                vos coups de cœur ou aux lieux visités.
+              </Text>
+            </YStack>
           </YStack>
         ) : null}
 
