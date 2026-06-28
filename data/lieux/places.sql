@@ -3,7 +3,7 @@
 
 create table if not exists public.places (
   id            text primary key,
-  type          text not null check (type in ('librairie','festival','cafe_philo','cercle_lecture')),
+  type          text not null check (type in ('librairie','festival','cafe_philo','cercle_lecture','atelier_ecriture')),
   name          text not null,
   description   text,
   address       text,
@@ -16,6 +16,8 @@ create table if not exists public.places (
   website       text,
   email         text,
   period        text,
+  specialty     text,        -- manga, jeunesse, editeur, rencontres (séparés par des virgules)
+  events_url    text,        -- agenda des rencontres d'auteurs (librairies)
   precision     text,
   source        text,
   source_ref    text,
@@ -24,6 +26,7 @@ create table if not exists public.places (
 
 create index if not exists places_type_idx on public.places (type);
 create index if not exists places_geo_idx  on public.places (latitude, longitude);
+create index if not exists places_specialty_idx on public.places (specialty);
 
 -- Lecture publique (données ouvertes) ; écriture réservée au service role.
 alter table public.places enable row level security;

@@ -47,3 +47,6 @@ design/ui envato/
 .vercel
 .env*
 /dist
+
+# duplicate of data/lieux (source CSVs live there)
+/lieux/
