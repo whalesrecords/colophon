@@ -15,6 +15,20 @@ function greeting(hour: number): { hello: string; moment: string } {
 }
 
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const MONTHS = [
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
+];
 
 function firstName(name: string | null | undefined, fallback: string | undefined): string {
   const n = (name || fallback || '').trim();
@@ -182,8 +196,7 @@ interface LibraryHomeProps {
   currentRead: CurrentRead | null;
   reading: LibraryItem[];
   wishlist: LibraryItem[];
-  hour: number;
-  weekday: number;
+  now: Date;
   onOpenBook: (id: string) => void;
   onSeeWishlist: () => void;
 }
@@ -196,12 +209,12 @@ export function LibraryHome({
   currentRead,
   reading,
   wishlist,
-  hour,
-  weekday,
+  now,
   onOpenBook,
   onSeeWishlist,
 }: LibraryHomeProps) {
-  const g = greeting(hour);
+  const g = greeting(now.getHours());
+  const dateLabel = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`;
   const who = firstName(name, emailFallback);
   const initial = who.slice(0, 1).toUpperCase();
   // "On continue" excludes the hero book to avoid showing it twice.
@@ -219,7 +232,7 @@ export function LibraryHome({
             textTransform="uppercase"
             color="$colorMuted"
           >
-            {DAYS[weekday]} · {g.moment}
+            {dateLabel}
           </Text>
           <Text fontFamily="$heading" fontSize={32} fontWeight="500" color="$color">
             {g.hello}, {who}

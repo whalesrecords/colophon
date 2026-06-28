@@ -51,6 +51,9 @@ const SORTS: {
   { key: 'rating', labelKey: 'library.sortRating' },
 ];
 
+/** How much text to show under a cover — covers shrink, labels drop. */
+type LabelMode = 'full' | 'title' | 'none';
+
 type GridSize = 'XXS' | 'XS' | 'S' | 'M' | 'L';
 const GRID_SIZES: GridSize[] = ['XXS', 'XS', 'S', 'M', 'L'];
 const GRID_BASE: Record<GridSize, number> = { XXS: 50, XS: 66, S: 84, M: 112, L: 150 };
@@ -137,6 +140,8 @@ export default function LibraryScreen() {
   const contentWidth = Math.min(width, 1200) - H_PADDING * 2;
   const cols = Math.max(1, Math.floor((contentWidth + GAP) / (GRID_BASE[size] + GAP)));
   const coverWidth = Math.floor((contentWidth - GAP * (cols - 1)) / cols);
+  // Small covers have no room for author / "Série · N tomes" — show less, pack tighter.
+  const labelMode: LabelMode = size === 'XXS' ? 'none' : size === 'XS' ? 'title' : 'full';
 
   return (
     <Screen>
@@ -149,8 +154,7 @@ export default function LibraryScreen() {
               currentRead={currentRead ?? null}
               reading={readingItems}
               wishlist={wishlistItems}
-              hour={now.getHours()}
-              weekday={now.getDay()}
+              now={now}
               onOpenBook={(id) => router.push(`/book/${id}`)}
               onSeeWishlist={() => toggleFacet('ownership', 'wishlist')}
             />
@@ -447,6 +451,7 @@ export default function LibraryScreen() {
                     group={g}
                     total={seriesTotals?.get(g.key)}
                     width={coverWidth}
+                    labels={labelMode}
                     onPress={() => setOpenSeries(g)}
                   />
                 ))}
@@ -456,6 +461,7 @@ export default function LibraryScreen() {
                     item={item}
                     width={coverWidth}
                     copies={copiesOf(item)}
+                    labels={labelMode}
                   />
                 ))}
               </XStack>
@@ -523,6 +529,7 @@ export default function LibraryScreen() {
                     item={item}
                     width={coverWidth}
                     copies={copiesOf(item)}
+                    labels="full"
                   />
                 ))}
               </XStack>
@@ -639,11 +646,13 @@ function SeriesCard({
   group,
   total,
   width,
+  labels,
   onPress,
 }: {
   group: SeriesGroup;
   total?: number;
   width: number;
+  labels: LabelMode;
   onPress: () => void;
 }) {
   const { t } = useT();
@@ -693,16 +702,20 @@ function SeriesCard({
           </XStack>
         </YStack>
       </Pressable>
-      <YStack gap={2}>
-        <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
-          {group.name}
-        </Text>
-        <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-          {showTotal
-            ? `${t('library.seriesProgress', { owned, total: total as number })}${complete ? ' ✓' : ''}`
-            : t('library.seriesVolumes', { count: owned })}
-        </Text>
-      </YStack>
+      {labels !== 'none' ? (
+        <YStack gap={2}>
+          <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
+            {group.name}
+          </Text>
+          {labels === 'full' ? (
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+              {showTotal
+                ? `${t('library.seriesProgress', { owned, total: total as number })}${complete ? ' ✓' : ''}`
+                : t('library.seriesVolumes', { count: owned })}
+            </Text>
+          ) : null}
+        </YStack>
+      ) : null}
     </YStack>
   );
 }
@@ -772,10 +785,12 @@ function LibraryCard({
   item,
   width,
   copies,
+  labels,
 }: {
   item: LibraryItem;
   width: number;
   copies: number;
+  labels: LabelMode;
 }) {
   const { t } = useT();
   const router = useRouter();
@@ -797,16 +812,18 @@ function LibraryCard({
         {item.lentTo ? <LentBadge /> : null}
         <OwnershipBadge ownership={item.ownership} />
       </YStack>
-      <YStack gap={2}>
-        <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
-          {item.book?.title ?? t('library.untitled')}
-        </Text>
-        {item.book?.authors?.[0] ? (
-          <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
-            {item.book.authors[0]}
+      {labels !== 'none' ? (
+        <YStack gap={2}>
+          <Text fontFamily="$heading" fontSize={13} color="$color" numberOfLines={1}>
+            {item.book?.title ?? t('library.untitled')}
           </Text>
-        ) : null}
-      </YStack>
+          {labels === 'full' && item.book?.authors?.[0] ? (
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+              {item.book.authors[0]}
+            </Text>
+          ) : null}
+        </YStack>
+      ) : null}
     </YStack>
   );
 }
