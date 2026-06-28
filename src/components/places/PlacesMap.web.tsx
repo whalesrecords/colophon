@@ -15,15 +15,18 @@ const CLUSTER_THEME =
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css';
 const CLUSTER_JS = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js';
 
+// A glyph per type gives a non-colour cue (accessibility — types aren't told apart
+// by colour alone) and makes markers legible on the map.
 const TYPES = [
-  { key: 'librairie', label: 'Librairies', color: palette.brick },
-  { key: 'festival', label: 'Festivals', color: palette.gold },
-  { key: 'cafe_philo', label: 'Cafés philo', color: palette.prussian },
-  { key: 'cercle_lecture', label: 'Cercles', color: palette.forest },
-  { key: 'atelier_ecriture', label: 'Ateliers', color: '#6B5B95' },
+  { key: 'librairie', label: 'Librairies', color: palette.brick, glyph: '📚' },
+  { key: 'festival', label: 'Festivals', color: palette.gold, glyph: '🎪' },
+  { key: 'cafe_philo', label: 'Cafés philo', color: palette.prussian, glyph: '☕' },
+  { key: 'cercle_lecture', label: 'Cercles', color: palette.forest, glyph: '👥' },
+  { key: 'atelier_ecriture', label: 'Ateliers', color: '#6B5B95', glyph: '✍️' },
 ] as const;
 const COLOR: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.color]));
 const TYPE_LABEL: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.label]));
+const GLYPH: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.glyph]));
 
 // Librairie specialties (a librairie can have several, comma-separated).
 const SPECIALTIES = [
@@ -138,8 +141,10 @@ function DetailSheet({
     >
       <XStack alignItems="flex-start" gap="$3">
         <YStack flex={1} gap="$1">
-          <XStack alignItems="center" gap="$2">
-            <YStack width={10} height={10} borderRadius={999} backgroundColor={color} />
+          <XStack alignItems="center" gap="$1.5">
+            <Text fontSize={13} lineHeight={15}>
+              {GLYPH[place.type] ?? '•'}
+            </Text>
             <Text
               fontFamily="$body"
               fontSize={11}
@@ -437,11 +442,12 @@ export function PlacesMap() {
       const [lng, lat] = f.geometry.coordinates;
       if (typeof lat !== 'number' || typeof lng !== 'number') continue;
       const color = COLOR[p.type] ?? palette.ink;
+      const glyph = GLYPH[p.type] ?? '•';
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid #FBF6EC;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>`,
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
+        html: `<div style="width:22px;height:22px;border-radius:50%;background:#FBF6EC;border:2px solid ${color};box-shadow:0 1px 3px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1">${glyph}</div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
       });
       const m = L.marker([lat, lng], { icon });
       m.on('click', () =>
@@ -526,12 +532,9 @@ export function PlacesMap() {
               backgroundColor={on ? t.color : 'transparent'}
               {...({ style: { cursor: 'pointer' } } as any)}
             >
-              <YStack
-                width={8}
-                height={8}
-                borderRadius={999}
-                backgroundColor={on ? palette.paper : t.color}
-              />
+              <Text fontSize={12} lineHeight={14}>
+                {t.glyph}
+              </Text>
               <Text
                 fontFamily="$body"
                 fontSize={12.5}
