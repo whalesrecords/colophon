@@ -222,17 +222,19 @@ export default function CircleScreen() {
         >
           Inviter
         </Button>
-        <Button
-          onPress={onLeave}
-          chromeless
-          height={32}
-          paddingHorizontal="$2"
-          color="$colorMuted"
-          fontFamily="$body"
-          fontSize={13}
-        >
-          Quitter
-        </Button>
+        {!isOwner ? (
+          <Button
+            onPress={onLeave}
+            chromeless
+            height={32}
+            paddingHorizontal="$2"
+            color="$colorMuted"
+            fontFamily="$body"
+            fontSize={13}
+          >
+            Quitter
+          </Button>
+        ) : null}
       </XStack>
 
       <XStack borderBottomColor="$borderColor" borderBottomWidth={1}>
