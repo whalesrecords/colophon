@@ -4,15 +4,20 @@ import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
+import { Avatar, AvatarStack } from '@/components/social/Avatar';
 import { useAuth } from '@/features/auth/auth-context';
 import {
+  type CircleSummary,
   useCircles,
   useCreateCircle,
   useJoinCircle,
   useUnreadCounts,
 } from '@/features/circles/use-circles';
-import { useFriendships } from '@/features/social/use-friends';
+import { type FriendPerson, useFriendships } from '@/features/social/use-friends';
 import { palette } from '@/theme/tokens';
+
+/** Each circle gets one of the four "tranches" as its accent, by position. */
+const TRANCHES = [palette.brick, palette.prussian, palette.forest, palette.gold];
 
 function Label({ children }: { children: string }) {
   return (
@@ -41,6 +46,125 @@ const inputProps = {
   fontSize: 14,
   color: '$color' as const,
 };
+
+function FriendsRow({
+  friends,
+  incoming,
+  onOpenReaders,
+  onOpenFriend,
+}: {
+  friends: FriendPerson[];
+  incoming: number;
+  onOpenReaders: () => void;
+  onOpenFriend: (id: string) => void;
+}) {
+  return (
+    <YStack gap="$3" marginBottom="$6">
+      <XStack alignItems="center" justifyContent="space-between">
+        <Label>Mes amis</Label>
+        <Text
+          onPress={onOpenReaders}
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+          color="$accent"
+          pressStyle={{ opacity: 0.6 }}
+        >
+          {incoming > 0 ? `Demandes · ${incoming}` : 'Découvrir'}
+        </Text>
+      </XStack>
+
+      {friends.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <XStack gap="$4" paddingRight="$4">
+            {friends.map((f) => (
+              <Pressable key={f.user_id} onPress={() => onOpenFriend(f.user_id)}>
+                <YStack alignItems="center" gap="$1" width={64}>
+                  <Avatar path={f.avatar_path} name={f.display_name} pseudo={f.pseudo} size={56} />
+                  <Text
+                    fontFamily="$body"
+                    fontSize={12}
+                    color="$colorSoft"
+                    numberOfLines={1}
+                    textAlign="center"
+                  >
+                    {f.display_name || f.pseudo || 'Lecteur'}
+                  </Text>
+                </YStack>
+              </Pressable>
+            ))}
+          </XStack>
+        </ScrollView>
+      ) : (
+        <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
+          Pas encore d'amis. Découvrez des lecteurs qui partagent vos goûts.
+        </Text>
+      )}
+    </YStack>
+  );
+}
+
+function CircleCard({
+  circle,
+  accent,
+  unread,
+  onPress,
+}: {
+  circle: CircleSummary;
+  accent: string;
+  unread: number;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress}>
+      <XStack
+        backgroundColor="$backgroundStrong"
+        borderColor="$borderColor"
+        borderWidth={1}
+        borderRadius={14}
+        overflow="hidden"
+      >
+        {/* tranche accent — what makes each circle read differently */}
+        <YStack width={6} backgroundColor={accent} />
+        <YStack flex={1} padding="$4" gap="$3">
+          <XStack alignItems="center" gap="$3">
+            <YStack flex={1} gap="$1">
+              <Text fontFamily="$heading" fontSize={18} color="$color" numberOfLines={1}>
+                {circle.name}
+              </Text>
+              <Text fontFamily="$body" fontSize={12.5} color="$colorMuted">
+                {circle.memberCount} membre{circle.memberCount > 1 ? 's' : ''} · code{' '}
+                {circle.invite_code}
+              </Text>
+            </YStack>
+            {unread > 0 ? (
+              <XStack
+                minWidth={22}
+                height={22}
+                paddingHorizontal={6}
+                borderRadius={999}
+                backgroundColor={palette.brick}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Text fontFamily="$body" fontSize={12} fontWeight="700" color={palette.paper}>
+                  {unread}
+                </Text>
+              </XStack>
+            ) : null}
+            <Text fontFamily="$heading" fontSize={22} color="$colorMuted">
+              ›
+            </Text>
+          </XStack>
+
+          {circle.members.length > 0 ? (
+            <AvatarStack people={circle.members} max={5} size={30} />
+          ) : null}
+        </YStack>
+      </XStack>
+    </Pressable>
+  );
+}
 
 export default function DiscussionsScreen() {
   const router = useRouter();
@@ -93,7 +217,7 @@ export default function DiscussionsScreen() {
           <YStack gap="$1">
             <Label>Échanges</Label>
             <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
-              Cercles de lecture
+              Amis & cercles
             </Text>
           </YStack>
           <Button
@@ -114,7 +238,15 @@ export default function DiscussionsScreen() {
           </Button>
         </XStack>
 
-        <YStack gap="$3" marginBottom="$6">
+        <FriendsRow
+          friends={friendships?.friends ?? []}
+          incoming={incomingCount}
+          onOpenReaders={() => router.push('/readers')}
+          onOpenFriend={(id) => router.push(`/u/${id}`)}
+        />
+
+        <YStack gap="$3" marginBottom="$5">
+          <Label>Nouveau cercle</Label>
           <XStack gap="$2">
             <Input
               flex={1}
@@ -171,60 +303,31 @@ export default function DiscussionsScreen() {
           ) : null}
         </YStack>
 
-        {isLoading ? (
-          <YStack alignItems="center" paddingVertical="$8">
-            <Spinner color="$accent" size="large" />
-          </YStack>
-        ) : circles && circles.length > 0 ? (
-          <YStack gap="$2">
-            {circles.map((circle) => (
-              <Pressable key={circle.id} onPress={() => router.push(`/circle/${circle.id}`)}>
-                <XStack
-                  alignItems="center"
-                  gap="$3"
-                  backgroundColor="$backgroundStrong"
-                  borderColor="$borderColor"
-                  borderWidth={1}
-                  borderRadius={12}
-                  padding="$4"
-                >
-                  <YStack flex={1} gap="$1">
-                    <Text fontFamily="$heading" fontSize={17} color="$color">
-                      {circle.name}
-                    </Text>
-                    <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                      {circle.memberCount} membre{circle.memberCount > 1 ? 's' : ''} · code{' '}
-                      {circle.invite_code}
-                    </Text>
-                  </YStack>
-                  {(unread?.get(circle.id) ?? 0) > 0 ? (
-                    <XStack
-                      minWidth={22}
-                      height={22}
-                      paddingHorizontal={6}
-                      borderRadius={999}
-                      backgroundColor={palette.terracotta}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Text fontFamily="$body" fontSize={12} fontWeight="700" color={palette.paper}>
-                        {unread?.get(circle.id)}
-                      </Text>
-                    </XStack>
-                  ) : null}
-                  <Text fontFamily="$heading" fontSize={22} color="$colorMuted">
-                    ›
-                  </Text>
-                </XStack>
-              </Pressable>
-            ))}
-          </YStack>
-        ) : (
-          <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
-            Aucun cercle pour le moment. Créez-en un, ou rejoignez celui d'un ami avec son code
-            d'invitation.
-          </Text>
-        )}
+        <Label>Mes cercles</Label>
+        <YStack marginTop="$3">
+          {isLoading ? (
+            <YStack alignItems="center" paddingVertical="$8">
+              <Spinner color="$accent" size="large" />
+            </YStack>
+          ) : circles && circles.length > 0 ? (
+            <YStack gap="$3">
+              {circles.map((circle, i) => (
+                <CircleCard
+                  key={circle.id}
+                  circle={circle}
+                  accent={TRANCHES[i % TRANCHES.length]}
+                  unread={unread?.get(circle.id) ?? 0}
+                  onPress={() => router.push(`/circle/${circle.id}`)}
+                />
+              ))}
+            </YStack>
+          ) : (
+            <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
+              Aucun cercle pour le moment. Créez-en un, ou rejoignez celui d'un ami avec son code
+              d'invitation.
+            </Text>
+          )}
+        </YStack>
       </ScrollView>
     </Screen>
   );

@@ -3,11 +3,18 @@ import { useEffect, useRef } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
+export interface CircleMemberPreview {
+  user_id: string;
+  display_name: string | null;
+  avatar_path: string | null;
+}
+
 export interface CircleSummary {
   id: string;
   name: string;
   invite_code: string;
   memberCount: number;
+  members: CircleMemberPreview[]; // for the avatar stack in the Échanges overview
 }
 
 export interface Circle {
@@ -37,14 +44,43 @@ export function useCircles(userId: string | undefined) {
     queryFn: async (): Promise<CircleSummary[]> => {
       const { data, error } = await supabase
         .from('circles')
-        .select('id, name, invite_code, created_at, members:circle_members(count)')
+        .select(
+          'id, name, invite_code, created_at, members:circle_members(count), member_rows:circle_members(user_id, display_name, joined_at)',
+        )
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data ?? []).map((c) => ({
+
+      const rows = (data ?? []) as unknown as {
+        id: string;
+        name: string;
+        invite_code: string;
+        members: { count: number }[] | null;
+        member_rows: { user_id: string; display_name: string | null; joined_at: string }[] | null;
+      }[];
+
+      // Resolve member avatars in one batch (profiles are SELECT-able to authenticated).
+      const ids = [...new Set(rows.flatMap((c) => (c.member_rows ?? []).map((m) => m.user_id)))];
+      const avatarById = new Map<string, string | null>();
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('user_id, avatar_path')
+          .in('user_id', ids);
+        for (const p of profs ?? []) avatarById.set(p.user_id, p.avatar_path);
+      }
+
+      return rows.map((c) => ({
         id: c.id,
         name: c.name,
         invite_code: c.invite_code,
-        memberCount: (c.members as unknown as { count: number }[])?.[0]?.count ?? 0,
+        memberCount: c.members?.[0]?.count ?? 0,
+        members: (c.member_rows ?? [])
+          .sort((a, b) => a.joined_at.localeCompare(b.joined_at))
+          .map((m) => ({
+            user_id: m.user_id,
+            display_name: m.display_name,
+            avatar_path: avatarById.get(m.user_id) ?? null,
+          })),
       }));
     },
   });
