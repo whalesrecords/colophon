@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Text, XStack, YStack } from 'tamagui';
+import { Button, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { useAuth } from '@/features/auth/auth-context';
 import { useUserPlaceActions, useUserPlaces } from '@/features/places/use-places';
@@ -104,18 +104,23 @@ function DetailSheet({
   place,
   mark,
   onToggle,
+  onSaveNote,
   onClose,
   signedIn,
 }: {
   place: SelectedPlace;
-  mark: { favorite: boolean; visited: boolean } | undefined;
+  mark: { favorite: boolean; visited: boolean; note: string | null } | undefined;
   onToggle: (field: 'favorite' | 'visited') => void;
+  onSaveNote: (note: string) => void;
   onClose: () => void;
   signedIn: boolean;
 }) {
   const color = COLOR[place.type] ?? palette.ink;
   const fav = mark?.favorite ?? false;
   const visited = mark?.visited ?? false;
+  const note = mark?.note ?? '';
+  const [editingNote, setEditingNote] = useState(false);
+  const [draft, setDraft] = useState(note);
   return (
     <YStack
       position="absolute"
@@ -257,38 +262,114 @@ function DetailSheet({
       </XStack>
 
       {signedIn ? (
-        <XStack gap="$2">
-          <Button
-            onPress={() => onToggle('favorite')}
-            flex={1}
-            backgroundColor={fav ? palette.brick : 'transparent'}
-            borderColor={fav ? palette.brick : '$borderColor'}
-            borderWidth={1}
-            color={fav ? palette.paper : '$colorSoft'}
-            borderRadius={12}
-            height={44}
-            fontFamily="$body"
-            fontWeight="600"
-            fontSize={14}
-          >
-            {fav ? '♥ Coup de cœur' : '♡ Coup de cœur'}
-          </Button>
-          <Button
-            onPress={() => onToggle('visited')}
-            flex={1}
-            backgroundColor={visited ? palette.forest : 'transparent'}
-            borderColor={visited ? palette.forest : '$borderColor'}
-            borderWidth={1}
-            color={visited ? palette.paper : '$colorSoft'}
-            borderRadius={12}
-            height={44}
-            fontFamily="$body"
-            fontWeight="600"
-            fontSize={14}
-          >
-            {visited ? '✓ Visité' : 'Visité ?'}
-          </Button>
-        </XStack>
+        <YStack gap="$2">
+          <XStack gap="$2">
+            <Button
+              onPress={() => onToggle('favorite')}
+              flex={1}
+              backgroundColor={fav ? palette.brick : 'transparent'}
+              borderColor={fav ? palette.brick : '$borderColor'}
+              borderWidth={1}
+              color={fav ? palette.paper : '$colorSoft'}
+              borderRadius={12}
+              height={44}
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={14}
+            >
+              {fav ? '♥ Coup de cœur' : '♡ Coup de cœur'}
+            </Button>
+            <Button
+              onPress={() => onToggle('visited')}
+              flex={1}
+              backgroundColor={visited ? palette.forest : 'transparent'}
+              borderColor={visited ? palette.forest : '$borderColor'}
+              borderWidth={1}
+              color={visited ? palette.paper : '$colorSoft'}
+              borderRadius={12}
+              height={44}
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={14}
+            >
+              {visited ? '✓ Visité' : 'Visité ?'}
+            </Button>
+          </XStack>
+
+          {editingNote ? (
+            <YStack gap="$2">
+              <TextArea
+                value={draft}
+                onChangeText={setDraft}
+                placeholder="Votre anecdote sur ce lieu…"
+                placeholderTextColor="$concreteLight"
+                backgroundColor="$backgroundStrong"
+                borderColor="$borderColor"
+                borderWidth={1}
+                borderRadius={10}
+                minHeight={66}
+                padding="$2"
+                fontFamily="$body"
+                fontSize={14}
+                color="$color"
+              />
+              <XStack gap="$2">
+                <Button
+                  onPress={() => {
+                    onSaveNote(draft);
+                    setEditingNote(false);
+                  }}
+                  backgroundColor="$accent"
+                  color={palette.paper}
+                  borderRadius={10}
+                  height={36}
+                  paddingHorizontal="$4"
+                  fontFamily="$body"
+                  fontWeight="600"
+                  fontSize={13}
+                >
+                  Enregistrer
+                </Button>
+                <Button
+                  onPress={() => {
+                    setDraft(note);
+                    setEditingNote(false);
+                  }}
+                  chromeless
+                  height={36}
+                  color="$colorMuted"
+                  fontFamily="$body"
+                  fontSize={13}
+                >
+                  Annuler
+                </Button>
+              </XStack>
+            </YStack>
+          ) : note ? (
+            <Text
+              onPress={() => setEditingNote(true)}
+              fontFamily="$body"
+              fontSize={13.5}
+              color="$colorSoft"
+              lineHeight={19}
+              fontStyle="italic"
+              {...({ style: { cursor: 'pointer' } } as any)}
+            >
+              « {note} » ✎
+            </Text>
+          ) : (
+            <Text
+              onPress={() => setEditingNote(true)}
+              fontFamily="$body"
+              fontSize={13}
+              fontWeight="600"
+              color="$accent"
+              {...({ style: { cursor: 'pointer' } } as any)}
+            >
+              + Ajouter une anecdote
+            </Text>
+          )}
+        </YStack>
       ) : (
         <Text fontFamily="$body" fontSize={12.5} color="$colorMuted">
           Connectez-vous pour enregistrer vos coups de cœur et lieux visités.
@@ -302,7 +383,7 @@ export function PlacesMap() {
   const { session } = useAuth();
   const userId = session?.user.id;
   const { data: marks } = useUserPlaces(userId);
-  const { toggle } = useUserPlaceActions(userId);
+  const { toggle, setNote } = useUserPlaceActions(userId);
 
   const hostRef = useRef<HTMLElement | null>(null);
   const mapRef = useRef<any>(null);
@@ -512,10 +593,22 @@ export function PlacesMap() {
 
         {selected ? (
           <DetailSheet
+            key={selected.id}
             place={selected}
             mark={marks?.get(selected.id)}
             signedIn={!!userId}
             onToggle={(field) => toggle.mutate({ place: selected, field })}
+            onSaveNote={(note) =>
+              setNote.mutate({
+                place: {
+                  id: selected.id,
+                  type: selected.type,
+                  name: selected.name,
+                  city: selected.city,
+                },
+                note,
+              })
+            }
             onClose={() => setSelected(null)}
           />
         ) : null}

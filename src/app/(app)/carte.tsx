@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, XStack, YStack } from 'tamagui';
+import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { PlacesMap } from '@/components/places/PlacesMap';
 
@@ -31,6 +31,22 @@ export default function CarteScreen() {
             Librairies · festivals · cafés philo · cercles
           </Text>
         </YStack>
+        <Button
+          onPress={() => router.push('/mes-lieux')}
+          height={32}
+          paddingHorizontal="$3"
+          borderRadius={999}
+          borderWidth={1}
+          borderColor="$accent"
+          backgroundColor="transparent"
+          color="$accent"
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+          pressStyle={{ opacity: 0.7 }}
+        >
+          ♥ Mes lieux
+        </Button>
       </XStack>
       <PlacesMap />
     </YStack>
