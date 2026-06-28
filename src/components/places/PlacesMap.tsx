@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Linking, Platform, View } from 'react-native';
-import MapView, { Marker, type Region } from 'react-native-maps';
+import { Linking } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { Button, Text, TextArea, XStack, YStack } from 'tamagui';
 
@@ -379,161 +378,9 @@ interface MapImplProps {
   onSelect: (p: NativePlace) => void;
 }
 
-const FILTER_TYPES = [
-  { key: 'librairie', label: 'Librairies' },
-  { key: 'festival', label: 'Festivals' },
-  { key: 'cafe_philo', label: 'Cafés philo' },
-  { key: 'cercle_lecture', label: 'Cercles' },
-  { key: 'atelier_ecriture', label: 'Ateliers' },
-] as const;
-
-function placeFromProps(p: Record<string, string>, lat: number, lng: number): NativePlace {
-  return {
-    id: p.id,
-    ptype: p.type,
-    name: p.name || 'Lieu',
-    city: p.city || '',
-    postal_code: p.postal_code || '',
-    website: p.website || '',
-    period: p.period || '',
-    specialty: p.specialty || '',
-    events_url: p.events_url || '',
-    lat,
-    lng,
-  };
-}
-
-/** iOS: a real Apple Maps map (no API key). Markers are viewport-filtered + capped
- *  for performance; colour-coded by type, with a chip filter bar. */
-function AppleMap({ favIds, visIds, onSelect }: MapImplProps) {
-  const [feats, setFeats] = useState<
-    { properties: Record<string, string>; geometry: { coordinates: [number, number] } }[]
-  >([]);
-  const [region, setRegion] = useState<Region>({
-    latitude: 46.6,
-    longitude: 2.4,
-    latitudeDelta: 9,
-    longitudeDelta: 9,
-  });
-  const [active, setActive] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(FILTER_TYPES.map((t) => [t.key, true])),
-  );
-  const [mineFav, setMineFav] = useState(false);
-  const [mineVis, setMineVis] = useState(false);
-  const favSet = useMemo(() => new Set(favIds), [favIds]);
-  const visSet = useMemo(() => new Set(visIds), [visIds]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void fetch(GEOJSON_URL)
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled) setFeats(d.features ?? []);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const visible = useMemo(() => {
-    const minLat = region.latitude - region.latitudeDelta / 2;
-    const maxLat = region.latitude + region.latitudeDelta / 2;
-    const minLng = region.longitude - region.longitudeDelta / 2;
-    const maxLng = region.longitude + region.longitudeDelta / 2;
-    const mineOnly = mineFav || mineVis;
-    const out: { p: Record<string, string>; lat: number; lng: number }[] = [];
-    for (const f of feats) {
-      const p = f.properties;
-      if (!active[p.type]) continue;
-      if (mineOnly && !((mineFav && favSet.has(p.id)) || (mineVis && visSet.has(p.id)))) continue;
-      const lng = f.geometry.coordinates[0];
-      const lat = f.geometry.coordinates[1];
-      if (lat < minLat || lat > maxLat || lng < minLng || lng > maxLng) continue;
-      out.push({ p, lat, lng });
-      if (out.length >= 250) break;
-    }
-    return out;
-  }, [feats, region, active, mineFav, mineVis, favSet, visSet]);
-
-  const chip = (on: boolean, color: string) => ({
-    alignItems: 'center' as const,
-    height: 28,
-    paddingHorizontal: 9,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: on ? color : '#DED4BF',
-    backgroundColor: on ? color : '#FBF6EC',
-  });
-
-  return (
-    <YStack flex={1}>
-      <MapView style={{ flex: 1 }} initialRegion={region} onRegionChangeComplete={setRegion}>
-        {visible.map(({ p, lat, lng }) => (
-          <Marker
-            key={p.id}
-            coordinate={{ latitude: lat, longitude: lng }}
-            pinColor={TYPE_META[p.type]?.color ?? palette.ink}
-            onPress={() => onSelect(placeFromProps(p, lat, lng))}
-          />
-        ))}
-      </MapView>
-
-      <View style={{ position: 'absolute', top: 8, left: 8, right: 8 }}>
-        <XStack gap={6} flexWrap="wrap">
-          {FILTER_TYPES.map((t) => {
-            const on = active[t.key];
-            const color = TYPE_META[t.key].color;
-            return (
-              <XStack
-                key={t.key}
-                onPress={() => setActive((a) => ({ ...a, [t.key]: !a[t.key] }))}
-                gap={4}
-                {...chip(on, color)}
-              >
-                <Text fontSize={12}>{TYPE_META[t.key].glyph}</Text>
-                <Text
-                  fontFamily="$body"
-                  fontSize={11.5}
-                  fontWeight="600"
-                  color={on ? '#fff' : '#6E6A62'}
-                >
-                  {t.label}
-                </Text>
-              </XStack>
-            );
-          })}
-          {favIds.length > 0 || visIds.length > 0 ? (
-            <>
-              <XStack onPress={() => setMineFav((v) => !v)} {...chip(mineFav, palette.brick)}>
-                <Text
-                  fontFamily="$body"
-                  fontSize={11.5}
-                  fontWeight="600"
-                  color={mineFav ? '#fff' : '#6E6A62'}
-                >
-                  ♥ Coups de cœur
-                </Text>
-              </XStack>
-              <XStack onPress={() => setMineVis((v) => !v)} {...chip(mineVis, palette.forest)}>
-                <Text
-                  fontFamily="$body"
-                  fontSize={11.5}
-                  fontWeight="600"
-                  color={mineVis ? '#fff' : '#6E6A62'}
-                >
-                  ✓ Visités
-                </Text>
-              </XStack>
-            </>
-          ) : null}
-        </XStack>
-      </View>
-    </YStack>
-  );
-}
-
-/** Android (and any non-iOS native): the Leaflet map inside a WebView. */
+/** The Leaflet map inside a WebView — used on every native platform (iOS + Android).
+ *  It's the same proven map as the web (clusters, glyph markers, filters); marker
+ *  taps bridge out to the native detail sheet. */
 function LeafletWebMap({ favIds, visIds, onSelect }: MapImplProps) {
   const webRef = useRef<WebView>(null);
   const [ready, setReady] = useState(false);
@@ -565,6 +412,10 @@ function LeafletWebMap({ favIds, visIds, onSelect }: MapImplProps) {
       javaScriptEnabled
       domStorageEnabled
       startInLoadingState
+      // Let Leaflet own pan/zoom gestures instead of the WebView's scroll view.
+      scrollEnabled={false}
+      bounces={false}
+      automaticallyAdjustContentInsets={false}
       style={{ flex: 1, backgroundColor: 'transparent' }}
     />
   );
@@ -586,11 +437,9 @@ export function PlacesMap() {
     [marks],
   );
 
-  const MapImpl = Platform.OS === 'ios' ? AppleMap : LeafletWebMap;
-
   return (
     <YStack flex={1} backgroundColor="$background">
-      <MapImpl favIds={favIds} visIds={visIds} onSelect={setSelected} />
+      <LeafletWebMap favIds={favIds} visIds={visIds} onSelect={setSelected} />
       {selected ? (
         <DetailSheet
           place={selected}
