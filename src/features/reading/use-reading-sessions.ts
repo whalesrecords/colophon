@@ -9,6 +9,82 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+export interface CurrentRead {
+  itemId: string;
+  title: string | null;
+  author: string | null;
+  coverUrl: string | null;
+  isbn13: string | null;
+  currentPage: number;
+  totalPages: number | null;
+  /** true when there's no open session — this is the most recently finished book. */
+  justFinished: boolean;
+}
+
+interface SessionItemRow {
+  item_id: string;
+  current_page: number | null;
+  total_pages: number | null;
+  item: {
+    cover_override: string | null;
+    book: {
+      title: string | null;
+      authors: string[] | null;
+      cover_url: string | null;
+      isbn13: string;
+    } | null;
+  } | null;
+}
+
+function toCurrentRead(row: SessionItemRow, justFinished: boolean): CurrentRead {
+  const book = row.item?.book ?? null;
+  return {
+    itemId: row.item_id,
+    title: book?.title ?? null,
+    author: book?.authors?.[0] ?? null,
+    coverUrl: row.item?.cover_override ?? book?.cover_url ?? null,
+    isbn13: book?.isbn13 ?? null,
+    currentPage: row.current_page ?? 0,
+    totalPages: row.total_pages,
+    justFinished,
+  };
+}
+
+const CURRENT_SELECT =
+  'item_id, current_page, total_pages, item:items!inner(cover_override, book:book_metadata(title, authors, cover_url, isbn13))';
+
+/**
+ * The book to surface on the home screen: the open reading session (most recent),
+ * or — failing that — the most recently finished book ("ce qu'on vient de lire").
+ */
+export function useCurrentlyReading(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['currently-reading', userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<CurrentRead | null> => {
+      const reading = await supabase
+        .from('reading_sessions')
+        .select(CURRENT_SELECT)
+        .eq('status', 'reading')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (reading.error) throw reading.error;
+      const open = (reading.data ?? []) as unknown as SessionItemRow[];
+      if (open[0]) return toCurrentRead(open[0], false);
+
+      const done = await supabase
+        .from('reading_sessions')
+        .select(CURRENT_SELECT)
+        .eq('status', 'finished')
+        .order('finished_on', { ascending: false, nullsFirst: false })
+        .limit(1);
+      if (done.error) throw done.error;
+      const last = (done.data ?? []) as unknown as SessionItemRow[];
+      return last[0] ? toCurrentRead(last[0], true) : null;
+    },
+  });
+}
+
 export function useReadingSessions(itemId: string | undefined) {
   return useQuery({
     queryKey: ['sessions', itemId],
@@ -31,6 +107,7 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
     queryClient.invalidateQueries({ queryKey: ['sessions', itemId] });
     queryClient.invalidateQueries({ queryKey: ['book-detail', itemId] });
     queryClient.invalidateQueries({ queryKey: ['library'] });
+    queryClient.invalidateQueries({ queryKey: ['currently-reading', userId] });
     queryClient.invalidateQueries({ queryKey: ['stats', userId] });
     // A date edit can move a read into/out of a year — clear all year recaps.
     queryClient.invalidateQueries({ queryKey: ['year-recap'] });

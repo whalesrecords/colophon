@@ -7,8 +7,11 @@ import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
 import { BulkCoverFill } from '@/components/library/BulkCoverFill';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
+import { LibraryHome } from '@/components/library/LibraryHome';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
 import { missingCover } from '@/features/library/use-bulk-cover-fill';
+import { useProfile } from '@/features/profile/use-profile';
+import { useCurrentlyReading } from '@/features/reading/use-reading-sessions';
 import { useSeriesTotals } from '@/features/books/use-series-volumes';
 import { useT } from '@/i18n';
 import { Screen } from '@/components/Screen';
@@ -87,15 +90,20 @@ export default function LibraryScreen() {
   const [sort, setSort] = useState<SortKey>('added');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [size, setSize] = useState<GridSize>('M');
-  const [group, setGroup] = useState(false);
+  const [group, setGroup] = useState(true); // relier les séries automatiquement par défaut
   const [openSeries, setOpenSeries] = useState<SeriesGroup | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showView, setShowView] = useState(false);
   const [showCovers, setShowCovers] = useState(false);
   const { data: shelves } = useShelves(session?.user.id);
   const { data: seriesTotals } = useSeriesTotals(session?.user.id);
+  const { data: profile } = useProfile(session?.user.id);
+  const { data: currentRead } = useCurrentlyReading(session?.user.id);
+  const now = new Date();
 
   const items = useMemo(() => data ?? [], [data]);
+  const readingItems = useMemo(() => items.filter((i) => i.status === 'reading'), [items]);
+  const wishlistItems = useMemo(() => items.filter((i) => i.ownership === 'wishlist'), [items]);
   const wishlistCount = useMemo(
     () => items.filter((i) => i.ownership === 'wishlist').length,
     [items],
@@ -132,317 +140,340 @@ export default function LibraryScreen() {
 
   return (
     <Screen>
-      <YStack paddingHorizontal={H_PADDING} paddingTop="$4" gap="$3">
-        <YStack gap="$1">
-          <Label>{t('library.myLibrary')}</Label>
-          <XStack alignItems="flex-end" justifyContent="space-between">
-            <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
-              {t('tabs.library')}
-            </Text>
-            <YStack alignItems="flex-end" gap="$1" marginBottom={4}>
-              <Button
-                onPress={() => router.push('/upcoming')}
-                height={30}
-                paddingHorizontal="$3"
-                borderRadius={999}
-                borderWidth={1}
-                borderColor="$accent"
-                backgroundColor="transparent"
-                color="$accent"
-                fontFamily="$body"
-                fontSize={13}
-                fontWeight="600"
-                pressStyle={{ opacity: 0.7 }}
-              >
-                {t('library.upcoming')}
-              </Button>
-              <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                {filtered.length === items.length
-                  ? items.length > 1
-                    ? t('library.bookMany', { count: items.length })
-                    : t('library.bookOne', { count: items.length })
-                  : t('library.countOf', { shown: filtered.length, total: items.length })}
-              </Text>
-            </YStack>
-          </XStack>
-        </YStack>
-
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {items.length > 0 ? (
-          <>
-            <Input
-              value={filters.search}
-              onChangeText={(search) => setFilters((f) => ({ ...f, search }))}
-              placeholder={t('library.searchPlaceholder')}
-              autoCapitalize="none"
-              backgroundColor="$backgroundStrong"
-              borderColor="$borderColor"
-              borderWidth={1}
-              borderRadius={12}
-              height={44}
-              paddingHorizontal="$3"
-              fontFamily="$body"
-              fontSize={15}
-              color="$color"
-              placeholderTextColor="$concreteLight"
-              focusStyle={{ borderColor: '$accent' }}
+          <YStack paddingHorizontal={H_PADDING} paddingTop="$4">
+            <LibraryHome
+              name={profile?.display_name}
+              emailFallback={session?.user.email}
+              currentRead={currentRead ?? null}
+              reading={readingItems}
+              wishlist={wishlistItems}
+              hour={now.getHours()}
+              weekday={now.getDay()}
+              onOpenBook={(id) => router.push(`/book/${id}`)}
+              onSeeWishlist={() => toggleFacet('ownership', 'wishlist')}
             />
+          </YStack>
+        ) : null}
 
-            <XStack alignItems="center" gap="$2">
-              <Button
-                onPress={() => setShowFilters((s) => !s)}
-                flex={1}
-                height={36}
-                paddingHorizontal="$3"
-                borderRadius={12}
-                borderWidth={1}
-                borderColor={nFilters || showFilters ? '$accent' : '$borderColor'}
-                backgroundColor="transparent"
-                color={nFilters || showFilters ? '$accent' : '$colorSoft'}
-                fontFamily="$body"
-                fontSize={14}
-                fontWeight="600"
-              >
-                {nFilters ? `Filtres et tri · ${nFilters}` : 'Filtres et tri'}
-              </Button>
-              <Button
-                onPress={() => setShowView((s) => !s)}
-                height={36}
-                paddingHorizontal="$3"
-                borderRadius={12}
-                borderWidth={1}
-                borderColor={showView ? '$accent' : '$borderColor'}
-                backgroundColor="transparent"
-                color={showView ? '$accent' : '$colorSoft'}
-                fontFamily="$body"
-                fontSize={14}
-                fontWeight="600"
-              >
-                Affichage
-              </Button>
+        <YStack paddingHorizontal={H_PADDING} paddingTop="$5" gap="$3">
+          <YStack gap="$1">
+            <Label>{t('library.myLibrary')}</Label>
+            <XStack alignItems="flex-end" justifyContent="space-between">
+              <Text fontFamily="$heading" fontSize={33} fontWeight="500" color="$color">
+                {t('tabs.library')}
+              </Text>
+              <YStack alignItems="flex-end" gap="$1" marginBottom={4}>
+                <Button
+                  onPress={() => router.push('/upcoming')}
+                  height={30}
+                  paddingHorizontal="$3"
+                  borderRadius={999}
+                  borderWidth={1}
+                  borderColor="$accent"
+                  backgroundColor="transparent"
+                  color="$accent"
+                  fontFamily="$body"
+                  fontSize={13}
+                  fontWeight="600"
+                  pressStyle={{ opacity: 0.7 }}
+                >
+                  {t('library.upcoming')}
+                </Button>
+                <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                  {filtered.length === items.length
+                    ? items.length > 1
+                      ? t('library.bookMany', { count: items.length })
+                      : t('library.bookOne', { count: items.length })
+                    : t('library.countOf', { shown: filtered.length, total: items.length })}
+                </Text>
+              </YStack>
             </XStack>
+          </YStack>
 
-            {showView ? (
-              <XStack gap="$2" alignItems="center" flexWrap="wrap">
-                {view === 'grid' ? (
+          {items.length > 0 ? (
+            <>
+              <Input
+                value={filters.search}
+                onChangeText={(search) => setFilters((f) => ({ ...f, search }))}
+                placeholder={t('library.searchPlaceholder')}
+                autoCapitalize="none"
+                backgroundColor="$backgroundStrong"
+                borderColor="$borderColor"
+                borderWidth={1}
+                borderRadius={12}
+                height={44}
+                paddingHorizontal="$3"
+                fontFamily="$body"
+                fontSize={15}
+                color="$color"
+                placeholderTextColor="$concreteLight"
+                focusStyle={{ borderColor: '$accent' }}
+              />
+
+              <XStack alignItems="center" gap="$2">
+                <Button
+                  onPress={() => setShowFilters((s) => !s)}
+                  flex={1}
+                  height={36}
+                  paddingHorizontal="$3"
+                  borderRadius={12}
+                  borderWidth={1}
+                  borderColor={nFilters || showFilters ? '$accent' : '$borderColor'}
+                  backgroundColor="transparent"
+                  color={nFilters || showFilters ? '$accent' : '$colorSoft'}
+                  fontFamily="$body"
+                  fontSize={14}
+                  fontWeight="600"
+                >
+                  {nFilters ? `Filtres et tri · ${nFilters}` : 'Filtres et tri'}
+                </Button>
+                <Button
+                  onPress={() => setShowView((s) => !s)}
+                  height={36}
+                  paddingHorizontal="$3"
+                  borderRadius={12}
+                  borderWidth={1}
+                  borderColor={showView ? '$accent' : '$borderColor'}
+                  backgroundColor="transparent"
+                  color={showView ? '$accent' : '$colorSoft'}
+                  fontFamily="$body"
+                  fontSize={14}
+                  fontWeight="600"
+                >
+                  Affichage
+                </Button>
+              </XStack>
+
+              {showView ? (
+                <XStack gap="$2" alignItems="center" flexWrap="wrap">
+                  {view === 'grid' ? (
+                    <ViewToggle
+                      label={t('library.series')}
+                      active={group}
+                      onPress={() => setGroup((g) => !g)}
+                    />
+                  ) : null}
+                  <SizeControl size={size} onSize={setSize} />
                   <ViewToggle
-                    label={t('library.series')}
-                    active={group}
-                    onPress={() => setGroup((g) => !g)}
+                    label={t('library.viewGrid')}
+                    active={view === 'grid'}
+                    onPress={() => setView('grid')}
                   />
-                ) : null}
-                <SizeControl size={size} onSize={setSize} />
-                <ViewToggle
-                  label={t('library.viewGrid')}
-                  active={view === 'grid'}
-                  onPress={() => setView('grid')}
-                />
-                <ViewToggle
-                  label={t('library.viewList')}
-                  active={view === 'list'}
-                  onPress={() => setView('list')}
-                />
-              </XStack>
-            ) : null}
-
-            {toReadCount > 0 || wishlistCount > 0 || missingCoverCount > 0 ? (
-              <XStack gap="$2" flexWrap="wrap">
-                {missingCoverCount > 0 ? (
-                  <Button
-                    onPress={() => setShowCovers(true)}
-                    height={30}
-                    paddingHorizontal="$3"
-                    borderRadius={999}
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                    backgroundColor="transparent"
-                    color="$colorSoft"
-                    fontFamily="$body"
-                    fontSize={13}
-                    fontWeight="600"
-                    pressStyle={{ opacity: 0.7 }}
-                  >
-                    {`Couvertures · ${missingCoverCount}`}
-                  </Button>
-                ) : null}
-                {toReadCount > 0 ? (
-                  <Button
-                    onPress={() => router.push('/queue')}
-                    height={30}
-                    paddingHorizontal="$3"
-                    borderRadius={999}
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                    backgroundColor="transparent"
-                    color="$colorSoft"
-                    fontFamily="$body"
-                    fontSize={13}
-                    fontWeight="600"
-                    pressStyle={{ opacity: 0.7 }}
-                  >
-                    {`À lire · ${toReadCount}`}
-                  </Button>
-                ) : null}
-                {wishlistCount > 0 ? (
-                  <OwnershipChip
-                    label={t('library.wishlistChip', { count: wishlistCount })}
-                    color={palette.gold}
-                    active={filters.facets.ownership.includes('wishlist')}
-                    onPress={() => toggleFacet('ownership', 'wishlist')}
+                  <ViewToggle
+                    label={t('library.viewList')}
+                    active={view === 'list'}
+                    onPress={() => setView('list')}
                   />
-                ) : null}
-              </XStack>
-            ) : null}
-
-            {shelves && shelves.length > 0 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <XStack gap="$2" alignItems="center" paddingRight="$4">
-                  <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                    {t('library.shelvesLabel')}
-                  </Text>
-                  {shelves.map((sh) => {
-                    const active = filters.facets.shelf.includes(sh.name);
-                    return (
-                      <Button
-                        key={sh.id}
-                        onPress={() => toggleFacet('shelf', sh.name)}
-                        height={32}
-                        paddingHorizontal="$3"
-                        borderRadius={999}
-                        borderWidth={1}
-                        borderColor={active ? '$accent' : '$borderColor'}
-                        backgroundColor={active ? '$accent' : 'transparent'}
-                        color={active ? palette.paper : '$colorSoft'}
-                        fontFamily="$body"
-                        fontSize={13}
-                        fontWeight="500"
-                      >
-                        <YStack
-                          width={7}
-                          height={7}
-                          borderRadius={999}
-                          marginRight={6}
-                          backgroundColor={active ? palette.paper : trancheColor(sh.name)}
-                        />
-                        {sh.name}
-                      </Button>
-                    );
-                  })}
                 </XStack>
-              </ScrollView>
-            ) : null}
+              ) : null}
 
-            {nFilters > 0 ? (
-              <XStack gap="$2" flexWrap="wrap">
-                {(Object.keys(filters.facets) as FacetKey[]).flatMap((key) =>
-                  filters.facets[key].map((value) => (
+              {toReadCount > 0 || wishlistCount > 0 || missingCoverCount > 0 ? (
+                <XStack gap="$2" flexWrap="wrap">
+                  {missingCoverCount > 0 ? (
                     <Button
-                      key={`${key}:${value}`}
-                      onPress={() => toggleFacet(key, value)}
+                      onPress={() => setShowCovers(true)}
                       height={30}
                       paddingHorizontal="$3"
                       borderRadius={999}
-                      backgroundColor="$accent"
-                      color={palette.paper}
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      backgroundColor="transparent"
+                      color="$colorSoft"
                       fontFamily="$body"
-                      fontSize={12}
+                      fontSize={13}
                       fontWeight="600"
+                      pressStyle={{ opacity: 0.7 }}
                     >
-                      {`${displayValue(key, value)}  ✕`}
+                      {`Couvertures · ${missingCoverCount}`}
                     </Button>
-                  )),
-                )}
-              </XStack>
-            ) : null}
+                  ) : null}
+                  {toReadCount > 0 ? (
+                    <Button
+                      onPress={() => router.push('/queue')}
+                      height={30}
+                      paddingHorizontal="$3"
+                      borderRadius={999}
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      backgroundColor="transparent"
+                      color="$colorSoft"
+                      fontFamily="$body"
+                      fontSize={13}
+                      fontWeight="600"
+                      pressStyle={{ opacity: 0.7 }}
+                    >
+                      {`À lire · ${toReadCount}`}
+                    </Button>
+                  ) : null}
+                  {wishlistCount > 0 ? (
+                    <OwnershipChip
+                      label={t('library.wishlistChip', { count: wishlistCount })}
+                      color={palette.gold}
+                      active={filters.facets.ownership.includes('wishlist')}
+                      onPress={() => toggleFacet('ownership', 'wishlist')}
+                    />
+                  ) : null}
+                </XStack>
+              ) : null}
 
-            {showFilters ? (
-              <YStack gap="$3">
+              {shelves && shelves.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <XStack gap="$2" alignItems="center" paddingRight="$4">
                     <Text fontFamily="$body" fontSize={13} color="$colorMuted">
-                      {t('library.sortLabel')}
+                      {t('library.shelvesLabel')}
                     </Text>
-                    {SORTS.map((s) => (
-                      <Button
-                        key={s.key}
-                        onPress={() => setSort(s.key)}
-                        height={32}
-                        paddingHorizontal="$3"
-                        borderRadius={999}
-                        borderWidth={1}
-                        borderColor={sort === s.key ? '$accent' : '$borderColor'}
-                        backgroundColor={sort === s.key ? '$accent' : 'transparent'}
-                        color={sort === s.key ? palette.paper : '$colorMuted'}
-                        fontFamily="$body"
-                        fontSize={13}
-                        fontWeight="500"
-                      >
-                        {t(s.labelKey)}
-                      </Button>
-                    ))}
+                    {shelves.map((sh) => {
+                      const active = filters.facets.shelf.includes(sh.name);
+                      return (
+                        <Button
+                          key={sh.id}
+                          onPress={() => toggleFacet('shelf', sh.name)}
+                          height={32}
+                          paddingHorizontal="$3"
+                          borderRadius={999}
+                          borderWidth={1}
+                          borderColor={active ? '$accent' : '$borderColor'}
+                          backgroundColor={active ? '$accent' : 'transparent'}
+                          color={active ? palette.paper : '$colorSoft'}
+                          fontFamily="$body"
+                          fontSize={13}
+                          fontWeight="500"
+                        >
+                          <YStack
+                            width={7}
+                            height={7}
+                            borderRadius={999}
+                            marginRight={6}
+                            backgroundColor={active ? palette.paper : trancheColor(sh.name)}
+                          />
+                          {sh.name}
+                        </Button>
+                      );
+                    })}
                   </XStack>
                 </ScrollView>
-                <FilterPanel facets={facets} filters={filters} onToggle={toggleFacet} />
-              </YStack>
-            ) : null}
-          </>
-        ) : null}
-      </YStack>
+              ) : null}
 
-      {isLoading ? (
-        <YStack flex={1} alignItems="center" justifyContent="center">
-          <BookLoader size={56} />
+              {nFilters > 0 ? (
+                <XStack gap="$2" flexWrap="wrap">
+                  {(Object.keys(filters.facets) as FacetKey[]).flatMap((key) =>
+                    filters.facets[key].map((value) => (
+                      <Button
+                        key={`${key}:${value}`}
+                        onPress={() => toggleFacet(key, value)}
+                        height={30}
+                        paddingHorizontal="$3"
+                        borderRadius={999}
+                        backgroundColor="$accent"
+                        color={palette.paper}
+                        fontFamily="$body"
+                        fontSize={12}
+                        fontWeight="600"
+                      >
+                        {`${displayValue(key, value)}  ✕`}
+                      </Button>
+                    )),
+                  )}
+                </XStack>
+              ) : null}
+
+              {showFilters ? (
+                <YStack gap="$3">
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <XStack gap="$2" alignItems="center" paddingRight="$4">
+                      <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                        {t('library.sortLabel')}
+                      </Text>
+                      {SORTS.map((s) => (
+                        <Button
+                          key={s.key}
+                          onPress={() => setSort(s.key)}
+                          height={32}
+                          paddingHorizontal="$3"
+                          borderRadius={999}
+                          borderWidth={1}
+                          borderColor={sort === s.key ? '$accent' : '$borderColor'}
+                          backgroundColor={sort === s.key ? '$accent' : 'transparent'}
+                          color={sort === s.key ? palette.paper : '$colorMuted'}
+                          fontFamily="$body"
+                          fontSize={13}
+                          fontWeight="500"
+                        >
+                          {t(s.labelKey)}
+                        </Button>
+                      ))}
+                    </XStack>
+                  </ScrollView>
+                  <FilterPanel facets={facets} filters={filters} onToggle={toggleFacet} />
+                </YStack>
+              ) : null}
+            </>
+          ) : null}
         </YStack>
-      ) : error ? (
-        <YStack flex={1} alignItems="center" justifyContent="center" paddingHorizontal="$8">
-          <Text color="$signal" fontFamily="$body" textAlign="center">
-            {t('library.loadError')}
-          </Text>
-        </YStack>
-      ) : items.length === 0 ? (
-        <EmptyLibrary coverWidth={Math.min(coverWidth, 110)} />
-      ) : filtered.length === 0 ? (
-        <YStack
-          flex={1}
-          alignItems="center"
-          justifyContent="center"
-          paddingHorizontal="$8"
-          paddingTop="$8"
-        >
-          <Text color="$colorMuted" fontFamily="$body" textAlign="center">
-            {t('library.noMatch')}
-          </Text>
-        </YStack>
-      ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
-          {view === 'grid' ? (
-            <XStack flexWrap="wrap" gap={GAP}>
-              {grouped.groups.map((g) => (
-                <SeriesCard
-                  key={g.key}
-                  group={g}
-                  total={seriesTotals?.get(g.key)}
-                  width={coverWidth}
-                  onPress={() => setOpenSeries(g)}
-                />
-              ))}
-              {grouped.singles.map((item) => (
-                <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
-              ))}
-            </XStack>
-          ) : (
-            <YStack gap="$2">
-              {filtered.map((item) => (
-                <LibraryRow
-                  key={item.id}
-                  item={item}
-                  copies={copiesOf(item)}
-                  coverWidth={ROW_COVER[size]}
-                />
-              ))}
-            </YStack>
-          )}
-        </ScrollView>
-      )}
+
+        {isLoading ? (
+          <YStack flex={1} alignItems="center" justifyContent="center">
+            <BookLoader size={56} />
+          </YStack>
+        ) : error ? (
+          <YStack flex={1} alignItems="center" justifyContent="center" paddingHorizontal="$8">
+            <Text color="$signal" fontFamily="$body" textAlign="center">
+              {t('library.loadError')}
+            </Text>
+          </YStack>
+        ) : items.length === 0 ? (
+          <EmptyLibrary coverWidth={Math.min(coverWidth, 110)} />
+        ) : filtered.length === 0 ? (
+          <YStack
+            flex={1}
+            alignItems="center"
+            justifyContent="center"
+            paddingHorizontal="$8"
+            paddingTop="$8"
+          >
+            <Text color="$colorMuted" fontFamily="$body" textAlign="center">
+              {t('library.noMatch')}
+            </Text>
+          </YStack>
+        ) : (
+          <YStack paddingHorizontal={H_PADDING} paddingVertical={16}>
+            {view === 'grid' ? (
+              <XStack flexWrap="wrap" gap={GAP}>
+                {grouped.groups.map((g) => (
+                  <SeriesCard
+                    key={g.key}
+                    group={g}
+                    total={seriesTotals?.get(g.key)}
+                    width={coverWidth}
+                    onPress={() => setOpenSeries(g)}
+                  />
+                ))}
+                {grouped.singles.map((item) => (
+                  <LibraryCard
+                    key={item.id}
+                    item={item}
+                    width={coverWidth}
+                    copies={copiesOf(item)}
+                  />
+                ))}
+              </XStack>
+            ) : (
+              <YStack gap="$2">
+                {filtered.map((item) => (
+                  <LibraryRow
+                    key={item.id}
+                    item={item}
+                    copies={copiesOf(item)}
+                    coverWidth={ROW_COVER[size]}
+                  />
+                ))}
+              </YStack>
+            )}
+          </YStack>
+        )}
+      </ScrollView>
 
       {openSeries ? (
         <YStack
