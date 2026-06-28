@@ -25,6 +25,22 @@ const TYPES = [
 const COLOR: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.color]));
 const TYPE_LABEL: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.label]));
 
+// Librairie specialties (a librairie can have several, comma-separated).
+const SPECIALTIES = [
+  { key: 'manga', label: 'Manga / BD' },
+  { key: 'jeunesse', label: 'Jeunesse' },
+  { key: 'rencontres', label: 'Rencontres' },
+  { key: 'editeur', label: 'Éditeurs' },
+] as const;
+const SPECIALTY_LABEL: Record<string, string> = Object.fromEntries(
+  SPECIALTIES.map((s) => [s.key, s.label]),
+);
+const splitSpecialty = (s?: string): string[] =>
+  (s || '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+
 interface SelectedPlace {
   id: string;
   type: string;
@@ -33,6 +49,8 @@ interface SelectedPlace {
   postal_code?: string;
   website?: string;
   period?: string;
+  specialty?: string;
+  eventsUrl?: string;
   lat: number;
   lng: number;
 }
@@ -141,6 +159,26 @@ function DetailSheet({
               {place.period}
             </Text>
           ) : null}
+          {splitSpecialty(place.specialty).length > 0 ? (
+            <XStack gap="$1.5" flexWrap="wrap" marginTop="$1">
+              {splitSpecialty(place.specialty).map((s) => (
+                <YStack
+                  key={s}
+                  paddingHorizontal="$2"
+                  height={20}
+                  borderRadius={999}
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                  justifyContent="center"
+                >
+                  <Text fontFamily="$body" fontSize={11} fontWeight="600" color="$colorSoft">
+                    {SPECIALTY_LABEL[s] ?? s}
+                  </Text>
+                </YStack>
+              ))}
+            </XStack>
+          ) : null}
         </YStack>
         <Text
           onPress={onClose}
@@ -201,6 +239,21 @@ function DetailSheet({
         >
           Horaires & avis ↗
         </Button>
+        {place.eventsUrl ? (
+          <Button
+            onPress={() => open(place.eventsUrl!)}
+            backgroundColor={palette.prussian}
+            color={palette.paper}
+            borderRadius={12}
+            height={42}
+            paddingHorizontal="$4"
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={14}
+          >
+            Agenda des rencontres ↗
+          </Button>
+        ) : null}
       </XStack>
 
       {signedIn ? (
@@ -259,6 +312,7 @@ export function PlacesMap() {
   const [active, setActive] = useState<Record<string, boolean>>(
     Object.fromEntries(TYPES.map((t) => [t.key, true])),
   );
+  const [specialties, setSpecialties] = useState<Record<string, boolean>>({});
   const [count, setCount] = useState(0);
   const [selected, setSelected] = useState<SelectedPlace | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -268,11 +322,18 @@ export function PlacesMap() {
     const map = mapRef.current;
     if (!L || !map) return;
     if (layerRef.current) map.removeLayer(layerRef.current);
+    const activeSpec = Object.keys(specialties).filter((k) => specialties[k]);
     const cluster = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 });
     let n = 0;
     for (const f of featuresRef.current) {
       const p = f.properties;
       if (!active[p.type]) continue;
+      // Specialty filter narrows librairies only (a place must match one selected spec).
+      if (activeSpec.length > 0) {
+        if (p.type !== 'librairie') continue;
+        const specs = splitSpecialty(p.specialty);
+        if (!activeSpec.some((s) => specs.includes(s))) continue;
+      }
       const [lng, lat] = f.geometry.coordinates;
       if (typeof lat !== 'number' || typeof lng !== 'number') continue;
       const color = COLOR[p.type] ?? palette.ink;
@@ -292,6 +353,8 @@ export function PlacesMap() {
           postal_code: p.postal_code,
           website: p.website || undefined,
           period: p.period || undefined,
+          specialty: p.specialty || undefined,
+          eventsUrl: p.events_url || undefined,
           lat,
           lng,
         }),
@@ -302,7 +365,7 @@ export function PlacesMap() {
     map.addLayer(cluster);
     layerRef.current = cluster;
     setCount(n);
-  }, [active]);
+  }, [active, specialties]);
 
   useEffect(() => {
     let cancelled = false;
@@ -383,6 +446,47 @@ export function PlacesMap() {
         <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginLeft="auto">
           {count.toLocaleString('fr-FR')} lieux
         </Text>
+      </XStack>
+
+      <XStack
+        gap="$2"
+        flexWrap="wrap"
+        paddingHorizontal="$3"
+        paddingVertical="$1.5"
+        backgroundColor="$background"
+        borderBottomColor="$borderColor"
+        borderBottomWidth={1}
+        alignItems="center"
+      >
+        <Text fontFamily="$body" fontSize={11.5} color="$colorMuted">
+          Librairies :
+        </Text>
+        {SPECIALTIES.map((s) => {
+          const on = specialties[s.key];
+          return (
+            <XStack
+              key={s.key}
+              onPress={() => setSpecialties((m) => ({ ...m, [s.key]: !m[s.key] }))}
+              alignItems="center"
+              paddingHorizontal="$2.5"
+              height={26}
+              borderRadius={999}
+              borderWidth={1}
+              borderColor={on ? palette.brick : '$borderColor'}
+              backgroundColor={on ? palette.brick : 'transparent'}
+              {...({ style: { cursor: 'pointer' } } as any)}
+            >
+              <Text
+                fontFamily="$body"
+                fontSize={12}
+                fontWeight="600"
+                color={on ? palette.paper : '$colorSoft'}
+              >
+                {s.label}
+              </Text>
+            </XStack>
+          );
+        })}
       </XStack>
 
       <YStack flex={1} position="relative">
