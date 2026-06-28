@@ -256,22 +256,40 @@ export default function DiscussionsScreen() {
               Amis & cercles
             </Text>
           </YStack>
-          <Button
-            onPress={() => router.push('/readers')}
-            height={34}
-            paddingHorizontal="$3"
-            borderRadius={999}
-            borderWidth={1}
-            borderColor="$accent"
-            backgroundColor="transparent"
-            color="$accent"
-            fontFamily="$body"
-            fontSize={13}
-            fontWeight="600"
-            pressStyle={{ opacity: 0.7 }}
-          >
-            {incomingCount > 0 ? `Lecteurs · ${incomingCount}` : 'Lecteurs'}
-          </Button>
+          <XStack gap="$2">
+            <Button
+              onPress={() => router.push('/carte')}
+              height={34}
+              paddingHorizontal="$3"
+              borderRadius={999}
+              borderWidth={1}
+              borderColor="$borderColor"
+              backgroundColor="transparent"
+              color="$colorSoft"
+              fontFamily="$body"
+              fontSize={13}
+              fontWeight="600"
+              pressStyle={{ opacity: 0.7 }}
+            >
+              Carte
+            </Button>
+            <Button
+              onPress={() => router.push('/readers')}
+              height={34}
+              paddingHorizontal="$3"
+              borderRadius={999}
+              borderWidth={1}
+              borderColor="$accent"
+              backgroundColor="transparent"
+              color="$accent"
+              fontFamily="$body"
+              fontSize={13}
+              fontWeight="600"
+              pressStyle={{ opacity: 0.7 }}
+            >
+              {incomingCount > 0 ? `Lecteurs · ${incomingCount}` : 'Lecteurs'}
+            </Button>
+          </XStack>
         </XStack>
 
         <FriendsRow
