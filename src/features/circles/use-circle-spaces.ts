@@ -40,7 +40,8 @@ export function useCircleLibrary(circleId: string | undefined) {
 
 export function useCircleBookActions(circleId: string, userId: string | undefined) {
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['circle-library', circleId] });
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ['circle-library', circleId] });
 
   const contribute = useMutation({
     mutationFn: async (input: { isbn13: string; status?: string }): Promise<void> => {

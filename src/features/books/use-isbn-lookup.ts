@@ -13,7 +13,7 @@ function isbnErrorMessage(error: IsbnError): string {
     case 'bad_length':
       return 'Un ISBN fait 10 ou 13 chiffres.';
     case 'bad_characters':
-      return "Cet ISBN contient des caractères invalides.";
+      return 'Cet ISBN contient des caractères invalides.';
     case 'bad_check_digit':
       return 'Clé de contrôle invalide — vérifiez la saisie.';
     case 'bad_prefix':

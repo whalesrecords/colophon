@@ -45,7 +45,10 @@ export function suggestShelves(
   existingShelfNames: string[],
 ): ShelfSuggestion[] {
   const taken = new Set(existingShelfNames.map((n) => n.trim().toLowerCase()));
-  const buckets = new Map<string, { facet: FacetKey; label: string; value: string; ids: string[] }>();
+  const buckets = new Map<
+    string,
+    { facet: FacetKey; label: string; value: string; ids: string[] }
+  >();
 
   for (const item of items) {
     for (const facet of FACETS) {
@@ -62,7 +65,14 @@ export function suggestShelves(
   }
 
   return [...buckets.entries()]
-    .map(([key, b]) => ({ key, label: b.label, facet: b.facet, value: b.value, itemIds: b.ids, count: b.ids.length }))
+    .map(([key, b]) => ({
+      key,
+      label: b.label,
+      facet: b.facet,
+      value: b.value,
+      itemIds: b.ids,
+      count: b.ids.length,
+    }))
     .filter((s) => s.count >= MIN_BOOKS)
     .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
     .slice(0, MAX_SUGGESTIONS);

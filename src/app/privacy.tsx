@@ -31,7 +31,11 @@ export default function PrivacyScreen() {
   return (
     <YStack flex={1} backgroundColor="$background" paddingTop={insets.top}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 28, paddingBottom: insets.bottom + 48 }}
+        contentContainerStyle={{
+          paddingHorizontal: padH,
+          paddingTop: 28,
+          paddingBottom: insets.bottom + 48,
+        }}
       >
         <Text fontFamily="$heading" fontSize={30} fontWeight="500" color="$color">
           Politique de confidentialité
@@ -41,8 +45,8 @@ export default function PrivacyScreen() {
         </Text>
 
         <P>
-          Colophon est une application de gestion de bibliothèque personnelle et de suivi de lecture.
-          Cette politique explique quelles données nous traitons, pourquoi, et vos droits.
+          Colophon est une application de gestion de bibliothèque personnelle et de suivi de
+          lecture. Cette politique explique quelles données nous traitons, pourquoi, et vos droits.
         </P>
 
         <H>Responsable</H>
@@ -73,8 +77,8 @@ export default function PrivacyScreen() {
         <H>Finalités</H>
         <P>
           Ces données servent uniquement à fournir le service : afficher votre bibliothèque, suivre
-          vos lectures, et faire fonctionner les cercles de lecture. Nous n'utilisons pas vos données
-          à des fins publicitaires.
+          vos lectures, et faire fonctionner les cercles de lecture. Nous n'utilisons pas vos
+          données à des fins publicitaires.
         </P>
 
         <H>Hébergement et sous‑traitants</H>
@@ -100,15 +104,15 @@ export default function PrivacyScreen() {
 
         <H>Vos droits</H>
         <P>
-          Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, et de suppression
-          de vos données. La suppression est disponible directement dans l'application ; pour toute
-          autre demande, écrivez à {CONTACT}.
+          Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, et de
+          suppression de vos données. La suppression est disponible directement dans l'application ;
+          pour toute autre demande, écrivez à {CONTACT}.
         </P>
 
         <H>Enfants</H>
         <P>
-          Colophon ne s'adresse pas aux enfants de moins de 13 ans et ne collecte pas sciemment leurs
-          données.
+          Colophon ne s'adresse pas aux enfants de moins de 13 ans et ne collecte pas sciemment
+          leurs données.
         </P>
 
         <H>Modifications</H>

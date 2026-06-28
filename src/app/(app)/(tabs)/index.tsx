@@ -30,7 +30,15 @@ import { OWNERSHIP_LABELS, palette, statusColors } from '@/theme/tokens';
 
 const H_PADDING = 20;
 const GAP = 16;
-const SORTS: { key: SortKey; labelKey: 'library.sortAdded' | 'library.sortTitle' | 'library.sortAuthor' | 'library.sortYear' | 'library.sortRating' }[] = [
+const SORTS: {
+  key: SortKey;
+  labelKey:
+    | 'library.sortAdded'
+    | 'library.sortTitle'
+    | 'library.sortAuthor'
+    | 'library.sortYear'
+    | 'library.sortRating';
+}[] = [
   { key: 'added', labelKey: 'library.sortAdded' },
   { key: 'title', labelKey: 'library.sortTitle' },
   { key: 'author', labelKey: 'library.sortAuthor' },
@@ -93,10 +101,7 @@ export default function LibraryScreen() {
     () => items.filter((i) => i.status === 'to_read' && i.ownership !== 'wishlist').length,
     [items],
   );
-  const copies = useMemo(
-    () => copiesByIsbn(items.filter((i) => i.ownership === 'owned')),
-    [items],
-  );
+  const copies = useMemo(() => copiesByIsbn(items.filter((i) => i.ownership === 'owned')), [items]);
   const copiesOf = (item: LibraryItem) =>
     item.book?.isbn13 ? (copies.get(item.book.isbn13) ?? 1) : 1;
   const facets = useMemo(() => computeFacets(items, filters), [items, filters]);
@@ -215,11 +220,23 @@ export default function LibraryScreen() {
             {showView ? (
               <XStack gap="$2" alignItems="center" flexWrap="wrap">
                 {view === 'grid' ? (
-                  <ViewToggle label={t('library.series')} active={group} onPress={() => setGroup((g) => !g)} />
+                  <ViewToggle
+                    label={t('library.series')}
+                    active={group}
+                    onPress={() => setGroup((g) => !g)}
+                  />
                 ) : null}
                 <SizeControl size={size} onSize={setSize} />
-                <ViewToggle label={t('library.viewGrid')} active={view === 'grid'} onPress={() => setView('grid')} />
-                <ViewToggle label={t('library.viewList')} active={view === 'list'} onPress={() => setView('list')} />
+                <ViewToggle
+                  label={t('library.viewGrid')}
+                  active={view === 'grid'}
+                  onPress={() => setView('grid')}
+                />
+                <ViewToggle
+                  label={t('library.viewList')}
+                  active={view === 'list'}
+                  onPress={() => setView('list')}
+                />
               </XStack>
             ) : null}
 
@@ -362,7 +379,13 @@ export default function LibraryScreen() {
       ) : items.length === 0 ? (
         <EmptyLibrary coverWidth={Math.min(coverWidth, 110)} />
       ) : filtered.length === 0 ? (
-        <YStack flex={1} alignItems="center" justifyContent="center" paddingHorizontal="$8" paddingTop="$8">
+        <YStack
+          flex={1}
+          alignItems="center"
+          justifyContent="center"
+          paddingHorizontal="$8"
+          paddingTop="$8"
+        >
           <Text color="$colorMuted" fontFamily="$body" textAlign="center">
             {t('library.noMatch')}
           </Text>
@@ -400,7 +423,14 @@ export default function LibraryScreen() {
       )}
 
       {openSeries ? (
-        <YStack position="absolute" top={0} left={0} right={0} bottom={0} backgroundColor="$background">
+        <YStack
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          backgroundColor="$background"
+        >
           <XStack
             paddingHorizontal={H_PADDING}
             paddingTop="$6"
@@ -435,16 +465,19 @@ export default function LibraryScreen() {
             <YStack gap="$6">
               <XStack flexWrap="wrap" gap={GAP}>
                 {openSeries.items.map((item) => (
-                  <LibraryCard key={item.id} item={item} width={coverWidth} copies={copiesOf(item)} />
+                  <LibraryCard
+                    key={item.id}
+                    item={item}
+                    width={coverWidth}
+                    copies={copiesOf(item)}
+                  />
                 ))}
               </XStack>
               <SeriesCompletion
                 seriesName={openSeries.name}
                 ownedIsbns={
                   new Set(
-                    openSeries.items
-                      .map((i) => i.book?.isbn13)
-                      .filter((x): x is string => !!x),
+                    openSeries.items.map((i) => i.book?.isbn13).filter((x): x is string => !!x),
                   )
                 }
                 userId={session?.user.id}
@@ -458,7 +491,15 @@ export default function LibraryScreen() {
   );
 }
 
-function ViewToggle({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function ViewToggle({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
     <Button
       onPress={onPress}
@@ -666,7 +707,15 @@ function OwnershipBadge({ ownership }: { ownership: LibraryItem['ownership'] }) 
   );
 }
 
-function LibraryCard({ item, width, copies }: { item: LibraryItem; width: number; copies: number }) {
+function LibraryCard({
+  item,
+  width,
+  copies,
+}: {
+  item: LibraryItem;
+  width: number;
+  copies: number;
+}) {
   const { t } = useT();
   const router = useRouter();
   const { bg, fg } = composedPalette(item.book?.isbn13 ?? item.id);
@@ -791,14 +840,35 @@ function EmptyLibrary({ coverWidth }: { coverWidth: number }) {
       <XStack gap={12} opacity={0.45}>
         {demo.map((d) => {
           const { bg, fg } = composedPalette(d.seed);
-          return <BookCover key={d.seed} title={d.title} author={d.author} bg={bg} fg={fg} width={coverWidth} />;
+          return (
+            <BookCover
+              key={d.seed}
+              title={d.title}
+              author={d.author}
+              bg={bg}
+              fg={fg}
+              width={coverWidth}
+            />
+          );
         })}
       </XStack>
       <YStack alignItems="center" gap="$2" maxWidth={320}>
-        <Text fontFamily="$heading" fontSize={24} fontWeight="500" color="$color" textAlign="center">
+        <Text
+          fontFamily="$heading"
+          fontSize={24}
+          fontWeight="500"
+          color="$color"
+          textAlign="center"
+        >
           {t('library.emptyTitle')}
         </Text>
-        <Text fontFamily="$body" fontSize={15} color="$colorMuted" textAlign="center" lineHeight={22}>
+        <Text
+          fontFamily="$body"
+          fontSize={15}
+          color="$colorMuted"
+          textAlign="center"
+          lineHeight={22}
+        >
           {t('library.emptyBody')}
         </Text>
       </YStack>

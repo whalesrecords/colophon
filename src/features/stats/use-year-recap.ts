@@ -55,7 +55,20 @@ interface SessionRow {
   } | null;
 }
 
-const MONTHS_FR = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+const MONTHS_FR = [
+  'Janv.',
+  'Févr.',
+  'Mars',
+  'Avr.',
+  'Mai',
+  'Juin',
+  'Juil.',
+  'Août',
+  'Sept.',
+  'Oct.',
+  'Nov.',
+  'Déc.',
+];
 
 /**
  * A rich "year in reading" recap, computed from the finished reading sessions of
@@ -117,8 +130,7 @@ export function useYearRecap(userId: string | undefined, year: number) {
         .map(([value, count]) => ({ value, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 6);
-      const topAuthor =
-        [...authorCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+      const topAuthor = [...authorCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
       const byMonth: RecapMonth[] = monthCount.map((count, month) => ({
         month,

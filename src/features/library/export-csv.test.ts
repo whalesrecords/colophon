@@ -36,7 +36,9 @@ describe('toLibraryCsv', () => {
   });
 
   it('quotes cells containing commas, quotes or newlines', () => {
-    const messy = item({ book: { ...item().book, title: 'Hello, "World"' } as LibraryItem['book'] });
+    const messy = item({
+      book: { ...item().book, title: 'Hello, "World"' } as LibraryItem['book'],
+    });
     expect(toLibraryCsv([messy])).toContain('"Hello, ""World"""');
   });
 

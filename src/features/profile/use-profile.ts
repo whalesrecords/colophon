@@ -17,7 +17,10 @@ function base64ToBytes(b64: string): Uint8Array {
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 
 /** Public URL for an avatar path, cache-busted on the profile's updated_at. */
-export function avatarUrl(path: string | null | undefined, updatedAt?: string | null): string | null {
+export function avatarUrl(
+  path: string | null | undefined,
+  updatedAt?: string | null,
+): string | null {
   if (!path) return null;
   if (path.startsWith('http')) return path; // a pasted image URL
   const { data } = supabase.storage.from('avatars').getPublicUrl(path);

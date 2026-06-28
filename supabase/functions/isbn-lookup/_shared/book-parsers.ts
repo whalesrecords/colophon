@@ -16,10 +16,34 @@ export function normalizeLanguage(value: string | null | undefined): string | nu
   const v = value.trim().toLowerCase();
   if (v.length === 2) return v;
   const map: Record<string, string> = {
-    fre: 'fr', fra: 'fr', eng: 'en', ger: 'de', deu: 'de', spa: 'es', ita: 'it',
-    por: 'pt', dut: 'nl', nld: 'nl', jpn: 'ja', chi: 'zh', zho: 'zh', rus: 'ru',
-    ara: 'ar', lat: 'la', gre: 'el', ell: 'el', heb: 'he', kor: 'ko', pol: 'pl',
-    swe: 'sv', dan: 'da', nor: 'no', fin: 'fi', tur: 'tr', ces: 'cs', cze: 'cs',
+    fre: 'fr',
+    fra: 'fr',
+    eng: 'en',
+    ger: 'de',
+    deu: 'de',
+    spa: 'es',
+    ita: 'it',
+    por: 'pt',
+    dut: 'nl',
+    nld: 'nl',
+    jpn: 'ja',
+    chi: 'zh',
+    zho: 'zh',
+    rus: 'ru',
+    ara: 'ar',
+    lat: 'la',
+    gre: 'el',
+    ell: 'el',
+    heb: 'he',
+    kor: 'ko',
+    pol: 'pl',
+    swe: 'sv',
+    dan: 'da',
+    nor: 'no',
+    fin: 'fi',
+    tur: 'tr',
+    ces: 'cs',
+    cze: 'cs',
   };
   return map[v] ?? null;
 }
@@ -165,9 +189,7 @@ function cleanBnfTitle(raw: string): { title: string; subtitle: string | null } 
 
 export function parseBnfDublinCore(fullXml: string): ParsedBook | null {
   // A single ISBN can match several editions; scope to the first DC record.
-  const firstRecord = fullXml.match(
-    /<(?:[A-Za-z0-9]+:)?dc(?=[ >])[^]*?<[/](?:[A-Za-z0-9]+:)?dc>/i,
-  );
+  const firstRecord = fullXml.match(/<(?:[A-Za-z0-9]+:)?dc(?=[ >])[^]*?<[/](?:[A-Za-z0-9]+:)?dc>/i);
   const xml = firstRecord ? firstRecord[0] : fullXml;
 
   const titles = extractDc(xml, 'title');
@@ -175,7 +197,8 @@ export function parseBnfDublinCore(fullXml: string): ParsedBook | null {
 
   const { title, subtitle } = cleanBnfTitle(titles[0]);
   const creators = extractDc(xml, 'creator').map(cleanBnfCreator).filter(Boolean);
-  const publisher = (extractDc(xml, 'publisher')[0] ?? '').replace(/[ ]*[(][^)]*[)][ ]*$/, '') || null;
+  const publisher =
+    (extractDc(xml, 'publisher')[0] ?? '').replace(/[ ]*[(][^)]*[)][ ]*$/, '') || null;
   const date = extractDc(xml, 'date')[0] ?? null;
   const language = normalizeLanguage(extractDc(xml, 'language')[0]);
   const format = extractDc(xml, 'format')[0] ?? '';

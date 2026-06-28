@@ -30,7 +30,11 @@ export default function SupportScreen() {
   return (
     <YStack flex={1} backgroundColor="$background" paddingTop={insets.top}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 28, paddingBottom: insets.bottom + 48 }}
+        contentContainerStyle={{
+          paddingHorizontal: padH,
+          paddingTop: 28,
+          paddingBottom: insets.bottom + 48,
+        }}
       >
         <Text fontFamily="$heading" fontSize={30} fontWeight="500" color="$color">
           Aide & support
@@ -40,15 +44,15 @@ export default function SupportScreen() {
         </Text>
 
         <P>
-          Une question, un bug, une demande ? Écrivez‑nous à {CONTACT} — nous répondons sous quelques
-          jours ouvrés.
+          Une question, un bug, une demande ? Écrivez‑nous à {CONTACT} — nous répondons sous
+          quelques jours ouvrés.
         </P>
 
         <H>Ajouter des livres</H>
         <P>
           Onglet « Ajouter » : scannez le code‑barres (EAN/ISBN) d'un livre, saisissez l'ISBN à la
-          main ou avec une douchette, recherchez par titre/auteur, ou collez une liste d'ISBN pour un
-          import en lot. Les métadonnées (titre, auteur, éditeur, couverture) sont récupérées
+          main ou avec une douchette, recherchez par titre/auteur, ou collez une liste d'ISBN pour
+          un import en lot. Les métadonnées (titre, auteur, éditeur, couverture) sont récupérées
           automatiquement par ISBN.
         </P>
 
@@ -60,8 +64,8 @@ export default function SupportScreen() {
 
         <H>Séries</H>
         <P>
-          Quand un livre fait partie d'une série, « Compléter la série » liste les tomes et permet de
-          les ajouter en une fois (les tomes déjà possédés sont indiqués).
+          Quand un livre fait partie d'une série, « Compléter la série » liste les tomes et permet
+          de les ajouter en une fois (les tomes déjà possédés sont indiqués).
         </P>
 
         <H>Cercles de lecture</H>
@@ -80,19 +84,20 @@ export default function SupportScreen() {
 
         <H>Exporter vos données</H>
         <P>
-          Profil → Données → « Exporter en CSV » télécharge toute votre bibliothèque (titre, auteurs,
-          ISBN, statut, note, étagères, tags…).
+          Profil → Données → « Exporter en CSV » télécharge toute votre bibliothèque (titre,
+          auteurs, ISBN, statut, note, étagères, tags…).
         </P>
 
         <H>Supprimer votre compte</H>
         <P>
-          Profil → « Supprimer mon compte » : action définitive qui efface l'ensemble de vos données.
+          Profil → « Supprimer mon compte » : action définitive qui efface l'ensemble de vos
+          données.
         </P>
 
         <H>Confidentialité</H>
         <P>
-          Notre politique de confidentialité est disponible sur la page /privacy. Nous ne vendons pas
-          vos données et n'intégrons pas de traceurs publicitaires.
+          Notre politique de confidentialité est disponible sur la page /privacy. Nous ne vendons
+          pas vos données et n'intégrons pas de traceurs publicitaires.
         </P>
 
         <H>Nous contacter</H>

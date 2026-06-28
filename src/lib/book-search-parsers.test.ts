@@ -36,8 +36,18 @@ describe('parseGoogleBooksSearch', () => {
   it('derives ISBN-13 from ISBN-10 and dedupes', () => {
     const res = parseGoogleBooksSearch({
       items: [
-        { volumeInfo: { title: 'A', industryIdentifiers: [{ type: 'ISBN_10', identifier: '2070360024' }] } },
-        { volumeInfo: { title: 'A again', industryIdentifiers: [{ type: 'ISBN_13', identifier: '9782070360024' }] } },
+        {
+          volumeInfo: {
+            title: 'A',
+            industryIdentifiers: [{ type: 'ISBN_10', identifier: '2070360024' }],
+          },
+        },
+        {
+          volumeInfo: {
+            title: 'A again',
+            industryIdentifiers: [{ type: 'ISBN_13', identifier: '9782070360024' }],
+          },
+        },
       ],
     });
     expect(res).toHaveLength(1);

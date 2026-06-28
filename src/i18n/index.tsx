@@ -13,10 +13,7 @@ export const LOCALES: { code: Locale; label: string }[] = [
   { code: 'en', label: 'English' },
 ];
 
-export type TranslateFn = (
-  key: TranslationKey,
-  vars?: Record<string, string | number>,
-) => string;
+export type TranslateFn = (key: TranslationKey, vars?: Record<string, string | number>) => string;
 
 interface LocaleContextValue {
   locale: Locale;

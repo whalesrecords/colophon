@@ -46,7 +46,13 @@ function Label({ children }: { children: string }) {
 }
 
 /** A horizontal strip of the user's own books, to contribute / propose by ISBN. */
-function MyBooksPicker({ userId, onPick }: { userId: string | undefined; onPick: (isbn13: string) => void }) {
+function MyBooksPicker({
+  userId,
+  onPick,
+}: {
+  userId: string | undefined;
+  onPick: (isbn13: string) => void;
+}) {
   const { data: items } = useLibrary(userId);
   const withBooks = (items ?? []).filter((i) => i.book?.isbn13);
   if (withBooks.length === 0) {
@@ -114,71 +120,66 @@ export function CircleLibrarySection({
             fontWeight="600"
           >
             {adding ? 'Fermer' : 'Ajouter de ma bibliothèque'}
-        </Button>
-        {adding ? (
-          <MyBooksPicker
-            userId={userId}
-            onPick={(isbn13) => {
-              contribute.mutate({ isbn13 });
-              setAdding(false);
-            }}
-          />
-        ) : null}
-      </YStack>
-
-      {isLoading ? (
-        <Spinner color="$accent" />
-      ) : books.length === 0 ? (
-        <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
-          Personne n'a encore ajouté de livre au cercle. Partagez vos lectures pour démarrer la
-          bibliothèque commune.
-        </Text>
-      ) : (
-        <YStack gap="$2">
-          <Label>Bibliothèque du cercle</Label>
-          {books.map((b) => {
-            const read = b.readers.filter((r) => r.reading_status === 'read').length;
-            return (
-              <Button
-                key={b.isbn13}
-                onPress={() => setSelected(b.isbn13)}
-                unstyled
-                padding={0}
-              >
-                <XStack
-                  gap="$3"
-                  alignItems="center"
-                  padding="$2"
-                  backgroundColor="$backgroundStrong"
-                  borderColor="$borderColor"
-                  borderWidth={1}
-                  borderRadius={12}
-                  width="100%"
-                >
-                  <BookCover
-                    title={b.book?.title ?? ''}
-                    coverUrl={b.book?.cover_url}
-                    isbn={b.isbn13}
-                    width={40}
-                  />
-                  <YStack flex={1} gap={2}>
-                    <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
-                      {b.book?.title ?? 'Sans titre'}
-                    </Text>
-                    <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
-                      {`${b.readers.length} lecteur${b.readers.length > 1 ? 's' : ''}`}
-                      {read > 0 ? ` · ${read} l'${read > 1 ? 'ont' : 'a'} lu` : ''}
-                    </Text>
-                  </YStack>
-                  <Text fontFamily="$heading" fontSize={20} color="$colorMuted">
-                    ›
-                  </Text>
-                </XStack>
-              </Button>
-            );
-          })}
+          </Button>
+          {adding ? (
+            <MyBooksPicker
+              userId={userId}
+              onPick={(isbn13) => {
+                contribute.mutate({ isbn13 });
+                setAdding(false);
+              }}
+            />
+          ) : null}
         </YStack>
-      )}
+
+        {isLoading ? (
+          <Spinner color="$accent" />
+        ) : books.length === 0 ? (
+          <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
+            Personne n'a encore ajouté de livre au cercle. Partagez vos lectures pour démarrer la
+            bibliothèque commune.
+          </Text>
+        ) : (
+          <YStack gap="$2">
+            <Label>Bibliothèque du cercle</Label>
+            {books.map((b) => {
+              const read = b.readers.filter((r) => r.reading_status === 'read').length;
+              return (
+                <Button key={b.isbn13} onPress={() => setSelected(b.isbn13)} unstyled padding={0}>
+                  <XStack
+                    gap="$3"
+                    alignItems="center"
+                    padding="$2"
+                    backgroundColor="$backgroundStrong"
+                    borderColor="$borderColor"
+                    borderWidth={1}
+                    borderRadius={12}
+                    width="100%"
+                  >
+                    <BookCover
+                      title={b.book?.title ?? ''}
+                      coverUrl={b.book?.cover_url}
+                      isbn={b.isbn13}
+                      width={40}
+                    />
+                    <YStack flex={1} gap={2}>
+                      <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
+                        {b.book?.title ?? 'Sans titre'}
+                      </Text>
+                      <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                        {`${b.readers.length} lecteur${b.readers.length > 1 ? 's' : ''}`}
+                        {read > 0 ? ` · ${read} l'${read > 1 ? 'ont' : 'a'} lu` : ''}
+                      </Text>
+                    </YStack>
+                    <Text fontFamily="$heading" fontSize={20} color="$colorMuted">
+                      ›
+                    </Text>
+                  </XStack>
+                </Button>
+              );
+            })}
+          </YStack>
+        )}
       </ScrollView>
 
       {selected ? (
@@ -222,14 +223,7 @@ function BookPanel({
   const { bg, fg } = composedPalette(isbn13);
 
   return (
-    <YStack
-      position="absolute"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      backgroundColor="$background"
-    >
+    <YStack position="absolute" top={0} left={0} right={0} bottom={0} backgroundColor="$background">
       <XStack
         paddingHorizontal="$4"
         paddingTop="$5"
@@ -239,7 +233,14 @@ function BookPanel({
         borderBottomColor="$borderColor"
         borderBottomWidth={1}
       >
-        <BookCover title={row?.title ?? ''} coverUrl={row?.cover_url} isbn={isbn13} bg={bg} fg={fg} width={44} />
+        <BookCover
+          title={row?.title ?? ''}
+          coverUrl={row?.cover_url}
+          isbn={isbn13}
+          bg={bg}
+          fg={fg}
+          width={44}
+        />
         <YStack flex={1}>
           <Text fontFamily="$heading" fontSize={17} color="$color" numberOfLines={2}>
             {row?.title ?? 'Sans titre'}
@@ -274,7 +275,9 @@ function BookPanel({
                 <Button
                   key={s}
                   onPress={() =>
-                    mine ? setStatus.mutate({ isbn13, status: s }) : contribute.mutate({ isbn13, status: s })
+                    mine
+                      ? setStatus.mutate({ isbn13, status: s })
+                      : contribute.mutate({ isbn13, status: s })
                   }
                   height={34}
                   paddingHorizontal="$3"
@@ -431,52 +434,52 @@ export function CircleProposalsSection({
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
       <YStack gap="$4">
-      <YStack gap="$2">
-        <Button
-          onPress={() => setAdding((a) => !a)}
-          backgroundColor="$accent"
-          color={palette.paper}
-          borderRadius={12}
-          height={44}
-          fontFamily="$body"
-          fontWeight="600"
-        >
-          {adding ? 'Fermer' : 'Proposer un livre'}
-        </Button>
-        {adding ? (
-          <MyBooksPicker
-            userId={userId}
-            onPick={(isbn13) => {
-              propose.mutate({ isbn13 });
-              setAdding(false);
-            }}
-          />
-        ) : null}
-      </YStack>
-
-      {isLoading ? (
-        <Spinner color="$accent" />
-      ) : (proposals ?? []).length === 0 ? (
-        <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
-          Aucune proposition. Proposez un livre à lire ensemble — les membres voteront.
-        </Text>
-      ) : (
         <YStack gap="$2">
-          {(proposals ?? []).map((p) => (
-            <ProposalRowView
-              key={p.id}
-              proposal={p}
+          <Button
+            onPress={() => setAdding((a) => !a)}
+            backgroundColor="$accent"
+            color={palette.paper}
+            borderRadius={12}
+            height={44}
+            fontFamily="$body"
+            fontWeight="600"
+          >
+            {adding ? 'Fermer' : 'Proposer un livre'}
+          </Button>
+          {adding ? (
+            <MyBooksPicker
               userId={userId}
-              isOwner={isOwner}
-              proposer={names.get(p.proposed_by) ?? 'Membre'}
-              onVote={() => toggleVote.mutate(p.id)}
-              onSelect={() => setStatus.mutate({ id: p.id, status: 'selected' })}
-              onArchive={() => setStatus.mutate({ id: p.id, status: 'archived' })}
-              onDelete={() => remove.mutate(p.id)}
+              onPick={(isbn13) => {
+                propose.mutate({ isbn13 });
+                setAdding(false);
+              }}
             />
-          ))}
+          ) : null}
         </YStack>
-      )}
+
+        {isLoading ? (
+          <Spinner color="$accent" />
+        ) : (proposals ?? []).length === 0 ? (
+          <Text fontFamily="$body" fontSize={14} color="$colorMuted" lineHeight={21}>
+            Aucune proposition. Proposez un livre à lire ensemble — les membres voteront.
+          </Text>
+        ) : (
+          <YStack gap="$2">
+            {(proposals ?? []).map((p) => (
+              <ProposalRowView
+                key={p.id}
+                proposal={p}
+                userId={userId}
+                isOwner={isOwner}
+                proposer={names.get(p.proposed_by) ?? 'Membre'}
+                onVote={() => toggleVote.mutate(p.id)}
+                onSelect={() => setStatus.mutate({ id: p.id, status: 'selected' })}
+                onArchive={() => setStatus.mutate({ id: p.id, status: 'archived' })}
+                onDelete={() => remove.mutate(p.id)}
+              />
+            ))}
+          </YStack>
+        )}
       </YStack>
     </ScrollView>
   );
@@ -551,13 +554,35 @@ function ProposalRowView({
       ) : null}
       {canModerate ? (
         <XStack gap="$3">
-          <Button onPress={onSelect} chromeless paddingHorizontal={0} color="$accent" fontFamily="$body" fontSize={13} fontWeight="600">
+          <Button
+            onPress={onSelect}
+            chromeless
+            paddingHorizontal={0}
+            color="$accent"
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="600"
+          >
             Choisir
           </Button>
-          <Button onPress={onArchive} chromeless paddingHorizontal={0} color="$colorMuted" fontFamily="$body" fontSize={13}>
+          <Button
+            onPress={onArchive}
+            chromeless
+            paddingHorizontal={0}
+            color="$colorMuted"
+            fontFamily="$body"
+            fontSize={13}
+          >
             Archiver
           </Button>
-          <Button onPress={onDelete} chromeless paddingHorizontal={0} color="$signal" fontFamily="$body" fontSize={13}>
+          <Button
+            onPress={onDelete}
+            chromeless
+            paddingHorizontal={0}
+            color="$signal"
+            fontFamily="$body"
+            fontSize={13}
+          >
             Supprimer
           </Button>
         </XStack>

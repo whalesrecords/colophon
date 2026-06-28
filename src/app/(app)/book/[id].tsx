@@ -30,7 +30,10 @@ import {
   statusColors,
 } from '@/theme/tokens';
 
-const STATUS_KEYS: Record<ReadingStatus, 'status.to_read' | 'status.reading' | 'status.read' | 'status.abandoned'> = {
+const STATUS_KEYS: Record<
+  ReadingStatus,
+  'status.to_read' | 'status.reading' | 'status.read' | 'status.abandoned'
+> = {
   to_read: 'status.to_read',
   reading: 'status.reading',
   read: 'status.read',
@@ -368,7 +371,11 @@ export default function BookDetailScreen() {
           </YStack>
 
           {/* reading sessions */}
-          <ReadingSection itemId={id} userId={session?.user.id} totalPages={book?.page_count ?? null} />
+          <ReadingSection
+            itemId={id}
+            userId={session?.user.id}
+            totalPages={book?.page_count ?? null}
+          />
 
           {/* review */}
           <EditableText

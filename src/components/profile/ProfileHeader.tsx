@@ -2,7 +2,12 @@ import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Button, Input, TextArea, Text, XStack, YStack } from 'tamagui';
 
-import { avatarUrl, useProfile, useUpdateProfile, useUploadAvatar } from '@/features/profile/use-profile';
+import {
+  avatarUrl,
+  useProfile,
+  useUpdateProfile,
+  useUploadAvatar,
+} from '@/features/profile/use-profile';
 import { palette } from '@/theme/tokens';
 
 const field = {
@@ -86,7 +91,13 @@ export function ProfileHeader({
       <XStack gap="$3" alignItems="center">
         <Avatar uri={avatar} initials={initials} />
         <YStack flex={1} gap={2}>
-          <Text fontFamily="$heading" fontSize={22} fontWeight="500" color="$color" numberOfLines={1}>
+          <Text
+            fontFamily="$heading"
+            fontSize={22}
+            fontWeight="500"
+            color="$color"
+            numberOfLines={1}
+          >
             {displayName}
           </Text>
           {profile?.pseudo ? (

@@ -66,7 +66,9 @@ export function groupBySeries(items: LibraryItem[]): {
       return (a.item.book?.isbn13 ?? '').localeCompare(b.item.book?.isbn13 ?? '');
     });
     const distinctTomes = new Set(
-      entry.list.map((x) => (x.volume != null ? `v${x.volume}` : `i${x.item.book?.isbn13 ?? x.item.id}`)),
+      entry.list.map((x) =>
+        x.volume != null ? `v${x.volume}` : `i${x.item.book?.isbn13 ?? x.item.id}`,
+      ),
     );
     groups.push({
       key,

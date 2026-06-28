@@ -32,7 +32,12 @@ function CoverFan({ books }: { books: RecapBook[] }) {
               shadowOffset: { width: 0, height: 8 },
             }}
           >
-            <BookCover title={b.title} coverUrl={b.coverUrl} isbn={b.isbn13 ?? undefined} width={98} />
+            <BookCover
+              title={b.title}
+              coverUrl={b.coverUrl}
+              isbn={b.isbn13 ?? undefined}
+              width={98}
+            />
           </View>
         );
       })}
@@ -101,7 +106,12 @@ function stars(rating: number): string {
 function RatedRow({ book }: { book: RecapBook }) {
   return (
     <XStack gap="$3" alignItems="center">
-      <BookCover title={book.title} coverUrl={book.coverUrl} isbn={book.isbn13 ?? undefined} width={30} />
+      <BookCover
+        title={book.title}
+        coverUrl={book.coverUrl}
+        isbn={book.isbn13 ?? undefined}
+        width={30}
+      />
       <Text fontFamily="$body" fontSize={14} color="$color" flex={1} numberOfLines={1}>
         {book.title}
       </Text>
@@ -345,7 +355,12 @@ export function YearRecap({
                         backgroundColor="$backgroundStrong"
                         borderRadius={16}
                       >
-                        <YStack width={9} height={9} borderRadius={999} backgroundColor={palette.sage} />
+                        <YStack
+                          width={9}
+                          height={9}
+                          borderRadius={999}
+                          backgroundColor={palette.sage}
+                        />
                         <Text
                           fontFamily="$body"
                           fontSize={11}
@@ -377,7 +392,12 @@ export function YearRecap({
                         backgroundColor="$backgroundStrong"
                         borderRadius={16}
                       >
-                        <YStack width={9} height={9} borderRadius={999} backgroundColor={palette.ochre} />
+                        <YStack
+                          width={9}
+                          height={9}
+                          borderRadius={999}
+                          backgroundColor={palette.ochre}
+                        />
                         <Text
                           fontFamily="$body"
                           fontSize={11}
@@ -413,7 +433,12 @@ export function YearRecap({
                   <YStack gap="$3">
                     {data.books.map((b) => (
                       <XStack key={b.itemId} gap="$3" alignItems="center">
-                        <BookCover title={b.title} coverUrl={b.coverUrl} isbn={b.isbn13 ?? undefined} width={34} />
+                        <BookCover
+                          title={b.title}
+                          coverUrl={b.coverUrl}
+                          isbn={b.isbn13 ?? undefined}
+                          width={34}
+                        />
                         <Text
                           fontFamily="$body"
                           fontSize={14}
@@ -435,7 +460,13 @@ export function YearRecap({
           )}
         </ScrollView>
 
-        <XStack paddingHorizontal="$5" paddingBottom="$7" paddingTop="$3" gap="$3" alignItems="center">
+        <XStack
+          paddingHorizontal="$5"
+          paddingBottom="$7"
+          paddingTop="$3"
+          gap="$3"
+          alignItems="center"
+        >
           <Button
             onPress={onShare}
             disabled={empty}

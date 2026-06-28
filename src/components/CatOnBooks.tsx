@@ -21,10 +21,7 @@ export function CatOnBooks({ width = 208 }: { width?: number }) {
 
       <G stroke={ink} strokeWidth={2.4} strokeLinejoin="round" strokeLinecap="round">
         {/* tail, draping down off the right edge with a dark tip */}
-        <Path
-          d="M150 70 C 190 70 204 100 188 128 C 183 138 173 142 168 134"
-          fill="none"
-        />
+        <Path d="M150 70 C 190 70 204 100 188 128 C 183 138 173 142 168 134" fill="none" />
         <Path
           d="M188 128 C 183 138 173 142 168 134 C 173 130 177 122 178 114 C 184 116 188 122 188 128 Z"
           fill={ink}

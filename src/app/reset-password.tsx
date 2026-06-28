@@ -51,13 +51,25 @@ export default function ResetPasswordScreen() {
           <Text fontFamily="$heading" fontSize={28} fontWeight="500" color="$color">
             {t('auth.resetTitle')}
           </Text>
-          <Text fontFamily="$heading" fontSize={15} fontStyle="italic" color="$colorMuted" textAlign="center">
+          <Text
+            fontFamily="$heading"
+            fontSize={15}
+            fontStyle="italic"
+            color="$colorMuted"
+            textAlign="center"
+          >
             {t('auth.resetBody')}
           </Text>
         </YStack>
 
         {done ? (
-          <Text color="$positive" fontFamily="$body" fontSize={16} fontWeight="600" textAlign="center">
+          <Text
+            color="$positive"
+            fontFamily="$body"
+            fontSize={16}
+            fontWeight="600"
+            textAlign="center"
+          >
             {t('auth.resetSuccess')}
           </Text>
         ) : (

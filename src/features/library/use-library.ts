@@ -71,9 +71,7 @@ export function useLibrary(userId: string | undefined) {
         shelfNames: (row.item_shelves ?? [])
           .map((s) => s.shelves?.name)
           .filter((n): n is string => !!n),
-        tagNames: (row.item_tags ?? [])
-          .map((t) => t.tags?.name)
-          .filter((n): n is string => !!n),
+        tagNames: (row.item_tags ?? []).map((t) => t.tags?.name).filter((n): n is string => !!n),
         lentTo: (row.loans ?? []).find((l) => !l.returned_on)?.borrower ?? null,
       }));
     },

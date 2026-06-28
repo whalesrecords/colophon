@@ -58,7 +58,12 @@ export default function SharedScreen() {
           </Text>
         </YStack>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingBottom: insets.bottom + 40 }}>
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: H_PADDING,
+            paddingBottom: insets.bottom + 40,
+          }}
+        >
           <XStack flexWrap="wrap" gap={GAP}>
             {data.items.map((item, i) => {
               const seed = item.book?.isbn13 ?? String(i);

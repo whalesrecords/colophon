@@ -62,10 +62,8 @@ export function useUnreadCounts(userId: string | undefined) {
     if (!userId) return;
     const channel = supabase
       .channel(channelName.current)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        () => queryClient.invalidateQueries({ queryKey: ['unread', userId] }),
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () =>
+        queryClient.invalidateQueries({ queryKey: ['unread', userId] }),
       )
       .subscribe();
     return () => {
@@ -278,7 +276,12 @@ export function useCircleMessages(circleId: string | undefined) {
       .channel(`messages:${circleId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `circle_id=eq.${circleId}` },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `circle_id=eq.${circleId}`,
+        },
         (payload) => {
           const row = payload.new as Message;
           queryClient.setQueryData<Message[]>(['messages', circleId], (old) => {
@@ -326,8 +329,7 @@ export function useCircleEvents(circleId: string | undefined) {
 
 export function useEventActions(circleId: string, userId: string | undefined) {
   const queryClient = useQueryClient();
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['circle-events', circleId] });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['circle-events', circleId] });
 
   const createEvent = useMutation({
     mutationFn: async (input: {
@@ -440,7 +442,11 @@ export function useSetRsvp(circleId: string, userId: string | undefined) {
 export function googleCalendarUrl(event: CircleEvent): string {
   const start = new Date(event.starts_at);
   const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const fmt = (d: Date) =>
+    d
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .replace(/\.\d{3}/, '');
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: event.title,

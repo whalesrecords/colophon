@@ -76,7 +76,10 @@ function withFacet(key: keyof Filters['facets'], values: string[]): Filters {
 
 describe('applyFilters', () => {
   it('filters by a facet (OR within facet)', () => {
-    expect(applyFilters(items, withFacet('genre', ['Fiction'])).map((i) => i.id)).toEqual(['a', 'b']);
+    expect(applyFilters(items, withFacet('genre', ['Fiction'])).map((i) => i.id)).toEqual([
+      'a',
+      'b',
+    ]);
   });
 
   it('filters by a custom tag', () => {
@@ -93,11 +96,12 @@ describe('applyFilters', () => {
   });
 
   it('searches title/author/isbn/publisher', () => {
-    expect(applyFilters(items, { ...EMPTY_FILTERS, search: 'calvino' }).map((i) => i.id)).toEqual(['b']);
-    expect(applyFilters(items, { ...EMPTY_FILTERS, search: 'gallimard' }).map((i) => i.id)).toEqual([
-      'a',
-      'c',
+    expect(applyFilters(items, { ...EMPTY_FILTERS, search: 'calvino' }).map((i) => i.id)).toEqual([
+      'b',
     ]);
+    expect(applyFilters(items, { ...EMPTY_FILTERS, search: 'gallimard' }).map((i) => i.id)).toEqual(
+      ['a', 'c'],
+    );
   });
 });
 

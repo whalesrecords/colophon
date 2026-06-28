@@ -127,9 +127,7 @@ Deno.serve(async (req: Request) => {
   const deep = params.deep === true;
   const key = Deno.env.get('GOOGLE_BOOKS_KEY');
   const [google, openlib] = await Promise.all([
-    key
-      ? searchGoogleBooks(params, key, deep ? 3 : 1)
-      : Promise.resolve([] as BookSearchResult[]),
+    key ? searchGoogleBooks(params, key, deep ? 3 : 1) : Promise.resolve([] as BookSearchResult[]),
     searchOpenLibrary(params, deep ? 60 : 20),
   ]);
 

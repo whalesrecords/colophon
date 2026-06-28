@@ -66,7 +66,9 @@ export default function TrendsScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}
+      >
         <YStack gap="$1" marginBottom="$5">
           <Label>Tendances</Label>
           <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
@@ -123,7 +125,9 @@ export default function TrendsScreen() {
             {data.tags.length > 0 ? (
               <YStack gap="$3">
                 <Label>Tags les plus utilisés</Label>
-                <BarList entries={data.tags.map((t) => ({ label: `#${t.label}`, count: t.count }))} />
+                <BarList
+                  entries={data.tags.map((t) => ({ label: `#${t.label}`, count: t.count }))}
+                />
               </YStack>
             ) : null}
 

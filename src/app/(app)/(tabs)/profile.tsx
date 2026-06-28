@@ -80,7 +80,9 @@ export default function ProfileScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}
+      >
         <ProfileHeader userId={session?.user.id} email={session?.user.email} />
 
         {isLoading || !stats ? (
@@ -163,7 +165,11 @@ export default function ProfileScreen() {
       </ScrollView>
 
       {recapOpen && stats ? (
-        <YearRecap userId={session?.user.id} year={stats.year} onClose={() => setRecapOpen(false)} />
+        <YearRecap
+          userId={session?.user.id}
+          year={stats.year}
+          onClose={() => setRecapOpen(false)}
+        />
       ) : null}
     </Screen>
   );
@@ -477,7 +483,10 @@ function Stats({ stats }: { stats: LibraryStats }) {
               }
             />
             <YStack width={1} backgroundColor="$borderColor" />
-            <StatBig value={formatCount(stats.acquiredThisYear)} label={`Achetés en ${stats.year}`} />
+            <StatBig
+              value={formatCount(stats.acquiredThisYear)}
+              label={`Achetés en ${stats.year}`}
+            />
             <YStack width={1} backgroundColor="$borderColor" />
             <StatBig value={euro(stats.spentThisYear)} label={`Dépensé en ${stats.year}`} />
           </XStack>
@@ -655,10 +664,7 @@ function SuggestedShelvesSection({
 function LoansSection({ items }: { items: LibraryItem[] }) {
   const router = useRouter();
   const { t } = useT();
-  const lent = useMemo(
-    () => items.filter((i) => i.lentTo && i.ownership === 'owned'),
-    [items],
-  );
+  const lent = useMemo(() => items.filter((i) => i.lentTo && i.ownership === 'owned'), [items]);
   if (lent.length === 0) return null;
   return (
     <YStack gap="$3" marginTop="$7">

@@ -26,9 +26,22 @@ const FACET_LABEL_KEYS: Record<FacetKey, TranslationKey> = {
 };
 
 const LANG_VALUE: Record<string, string> = {
-  fr: 'Français', en: 'Anglais', it: 'Italien', es: 'Espagnol', de: 'Allemand',
-  pt: 'Portugais', nl: 'Néerlandais', ja: 'Japonais', zh: 'Chinois', ru: 'Russe',
-  ar: 'Arabe', la: 'Latin', el: 'Grec', he: 'Hébreu', ko: 'Coréen', pl: 'Polonais',
+  fr: 'Français',
+  en: 'Anglais',
+  it: 'Italien',
+  es: 'Espagnol',
+  de: 'Allemand',
+  pt: 'Portugais',
+  nl: 'Néerlandais',
+  ja: 'Japonais',
+  zh: 'Chinois',
+  ru: 'Russe',
+  ar: 'Arabe',
+  la: 'Latin',
+  el: 'Grec',
+  he: 'Hébreu',
+  ko: 'Coréen',
+  pl: 'Polonais',
 };
 
 export function displayValue(key: FacetKey, value: string): string {
@@ -55,9 +68,7 @@ interface FilterPanelProps {
  */
 export function FilterPanel({ facets, filters, onToggle }: FilterPanelProps) {
   const { t } = useT();
-  const visible = FACET_KEYS.filter(
-    (k) => facets[k].length >= 2 || filters.facets[k].length > 0,
-  );
+  const visible = FACET_KEYS.filter((k) => facets[k].length >= 2 || filters.facets[k].length > 0);
   const [open, setOpen] = useState<FacetKey | null>(
     () => visible.find((k) => filters.facets[k].length > 0) ?? null,
   );

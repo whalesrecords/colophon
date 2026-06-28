@@ -48,7 +48,9 @@ describe('suggestShelves', () => {
   });
 
   it('does not re-suggest a shelf that already exists', () => {
-    expect(suggestShelves(items, ['gallimard']).find((x) => x.label === 'Gallimard')).toBeUndefined();
+    expect(
+      suggestShelves(items, ['gallimard']).find((x) => x.label === 'Gallimard'),
+    ).toBeUndefined();
   });
 
   it('labels decades and languages nicely', () => {

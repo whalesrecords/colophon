@@ -25,15 +25,7 @@ export function ColophonMark({ size = 120, dark = false }: { size?: number; dark
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       {rows.map((r, i) => (
-        <Rect
-          key={i}
-          x={50 - r.w / 2}
-          y={r.y}
-          width={r.w}
-          height={11}
-          rx={3}
-          fill={slices[i]}
-        />
+        <Rect key={i} x={50 - r.w / 2} y={r.y} width={r.w} height={11} rx={3} fill={slices[i]} />
       ))}
       {rows.map((r, i) => (
         <Rect

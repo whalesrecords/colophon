@@ -173,9 +173,19 @@ export function SeriesCompletion({
                   const sel = !excluded.has(v.isbn13);
                   return (
                     <Pressable key={v.isbn13} onPress={() => toggle(v.isbn13)}>
-                      <YStack width={coverWidth} gap={4} alignItems="center" opacity={sel ? 1 : 0.4}>
+                      <YStack
+                        width={coverWidth}
+                        gap={4}
+                        alignItems="center"
+                        opacity={sel ? 1 : 0.4}
+                      >
                         <YStack position="relative">
-                          <BookCover title={v.title} coverUrl={v.coverUrl} isbn={v.isbn13} width={coverWidth} />
+                          <BookCover
+                            title={v.title}
+                            coverUrl={v.coverUrl}
+                            isbn={v.isbn13}
+                            width={coverWidth}
+                          />
                           {sel ? (
                             <YStack
                               position="absolute"
@@ -188,7 +198,12 @@ export function SeriesCompletion({
                               alignItems="center"
                               justifyContent="center"
                             >
-                              <Text fontFamily="$body" fontSize={12} fontWeight="700" color={palette.paper}>
+                              <Text
+                                fontFamily="$body"
+                                fontSize={12}
+                                fontWeight="700"
+                                color={palette.paper}
+                              >
                                 ✓
                               </Text>
                             </YStack>

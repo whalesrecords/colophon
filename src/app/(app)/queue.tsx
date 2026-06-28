@@ -29,7 +29,14 @@ function Section({ children }: { children: string }) {
 }
 
 function Cover({ item }: { item: QueueItem }) {
-  return <BookCover title={item.title} coverUrl={item.coverUrl} isbn={item.isbn13 ?? undefined} width={40} />;
+  return (
+    <BookCover
+      title={item.title}
+      coverUrl={item.coverUrl}
+      isbn={item.isbn13 ?? undefined}
+      width={40}
+    />
+  );
 }
 
 export default function QueueScreen() {
@@ -114,11 +121,22 @@ export default function QueueScreen() {
                     >
                       <Cover item={item} />
                       <YStack flex={1}>
-                        <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color" numberOfLines={1}>
+                        <Text
+                          fontFamily="$body"
+                          fontSize={14}
+                          fontWeight="600"
+                          color="$color"
+                          numberOfLines={1}
+                        >
                           {item.title}
                         </Text>
                         {item.author ? (
-                          <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                          <Text
+                            fontFamily="$body"
+                            fontSize={12}
+                            color="$colorMuted"
+                            numberOfLines={1}
+                          >
                             {item.author}
                           </Text>
                         ) : null}
@@ -183,11 +201,22 @@ export default function QueueScreen() {
                     >
                       <Cover item={item} />
                       <YStack flex={1}>
-                        <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color" numberOfLines={1}>
+                        <Text
+                          fontFamily="$body"
+                          fontSize={14}
+                          fontWeight="600"
+                          color="$color"
+                          numberOfLines={1}
+                        >
                           {item.title}
                         </Text>
                         {item.author ? (
-                          <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                          <Text
+                            fontFamily="$body"
+                            fontSize={12}
+                            color="$colorMuted"
+                            numberOfLines={1}
+                          >
                             {item.author}
                           </Text>
                         ) : null}

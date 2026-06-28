@@ -86,7 +86,9 @@ export default function DiscussionsScreen() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}
+      >
         <XStack gap="$1" marginBottom="$5" alignItems="flex-end" justifyContent="space-between">
           <YStack gap="$1">
             <Label>Échanges</Label>

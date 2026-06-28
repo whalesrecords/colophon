@@ -182,8 +182,7 @@ export function useUpcoming(userId: string | undefined) {
       const missing = perSeries
         .flatMap((p) => p.missing)
         .sort(
-          (a, b) =>
-            a.seriesName.localeCompare(b.seriesName) || a.volume.volume - b.volume.volume,
+          (a, b) => a.seriesName.localeCompare(b.seriesName) || a.volume.volume - b.volume.volume,
         );
 
       // Dedupe author books across authors, newest publication first, capped.

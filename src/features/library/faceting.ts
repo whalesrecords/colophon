@@ -92,7 +92,12 @@ export function facetValues(item: LibraryItem, key: FacetKey): string[] {
 function matchesSearch(item: LibraryItem, q: string): boolean {
   const needle = q.trim().toLowerCase();
   if (!needle) return true;
-  const hay = [item.book?.title, ...(item.book?.authors ?? []), item.book?.isbn13, item.book?.publisher]
+  const hay = [
+    item.book?.title,
+    ...(item.book?.authors ?? []),
+    item.book?.isbn13,
+    item.book?.publisher,
+  ]
     .filter(Boolean)
     .join(' ')
     .toLowerCase();

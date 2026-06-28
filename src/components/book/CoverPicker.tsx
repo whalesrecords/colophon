@@ -32,7 +32,14 @@ interface CoverPickerProps {
 }
 
 /** Let the user override a book's cover: deep-search candidates or paste a URL. */
-export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride }: CoverPickerProps) {
+export function CoverPicker({
+  itemId,
+  userId,
+  isbn13,
+  title,
+  author,
+  hasOverride,
+}: CoverPickerProps) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState('');
   const update = useUpdateItem(itemId, userId);
@@ -127,7 +134,12 @@ export function CoverPicker({ itemId, userId, isbn13, title, author, hasOverride
                 <XStack gap="$3" paddingVertical="$1">
                   {candidates.map((c, i) => (
                     <YStack key={`${c.url}-${i}`} gap={2} alignItems="center" width={72}>
-                      <BookCover title={title} coverUrl={c.url} width={72} onPress={() => setCover(c.url)} />
+                      <BookCover
+                        title={title}
+                        coverUrl={c.url}
+                        width={72}
+                        onPress={() => setCover(c.url)}
+                      />
                       <Text fontFamily="$body" fontSize={10} color="$colorMuted">
                         {c.source}
                       </Text>

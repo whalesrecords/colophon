@@ -221,7 +221,11 @@ export default function CircleScreen() {
       <XStack borderBottomColor="$borderColor" borderBottomWidth={1}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <XStack paddingHorizontal="$3" paddingVertical="$2" gap="$2">
-            <SegTab label="Discussion" active={section === 'chat'} onPress={() => setSection('chat')} />
+            <SegTab
+              label="Discussion"
+              active={section === 'chat'}
+              onPress={() => setSection('chat')}
+            />
             <SegTab
               label="Bibliothèque"
               active={section === 'library'}
@@ -253,143 +257,155 @@ export default function CircleScreen() {
           isOwner={circle?.owner_id === userId}
         />
       ) : (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={insets.top + 56}
+        >
+          {isLoading ? (
+            <YStack flex={1} alignItems="center" justifyContent="center">
+              <Spinner color="$accent" />
+            </YStack>
+          ) : (
+            <ScrollView
+              ref={scrollRef}
+              contentContainerStyle={{
+                paddingHorizontal: padH,
+                paddingTop: 16,
+                gap: 10,
+                paddingBottom: 20,
+              }}
+            >
+              {blockedMembers.length > 0 ? (
+                <YStack
+                  gap="$1"
+                  padding="$2"
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                  borderRadius={12}
+                >
+                  <Text fontFamily="$body" fontSize={11} color="$colorMuted">
+                    {`${blockedMembers.length} membre${blockedMembers.length > 1 ? 's' : ''} masqué${blockedMembers.length > 1 ? 's' : ''}`}
+                  </Text>
+                  {blockedMembers.map((bm) => (
+                    <XStack key={bm.user_id} alignItems="center" justifyContent="space-between">
+                      <Text fontFamily="$body" fontSize={13} color="$colorSoft">
+                        {bm.display_name ?? 'Membre'}
+                      </Text>
+                      <Button
+                        onPress={() => unblock.mutate(bm.user_id)}
+                        chromeless
+                        height={26}
+                        paddingHorizontal={0}
+                        color="$accent"
+                        fontFamily="$body"
+                        fontSize={13}
+                        fontWeight="600"
+                      >
+                        Réafficher
+                      </Button>
+                    </XStack>
+                  ))}
+                </YStack>
+              ) : null}
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={insets.top + 56}
-      >
-        {isLoading ? (
-          <YStack flex={1} alignItems="center" justifyContent="center">
-            <Spinner color="$accent" />
-          </YStack>
-        ) : (
-          <ScrollView
-            ref={scrollRef}
-            contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 16, gap: 10, paddingBottom: 20 }}
-          >
-            {blockedMembers.length > 0 ? (
-              <YStack
-                gap="$1"
-                padding="$2"
-                backgroundColor="$backgroundStrong"
-                borderColor="$borderColor"
-                borderWidth={1}
-                borderRadius={12}
-              >
-                <Text fontFamily="$body" fontSize={11} color="$colorMuted">
-                  {`${blockedMembers.length} membre${blockedMembers.length > 1 ? 's' : ''} masqué${blockedMembers.length > 1 ? 's' : ''}`}
+              {visibleMessages.length === 0 ? (
+                <Text
+                  fontFamily="$body"
+                  fontSize={14}
+                  color="$colorMuted"
+                  textAlign="center"
+                  marginTop="$8"
+                >
+                  Démarrez la discussion — partagez vos impressions de lecture.
                 </Text>
-                {blockedMembers.map((bm) => (
-                  <XStack key={bm.user_id} alignItems="center" justifyContent="space-between">
-                    <Text fontFamily="$body" fontSize={13} color="$colorSoft">
-                      {bm.display_name ?? 'Membre'}
-                    </Text>
-                    <Button
-                      onPress={() => unblock.mutate(bm.user_id)}
-                      chromeless
-                      height={26}
-                      paddingHorizontal={0}
-                      color="$accent"
-                      fontFamily="$body"
-                      fontSize={13}
-                      fontWeight="600"
-                    >
-                      Réafficher
-                    </Button>
-                  </XStack>
-                ))}
-              </YStack>
-            ) : null}
+              ) : (
+                visibleMessages.map((m) => (
+                  <Bubble
+                    key={m.id}
+                    message={m}
+                    mine={m.user_id === userId}
+                    author={nameByUser.get(m.user_id) ?? 'Membre'}
+                    onReport={() => onReport(m)}
+                    onBlock={() => onBlock(m)}
+                  />
+                ))
+              )}
+            </ScrollView>
+          )}
 
-            {visibleMessages.length === 0 ? (
-              <Text
-                fontFamily="$body"
-                fontSize={14}
-                color="$colorMuted"
-                textAlign="center"
-                marginTop="$8"
-              >
-                Démarrez la discussion — partagez vos impressions de lecture.
-              </Text>
-            ) : (
-              visibleMessages.map((m) => (
-                <Bubble
-                  key={m.id}
-                  message={m}
-                  mine={m.user_id === userId}
-                  author={nameByUser.get(m.user_id) ?? 'Membre'}
-                  onReport={() => onReport(m)}
-                  onBlock={() => onBlock(m)}
-                />
-              ))
-            )}
-          </ScrollView>
-        )}
+          {sendError ? (
+            <Text
+              fontFamily="$body"
+              fontSize={12}
+              color="$signal"
+              paddingHorizontal={padH}
+              paddingTop="$2"
+              backgroundColor="$backgroundStrong"
+            >
+              {sendError}
+            </Text>
+          ) : null}
 
-        {sendError ? (
-          <Text
-            fontFamily="$body"
-            fontSize={12}
-            color="$signal"
+          <XStack
+            gap="$2"
             paddingHorizontal={padH}
-            paddingTop="$2"
+            paddingTop="$3"
+            paddingBottom={insets.bottom + 8}
+            borderTopColor="$borderColor"
+            borderTopWidth={1}
             backgroundColor="$backgroundStrong"
           >
-            {sendError}
-          </Text>
-        ) : null}
-
-        <XStack
-          gap="$2"
-          paddingHorizontal={padH}
-          paddingTop="$3"
-          paddingBottom={insets.bottom + 8}
-          borderTopColor="$borderColor"
-          borderTopWidth={1}
-          backgroundColor="$backgroundStrong"
-        >
-          <Input
-            flex={1}
-            value={text}
-            onChangeText={(v) => {
-              setText(v);
-              if (sendError) setSendError(null);
-            }}
-            onSubmitEditing={onSend}
-            placeholder="Votre message…"
-            placeholderTextColor="$concreteLight"
-            backgroundColor="$background"
-            borderColor="$borderColor"
-            borderWidth={1}
-            borderRadius={20}
-            height={42}
-            paddingHorizontal="$3"
-            fontFamily="$body"
-            fontSize={14}
-            color="$color"
-          />
-          <Button
-            onPress={onSend}
-            backgroundColor="$accent"
-            color={palette.paper}
-            borderRadius={999}
-            height={42}
-            width={42}
-            padding={0}
-            fontFamily="$heading"
-            fontSize={18}
-          >
-            ↑
-          </Button>
-        </XStack>
-      </KeyboardAvoidingView>
+            <Input
+              flex={1}
+              value={text}
+              onChangeText={(v) => {
+                setText(v);
+                if (sendError) setSendError(null);
+              }}
+              onSubmitEditing={onSend}
+              placeholder="Votre message…"
+              placeholderTextColor="$concreteLight"
+              backgroundColor="$background"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius={20}
+              height={42}
+              paddingHorizontal="$3"
+              fontFamily="$body"
+              fontSize={14}
+              color="$color"
+            />
+            <Button
+              onPress={onSend}
+              backgroundColor="$accent"
+              color={palette.paper}
+              borderRadius={999}
+              height={42}
+              width={42}
+              padding={0}
+              fontFamily="$heading"
+              fontSize={18}
+            >
+              ↑
+            </Button>
+          </XStack>
+        </KeyboardAvoidingView>
       )}
     </YStack>
   );
 }
 
-function SegTab({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function SegTab({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
     <Button
       onPress={onPress}
@@ -463,16 +479,54 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 20 }}>
-      <YStack gap="$2" backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} borderRadius={12} padding="$3">
-        <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
+      <YStack
+        gap="$2"
+        backgroundColor="$backgroundStrong"
+        borderColor="$borderColor"
+        borderWidth={1}
+        borderRadius={12}
+        padding="$3"
+      >
+        <Text
+          fontFamily="$body"
+          fontSize={11}
+          fontWeight="600"
+          letterSpacing={2}
+          textTransform="uppercase"
+          color="$colorMuted"
+        >
           Nouveau rendez-vous
         </Text>
-        <Input {...field} value={title} onChangeText={setTitle} placeholder="Titre (ex. Réunion mensuelle)" />
+        <Input
+          {...field}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Titre (ex. Réunion mensuelle)"
+        />
         <XStack gap="$2">
-          <Input {...field} flex={1} value={date} onChangeText={setDate} autoCapitalize="none" placeholder="Date AAAA-MM-JJ" />
-          <Input {...field} width={110} value={time} onChangeText={setTime} autoCapitalize="none" placeholder="HH:MM" />
+          <Input
+            {...field}
+            flex={1}
+            value={date}
+            onChangeText={setDate}
+            autoCapitalize="none"
+            placeholder="Date AAAA-MM-JJ"
+          />
+          <Input
+            {...field}
+            width={110}
+            value={time}
+            onChangeText={setTime}
+            autoCapitalize="none"
+            placeholder="HH:MM"
+          />
         </XStack>
-        <Input {...field} value={location} onChangeText={setLocation} placeholder="Lieu (optionnel)" />
+        <Input
+          {...field}
+          value={location}
+          onChangeText={setLocation}
+          placeholder="Lieu (optionnel)"
+        />
         <Button
           onPress={onCreate}
           disabled={createEvent.isPending}
@@ -494,7 +548,14 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
 
       {upcoming.length > 0 ? (
         <YStack gap="$2">
-          <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
+          <Text
+            fontFamily="$body"
+            fontSize={11}
+            fontWeight="600"
+            letterSpacing={2}
+            textTransform="uppercase"
+            color="$colorMuted"
+          >
             À venir
           </Text>
           {upcoming.map((e) => (
@@ -516,7 +577,14 @@ function AgendaSection({ circleId, userId }: { circleId: string; userId: string 
 
       {past.length > 0 ? (
         <YStack gap="$2" opacity={0.6}>
-          <Text fontFamily="$body" fontSize={11} fontWeight="600" letterSpacing={2} textTransform="uppercase" color="$colorMuted">
+          <Text
+            fontFamily="$body"
+            fontSize={11}
+            fontWeight="600"
+            letterSpacing={2}
+            textTransform="uppercase"
+            color="$colorMuted"
+          >
             Passés
           </Text>
           {past.map((e) => (
@@ -694,7 +762,12 @@ function Bubble({
         paddingHorizontal="$3"
         paddingVertical="$2"
       >
-        <Text fontFamily="$body" fontSize={14} color={mine ? palette.paper : '$color'} lineHeight={20}>
+        <Text
+          fontFamily="$body"
+          fontSize={14}
+          color={mine ? palette.paper : '$color'}
+          lineHeight={20}
+        >
           {message.body}
         </Text>
       </YStack>

@@ -63,10 +63,17 @@ export default function AppTabsLayout() {
         name="index"
         options={{ title: t('tabs.library'), tabBarIcon: tabIcon('library') }}
       />
-      <Tabs.Screen name="trends" options={{ title: t('tabs.trends'), tabBarIcon: tabIcon('trends') }} />
+      <Tabs.Screen
+        name="trends"
+        options={{ title: t('tabs.trends'), tabBarIcon: tabIcon('trends') }}
+      />
       <Tabs.Screen
         name="scan"
-        options={{ title: t('tabs.scan'), tabBarIcon: ScanTabIcon, tabBarLabelStyle: { display: 'none' } }}
+        options={{
+          title: t('tabs.scan'),
+          tabBarIcon: ScanTabIcon,
+          tabBarLabelStyle: { display: 'none' },
+        }}
       />
       <Tabs.Screen
         name="discussions"
@@ -77,7 +84,10 @@ export default function AppTabsLayout() {
           tabBarBadgeStyle: { backgroundColor: palette.terracotta, color: palette.paper },
         }}
       />
-      <Tabs.Screen name="profile" options={{ title: t('tabs.profile'), tabBarIcon: tabIcon('profile') }} />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: t('tabs.profile'), tabBarIcon: tabIcon('profile') }}
+      />
     </Tabs>
   );
 }

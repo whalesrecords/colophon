@@ -172,9 +172,21 @@ export default function ScanScreen() {
             </Text>
           </YStack>
           <XStack gap="$2" flexWrap="wrap">
-            <ModeTab label={t('scan.modeScan')} active={mode === 'scan'} onPress={() => setMode('scan')} />
-            <ModeTab label={t('scan.modeSearch')} active={mode === 'search'} onPress={() => setMode('search')} />
-            <ModeTab label={t('scan.modeImport')} active={mode === 'import'} onPress={() => setMode('import')} />
+            <ModeTab
+              label={t('scan.modeScan')}
+              active={mode === 'scan'}
+              onPress={() => setMode('scan')}
+            />
+            <ModeTab
+              label={t('scan.modeSearch')}
+              active={mode === 'search'}
+              onPress={() => setMode('search')}
+            />
+            <ModeTab
+              label={t('scan.modeImport')}
+              active={mode === 'import'}
+              onPress={() => setMode('import')}
+            />
           </XStack>
         </YStack>
 
@@ -243,7 +255,8 @@ export default function ScanScreen() {
                 <Label>{t('scan.importCsvFile')}</Label>
                 <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={19}>
                   {t('scan.importCsvHint', {
-                    action: Platform.OS === 'web' ? t('scan.chooseFileVerb') : t('scan.pasteContentVerb'),
+                    action:
+                      Platform.OS === 'web' ? t('scan.chooseFileVerb') : t('scan.pasteContentVerb'),
                   })}
                   {parsedCsv.books.length > 0
                     ? ` ${parsedCsv.books.length > 1 ? t('scan.csvDetectedMany', { count: parsedCsv.books.length }) : t('scan.csvDetectedOne', { count: parsedCsv.books.length })}${
@@ -554,7 +567,14 @@ function EntryRow({
       </YStack>
 
       {entry.status === 'error' ? (
-        <Button onPress={onRetry} chromeless height={32} color="$accent" fontFamily="$body" fontWeight="600">
+        <Button
+          onPress={onRetry}
+          chromeless
+          height={32}
+          color="$accent"
+          fontFamily="$body"
+          fontWeight="600"
+        >
           {t('scan.retry')}
         </Button>
       ) : entry.status === 'added' ? (

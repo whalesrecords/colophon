@@ -71,7 +71,8 @@ function mapStatus(shelf: string): ImportStatus | null {
   if (!s) return null;
   if (s === 'read' || s === 'lu' || s === 'lus') return 'read';
   if (s === 'currently-reading' || s === 'reading' || s.includes('cours')) return 'reading';
-  if (s === 'to-read' || s === 'to_read' || s.includes('lire') || s.includes('envie')) return 'to_read';
+  if (s === 'to-read' || s === 'to_read' || s.includes('lire') || s.includes('envie'))
+    return 'to_read';
   if (s.includes('abandon') || s === 'dnf') return 'abandoned';
   return null;
 }

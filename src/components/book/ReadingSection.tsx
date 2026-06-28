@@ -6,6 +6,7 @@ import {
   useReadingSessions,
   useSessionActions,
 } from '@/features/reading/use-reading-sessions';
+import { parseFlexibleDate } from '@/lib/reading-date';
 import { palette } from '@/theme/tokens';
 
 const SESSION_STATUS: Record<string, string> = {
@@ -45,7 +46,11 @@ export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionPro
       <Label>Suivi de lecture</Label>
 
       {open ? (
-        <Progress session={open} onSetPage={(page) => setPage.mutate({ sessionId: open.id, page })} onFinish={() => finish.mutate(open.id)} />
+        <Progress
+          session={open}
+          onSetPage={(page) => setPage.mutate({ sessionId: open.id, page })}
+          onFinish={() => finish.mutate(open.id)}
+        />
       ) : (
         <Button
           onPress={() => start.mutate(totalPages)}
@@ -67,20 +72,13 @@ export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionPro
               key={s.id}
               session={s}
               onRemove={() => remove.mutate(s.id)}
-              onSave={(dates) => updateDates.mutate({ sessionId: s.id, ...dates })}
+              onSave={(dates) => updateDates.mutateAsync({ sessionId: s.id, ...dates })}
             />
           ))}
         </YStack>
       ) : null}
     </YStack>
   );
-}
-
-/** A date is a valid real calendar day in YYYY-MM-DD form (rejects e.g. Feb 30). */
-function isValidDate(s: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
-  const d = new Date(`${s}T00:00:00`);
-  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
 }
 
 function DateField({
@@ -92,7 +90,7 @@ function DateField({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const invalid = value !== '' && !isValidDate(value);
+  const invalid = value.trim() !== '' && parseFlexibleDate(value) === null;
   return (
     <YStack flex={1} gap="$1">
       <Text fontFamily="$body" fontSize={11} color="$colorMuted">
@@ -101,9 +99,10 @@ function DateField({
       <Input
         value={value}
         onChangeText={onChange}
-        placeholder="AAAA-MM-JJ"
+        placeholder="JJ/MM/AAAA"
         placeholderTextColor="$concreteLight"
         autoCapitalize="none"
+        keyboardType="numbers-and-punctuation"
         backgroundColor="$background"
         borderColor={invalid ? '$signal' : '$borderColor'}
         borderWidth={1}
@@ -125,14 +124,13 @@ function SessionRow({
 }: {
   session: ReadingSession;
   onRemove: () => void;
-  onSave: (dates: { startedOn: string | null; finishedOn: string | null }) => void;
+  onSave: (dates: { startedOn: string | null; finishedOn: string | null }) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
   const [startedOn, setStartedOn] = useState(session.started_on ?? '');
   const [finishedOn, setFinishedOn] = useState(session.finished_on ?? '');
-
-  const canSave =
-    (startedOn === '' || isValidDate(startedOn)) && (finishedOn === '' || isValidDate(finishedOn));
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const datePart = session.finished_on
     ? ` · lu le ${session.finished_on}`
@@ -140,25 +138,47 @@ function SessionRow({
       ? ` · depuis le ${session.started_on}`
       : '';
 
+  const onSubmit = async () => {
+    if (saving) return;
+    setError(null);
+    // Empty clears the date; otherwise it must parse.
+    const start = startedOn.trim() ? parseFlexibleDate(startedOn) : '';
+    const finish = finishedOn.trim() ? parseFlexibleDate(finishedOn) : '';
+    if (start === null || finish === null) {
+      setError('Date invalide. Essaie JJ/MM/AAAA (ex. 14/03/2019) ou juste l’année.');
+      return;
+    }
+    if (start && finish && finish < start) {
+      setError('La date de fin est avant la date de début.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await onSave({ startedOn: start || null, finishedOn: finish || null });
+      setEditing(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Enregistrement impossible.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (editing) {
     return (
-      <YStack
-        gap="$2"
-        paddingVertical="$2"
-        borderBottomColor="$borderColor"
-        borderBottomWidth={1}
-      >
+      <YStack gap="$2" paddingVertical="$2" borderBottomColor="$borderColor" borderBottomWidth={1}>
         <XStack gap="$2">
           <DateField label="Début" value={startedOn} onChange={setStartedOn} />
           <DateField label="Fin (lu le)" value={finishedOn} onChange={setFinishedOn} />
         </XStack>
+        {error ? (
+          <Text fontFamily="$body" fontSize={12} color="$signal">
+            {error}
+          </Text>
+        ) : null}
         <XStack gap="$2" alignItems="center">
           <Button
-            onPress={() => {
-              onSave({ startedOn: startedOn || null, finishedOn: finishedOn || null });
-              setEditing(false);
-            }}
-            disabled={!canSave}
+            onPress={onSubmit}
+            disabled={saving}
             backgroundColor="$accent"
             color={palette.paper}
             borderRadius={10}
@@ -167,14 +187,15 @@ function SessionRow({
             fontFamily="$body"
             fontWeight="600"
             fontSize={14}
-            opacity={canSave ? 1 : 0.5}
+            opacity={saving ? 0.6 : 1}
           >
-            Enregistrer
+            {saving ? 'Enregistrement…' : 'Enregistrer'}
           </Button>
           <Button
             onPress={() => {
               setStartedOn(session.started_on ?? '');
               setFinishedOn(session.finished_on ?? '');
+              setError(null);
               setEditing(false);
             }}
             chromeless
@@ -274,7 +295,18 @@ function Progress({
       </YStack>
 
       <XStack gap="$2" alignItems="center">
-        <Button onPress={() => commit(current - 10)} backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} color="$color" borderRadius={12} height={40} width={48} fontFamily="$body" fontSize={18}>
+        <Button
+          onPress={() => commit(current - 10)}
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          color="$color"
+          borderRadius={12}
+          height={40}
+          width={48}
+          fontFamily="$body"
+          fontSize={18}
+        >
           −
         </Button>
         <Input
@@ -293,10 +325,30 @@ function Progress({
           fontSize={15}
           color="$color"
         />
-        <Button onPress={() => commit(current + 10)} backgroundColor="$backgroundStrong" borderColor="$borderColor" borderWidth={1} color="$color" borderRadius={12} height={40} width={48} fontFamily="$body" fontSize={18}>
+        <Button
+          onPress={() => commit(current + 10)}
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          color="$color"
+          borderRadius={12}
+          height={40}
+          width={48}
+          fontFamily="$body"
+          fontSize={18}
+        >
           +
         </Button>
-        <Button onPress={onFinish} backgroundColor="$accent" color={palette.paper} borderRadius={12} height={40} paddingHorizontal="$4" fontFamily="$body" fontWeight="600">
+        <Button
+          onPress={onFinish}
+          backgroundColor="$accent"
+          color={palette.paper}
+          borderRadius={12}
+          height={40}
+          paddingHorizontal="$4"
+          fontFamily="$body"
+          fontWeight="600"
+        >
           Terminer
         </Button>
       </XStack>

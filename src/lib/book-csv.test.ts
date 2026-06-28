@@ -34,9 +34,7 @@ describe('parseBookCsv — Goodreads', () => {
   });
 
   it('treats a 0 rating as unrated', () => {
-    const { books } = parseBookCsv(
-      'ISBN13,My Rating\n="9782070360024",0',
-    );
+    const { books } = parseBookCsv('ISBN13,My Rating\n="9782070360024",0');
     expect(books[0].rating).toBeNull();
   });
 });

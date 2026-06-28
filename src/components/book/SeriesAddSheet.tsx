@@ -130,7 +130,13 @@ export function SeriesAddSheet({
             const isOwned = owned.has(v.isbn13);
             const sel = selected.has(v.isbn13);
             return (
-              <Button key={v.isbn13} onPress={() => !isOwned && toggle(v.isbn13)} unstyled padding={0} disabled={isOwned}>
+              <Button
+                key={v.isbn13}
+                onPress={() => !isOwned && toggle(v.isbn13)}
+                unstyled
+                padding={0}
+                disabled={isOwned}
+              >
                 <XStack
                   gap="$3"
                   alignItems="center"

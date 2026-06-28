@@ -225,7 +225,14 @@ function FriendButton({
             Amis ✓
           </Text>
         </YStack>
-        <Button onPress={onRemove} chromeless height={40} color="$colorMuted" fontFamily="$body" fontSize={13}>
+        <Button
+          onPress={onRemove}
+          chromeless
+          height={40}
+          color="$colorMuted"
+          fontFamily="$body"
+          fontSize={13}
+        >
           Retirer
         </Button>
       </XStack>
@@ -249,7 +256,18 @@ function FriendButton({
   }
   if (status === 'pending_out') {
     return (
-      <Button onPress={onRemove} height={44} paddingHorizontal="$5" borderRadius={999} backgroundColor="$backgroundStrong" borderWidth={1} borderColor="$borderColor" color="$colorMuted" fontFamily="$body" fontWeight="600">
+      <Button
+        onPress={onRemove}
+        height={44}
+        paddingHorizontal="$5"
+        borderRadius={999}
+        backgroundColor="$backgroundStrong"
+        borderWidth={1}
+        borderColor="$borderColor"
+        color="$colorMuted"
+        fontFamily="$body"
+        fontWeight="600"
+      >
         Demande envoyée · annuler
       </Button>
     );

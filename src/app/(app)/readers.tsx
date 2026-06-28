@@ -212,7 +212,12 @@ export default function ReadersScreen() {
                         + Ajouter
                       </Button>
                       {r.sample_genres?.length ? (
-                        <Text fontFamily="$body" fontSize={11} color="$colorMuted" numberOfLines={1}>
+                        <Text
+                          fontFamily="$body"
+                          fontSize={11}
+                          color="$colorMuted"
+                          numberOfLines={1}
+                        >
                           {r.sample_genres.slice(0, 2).join(' · ')}
                         </Text>
                       ) : null}
