@@ -5,8 +5,10 @@ import { Button, Input, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
+import { BulkCoverFill } from '@/components/library/BulkCoverFill';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
+import { missingCover } from '@/features/library/use-bulk-cover-fill';
 import { useSeriesTotals } from '@/features/books/use-series-volumes';
 import { useT } from '@/i18n';
 import { Screen } from '@/components/Screen';
@@ -89,6 +91,7 @@ export default function LibraryScreen() {
   const [openSeries, setOpenSeries] = useState<SeriesGroup | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showView, setShowView] = useState(false);
+  const [showCovers, setShowCovers] = useState(false);
   const { data: shelves } = useShelves(session?.user.id);
   const { data: seriesTotals } = useSeriesTotals(session?.user.id);
 
@@ -101,6 +104,7 @@ export default function LibraryScreen() {
     () => items.filter((i) => i.status === 'to_read' && i.ownership !== 'wishlist').length,
     [items],
   );
+  const missingCoverCount = useMemo(() => items.filter(missingCover).length, [items]);
   const copies = useMemo(() => copiesByIsbn(items.filter((i) => i.ownership === 'owned')), [items]);
   const copiesOf = (item: LibraryItem) =>
     item.book?.isbn13 ? (copies.get(item.book.isbn13) ?? 1) : 1;
@@ -240,8 +244,26 @@ export default function LibraryScreen() {
               </XStack>
             ) : null}
 
-            {toReadCount > 0 || wishlistCount > 0 ? (
+            {toReadCount > 0 || wishlistCount > 0 || missingCoverCount > 0 ? (
               <XStack gap="$2" flexWrap="wrap">
+                {missingCoverCount > 0 ? (
+                  <Button
+                    onPress={() => setShowCovers(true)}
+                    height={30}
+                    paddingHorizontal="$3"
+                    borderRadius={999}
+                    borderWidth={1}
+                    borderColor="$borderColor"
+                    backgroundColor="transparent"
+                    color="$colorSoft"
+                    fontFamily="$body"
+                    fontSize={13}
+                    fontWeight="600"
+                    pressStyle={{ opacity: 0.7 }}
+                  >
+                    {`Couvertures · ${missingCoverCount}`}
+                  </Button>
+                ) : null}
                 {toReadCount > 0 ? (
                   <Button
                     onPress={() => router.push('/queue')}
@@ -486,6 +508,14 @@ export default function LibraryScreen() {
             </YStack>
           </ScrollView>
         </YStack>
+      ) : null}
+
+      {showCovers ? (
+        <BulkCoverFill
+          items={items}
+          userId={session?.user.id}
+          onClose={() => setShowCovers(false)}
+        />
       ) : null}
     </Screen>
   );
