@@ -394,6 +394,8 @@ export function PlacesMap() {
     Object.fromEntries(TYPES.map((t) => [t.key, true])),
   );
   const [specialties, setSpecialties] = useState<Record<string, boolean>>({});
+  const [mineFav, setMineFav] = useState(false);
+  const [mineVisited, setMineVisited] = useState(false);
   const [count, setCount] = useState(0);
   const [selected, setSelected] = useState<SelectedPlace | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -404,11 +406,18 @@ export function PlacesMap() {
     if (!L || !map) return;
     if (layerRef.current) map.removeLayer(layerRef.current);
     const activeSpec = Object.keys(specialties).filter((k) => specialties[k]);
+    const mineOnly = mineFav || mineVisited;
     const cluster = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 });
     let n = 0;
     for (const f of featuresRef.current) {
       const p = f.properties;
       if (!active[p.type]) continue;
+      // "Mes lieux" filter — only my coups de cœur / visités.
+      if (mineOnly) {
+        const mk = marks?.get(p.id);
+        if (!mk) continue;
+        if (!((mineFav && mk.favorite) || (mineVisited && mk.visited))) continue;
+      }
       // Specialty filter narrows librairies only (a place must match one selected spec).
       if (activeSpec.length > 0) {
         if (p.type !== 'librairie') continue;
@@ -446,7 +455,7 @@ export function PlacesMap() {
     map.addLayer(cluster);
     layerRef.current = cluster;
     setCount(n);
-  }, [active, specialties]);
+  }, [active, specialties, marks, mineFav, mineVisited]);
 
   useEffect(() => {
     let cancelled = false;
@@ -524,6 +533,52 @@ export function PlacesMap() {
             </XStack>
           );
         })}
+        {userId ? (
+          <XStack gap="$2" marginLeft="$2" alignItems="center">
+            <XStack
+              onPress={() => setMineFav((v) => !v)}
+              alignItems="center"
+              gap="$1.5"
+              paddingHorizontal="$2.5"
+              height={30}
+              borderRadius={999}
+              borderWidth={1}
+              borderColor={mineFav ? palette.brick : '$borderColor'}
+              backgroundColor={mineFav ? palette.brick : 'transparent'}
+              {...({ style: { cursor: 'pointer' } } as any)}
+            >
+              <Text
+                fontFamily="$body"
+                fontSize={12.5}
+                fontWeight="600"
+                color={mineFav ? palette.paper : '$colorSoft'}
+              >
+                ♥ Coups de cœur
+              </Text>
+            </XStack>
+            <XStack
+              onPress={() => setMineVisited((v) => !v)}
+              alignItems="center"
+              gap="$1.5"
+              paddingHorizontal="$2.5"
+              height={30}
+              borderRadius={999}
+              borderWidth={1}
+              borderColor={mineVisited ? palette.forest : '$borderColor'}
+              backgroundColor={mineVisited ? palette.forest : 'transparent'}
+              {...({ style: { cursor: 'pointer' } } as any)}
+            >
+              <Text
+                fontFamily="$body"
+                fontSize={12.5}
+                fontWeight="600"
+                color={mineVisited ? palette.paper : '$colorSoft'}
+              >
+                ✓ Visités
+              </Text>
+            </XStack>
+          </XStack>
+        ) : null}
         <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginLeft="auto">
           {count.toLocaleString('fr-FR')} lieux
         </Text>
