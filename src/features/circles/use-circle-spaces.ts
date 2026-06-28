@@ -91,13 +91,17 @@ export function useCircleBookActions(circleId: string, userId: string | undefine
 }
 
 // ── Per-book comments ───────────────────────────────────────────────────────
+export const GENERAL_CHANNEL = 'Généralités';
+
 export interface BookComment {
   id: string;
   user_id: string;
   body: string;
   created_at: string;
+  channel: string;
 }
 
+/** All comments for a book across every channel (the panel filters client-side). */
 export function useBookComments(circleId: string | undefined, isbn13: string | undefined) {
   return useQuery({
     queryKey: ['circle-comments', circleId, isbn13],
@@ -105,12 +109,12 @@ export function useBookComments(circleId: string | undefined, isbn13: string | u
     queryFn: async (): Promise<BookComment[]> => {
       const { data, error } = await supabase
         .from('circle_book_comments')
-        .select('id, user_id, body, created_at')
+        .select('id, user_id, body, created_at, channel')
         .eq('circle_id', circleId as string)
         .eq('isbn13', isbn13 as string)
         .order('created_at', { ascending: true });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []).map((c) => ({ ...c, channel: c.channel ?? GENERAL_CHANNEL }));
     },
   });
 }
@@ -121,12 +125,16 @@ export function useCommentActions(circleId: string, isbn13: string, userId: stri
     queryClient.invalidateQueries({ queryKey: ['circle-comments', circleId, isbn13] });
 
   const add = useMutation({
-    mutationFn: async (body: string): Promise<void> => {
-      const text = body.trim();
+    mutationFn: async (input: { body: string; channel?: string }): Promise<void> => {
+      const text = input.body.trim();
       if (!text || !userId) return;
-      const { error } = await supabase
-        .from('circle_book_comments')
-        .insert({ circle_id: circleId, isbn13, user_id: userId, body: text });
+      const { error } = await supabase.from('circle_book_comments').insert({
+        circle_id: circleId,
+        isbn13,
+        user_id: userId,
+        body: text,
+        channel: input.channel?.trim() || GENERAL_CHANNEL,
+      });
       if (error) throw new Error(error.message);
     },
     onSuccess: invalidate,

@@ -26,6 +26,7 @@ import {
   useCircleMembers,
   useBlockedUsers,
   useCircleMessages,
+  useDeleteMessage,
   useEventActions,
   useEventRsvps,
   useLeaveCircle,
@@ -46,6 +47,8 @@ export default function CircleScreen() {
   const { data: members } = useCircleMembers(id);
   const { data: messages, isLoading } = useCircleMessages(id);
   const send = useSendMessage(id, userId);
+  const deleteMessage = useDeleteMessage(id, userId);
+  const isOwner = circle?.owner_id === userId;
   const markRead = useMarkCircleRead(userId);
   const leave = useLeaveCircle(userId);
   const { data: blocked } = useBlockedUsers(userId);
@@ -124,6 +127,20 @@ export default function CircleScreen() {
       notify('Message signalé. Merci — nous allons l’examiner.');
     } catch {
       notify('Impossible de signaler pour le moment.');
+    }
+  };
+
+  const onDeleteMessage = async (m: Message) => {
+    const ok = await confirm(
+      'Supprimer ce message',
+      'Ce message sera retiré pour tout le monde.',
+      'Supprimer',
+    );
+    if (!ok) return;
+    try {
+      await deleteMessage.mutateAsync(m.id);
+    } catch {
+      notify('Suppression impossible pour le moment.');
     }
   };
 
@@ -326,9 +343,11 @@ export default function CircleScreen() {
                     key={m.id}
                     message={m}
                     mine={m.user_id === userId}
+                    canModerate={isOwner}
                     author={nameByUser.get(m.user_id) ?? 'Membre'}
                     onReport={() => onReport(m)}
                     onBlock={() => onBlock(m)}
+                    onDelete={() => onDeleteMessage(m)}
                   />
                 ))
               )}
@@ -736,17 +755,24 @@ function EventRow({
 function Bubble({
   message,
   mine,
+  canModerate,
   author,
   onReport,
   onBlock,
+  onDelete,
 }: {
   message: Message;
   mine: boolean;
+  canModerate?: boolean;
   author: string;
   onReport?: () => void;
   onBlock?: () => void;
+  onDelete?: () => void;
 }) {
   const [menu, setMenu] = useState(false);
+  // You can delete your own messages; a circle owner can delete anyone's.
+  const canDelete = !!onDelete && (mine || canModerate);
+  const hasMenu = canDelete || (!mine && (onReport || onBlock));
   return (
     <YStack alignSelf={mine ? 'flex-end' : 'flex-start'} maxWidth="80%" gap={2}>
       {!mine ? (
@@ -771,45 +797,66 @@ function Bubble({
           {message.body}
         </Text>
       </YStack>
-      {!mine && (onReport || onBlock) ? (
-        <YStack gap={2}>
+      {hasMenu ? (
+        <YStack gap={2} alignSelf={mine ? 'flex-end' : 'flex-start'}>
           <Pressable onPress={() => setMenu((o) => !o)} hitSlop={8}>
-            <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginLeft="$2">
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginHorizontal="$2">
               {menu ? 'Fermer' : '⋯'}
             </Text>
           </Pressable>
           {menu ? (
-            <XStack gap="$3" marginLeft="$2">
-              <Button
-                onPress={() => {
-                  setMenu(false);
-                  onReport?.();
-                }}
-                chromeless
-                height={24}
-                paddingHorizontal={0}
-                color="$accent"
-                fontFamily="$body"
-                fontSize={12}
-                fontWeight="600"
-              >
-                Signaler
-              </Button>
-              <Button
-                onPress={() => {
-                  setMenu(false);
-                  onBlock?.();
-                }}
-                chromeless
-                height={24}
-                paddingHorizontal={0}
-                color="$signal"
-                fontFamily="$body"
-                fontSize={12}
-                fontWeight="600"
-              >
-                Bloquer
-              </Button>
+            <XStack gap="$3" marginHorizontal="$2">
+              {!mine && onReport ? (
+                <Button
+                  onPress={() => {
+                    setMenu(false);
+                    onReport();
+                  }}
+                  chromeless
+                  height={24}
+                  paddingHorizontal={0}
+                  color="$accent"
+                  fontFamily="$body"
+                  fontSize={12}
+                  fontWeight="600"
+                >
+                  Signaler
+                </Button>
+              ) : null}
+              {!mine && onBlock ? (
+                <Button
+                  onPress={() => {
+                    setMenu(false);
+                    onBlock();
+                  }}
+                  chromeless
+                  height={24}
+                  paddingHorizontal={0}
+                  color="$signal"
+                  fontFamily="$body"
+                  fontSize={12}
+                  fontWeight="600"
+                >
+                  Bloquer
+                </Button>
+              ) : null}
+              {canDelete ? (
+                <Button
+                  onPress={() => {
+                    setMenu(false);
+                    onDelete?.();
+                  }}
+                  chromeless
+                  height={24}
+                  paddingHorizontal={0}
+                  color="$signal"
+                  fontFamily="$body"
+                  fontSize={12}
+                  fontWeight="600"
+                >
+                  Supprimer
+                </Button>
+              ) : null}
             </XStack>
           ) : null}
         </YStack>

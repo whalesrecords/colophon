@@ -342,6 +342,22 @@ export function useCircleMessages(circleId: string | undefined) {
   return query;
 }
 
+/** Delete a message (RLS: your own, or any if you own the circle). */
+export function useDeleteMessage(circleId: string, userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (messageId: string): Promise<void> => {
+      const { error } = await supabase.from('messages').delete().eq('id', messageId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_data, messageId) => {
+      queryClient.setQueryData<Message[]>(['messages', circleId], (old) =>
+        (old ?? []).filter((m) => m.id !== messageId),
+      );
+    },
+  });
+}
+
 export interface CircleEvent {
   id: string;
   circle_id: string;

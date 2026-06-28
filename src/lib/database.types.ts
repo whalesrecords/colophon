@@ -62,6 +62,7 @@ export type Database = {
       circle_book_comments: {
         Row: {
           body: string;
+          channel: string;
           circle_id: string;
           created_at: string;
           id: string;
@@ -70,6 +71,7 @@ export type Database = {
         };
         Insert: {
           body: string;
+          channel?: string;
           circle_id: string;
           created_at?: string;
           id?: string;
@@ -78,6 +80,7 @@ export type Database = {
         };
         Update: {
           body?: string;
+          channel?: string;
           circle_id?: string;
           created_at?: string;
           id?: string;

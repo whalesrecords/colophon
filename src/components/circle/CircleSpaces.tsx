@@ -6,6 +6,7 @@ import { BookCover } from '@/components/BookCover';
 import { type CircleMember } from '@/features/circles/use-circles';
 import {
   type CircleBookRow,
+  GENERAL_CHANNEL,
   type ProposalRow,
   useBookComments,
   useCircleBookActions,
@@ -219,8 +220,41 @@ function BookPanel({
   const { data: comments } = useBookComments(circleId, isbn13);
   const { add, remove: removeComment } = useCommentActions(circleId, isbn13, userId);
   const [text, setText] = useState('');
+  const [channel, setChannel] = useState<string>(GENERAL_CHANNEL);
+  const [extraChannels, setExtraChannels] = useState<string[]>([]);
+  const [addingChannel, setAddingChannel] = useState(false);
+  const [channelName, setChannelName] = useState('');
   const mine = readers.find((r) => r.user_id === userId);
   const { bg, fg } = composedPalette(isbn13);
+
+  // One discussion per book = the "Généralités" channel; members open extra
+  // channels for specific points (a chapter, the ending, a theme…).
+  const channels = useMemo(() => {
+    const set = new Set<string>([GENERAL_CHANNEL]);
+    for (const c of comments ?? []) set.add(c.channel || GENERAL_CHANNEL);
+    for (const c of extraChannels) set.add(c);
+    return [...set];
+  }, [comments, extraChannels]);
+  const channelComments = (comments ?? []).filter(
+    (c) => (c.channel || GENERAL_CHANNEL) === channel,
+  );
+  const post = () => {
+    if (text.trim()) {
+      add.mutate({ body: text, channel });
+      setText('');
+    }
+  };
+  const addChannel = () => {
+    const n = channelName.trim();
+    if (n && !channels.includes(n)) {
+      setExtraChannels((p) => [...p, n]);
+      setChannel(n);
+    } else if (n) {
+      setChannel(n);
+    }
+    setChannelName('');
+    setAddingChannel(false);
+  };
 
   return (
     <YStack position="absolute" top={0} left={0} right={0} bottom={0} backgroundColor="$background">
@@ -333,53 +367,133 @@ function BookPanel({
           )}
         </YStack>
 
-        <YStack gap="$2">
-          <Label>Commentaires</Label>
-          {(comments ?? []).map((c) => (
-            <YStack
-              key={c.id}
-              gap={2}
-              padding="$3"
-              backgroundColor="$backgroundStrong"
-              borderColor="$borderColor"
-              borderWidth={1}
-              borderRadius={12}
-            >
-              <XStack justifyContent="space-between" alignItems="center">
-                <Text fontFamily="$body" fontSize={12} fontWeight="600" color="$colorSoft">
-                  {names.get(c.user_id) ?? 'Membre'}
-                </Text>
-                {c.user_id === userId ? (
-                  <Button
-                    onPress={() => removeComment.mutate(c.id)}
-                    chromeless
-                    height={22}
-                    paddingHorizontal={0}
-                    color="$colorMuted"
-                    fontFamily="$body"
-                    fontSize={14}
-                  >
-                    ✕
-                  </Button>
-                ) : null}
+        <YStack gap="$3">
+          <Label>Discussions</Label>
+
+          {/* channel selector — one tab per topic, + to open a new one */}
+          <XStack gap="$2" flexWrap="wrap" alignItems="center">
+            {channels.map((ch) => {
+              const active = ch === channel;
+              return (
+                <Button
+                  key={ch}
+                  onPress={() => setChannel(ch)}
+                  height={32}
+                  paddingHorizontal="$3"
+                  borderRadius={999}
+                  borderWidth={1}
+                  borderColor={active ? '$accent' : '$borderColor'}
+                  backgroundColor={active ? '$accent' : 'transparent'}
+                  color={active ? palette.paper : '$colorSoft'}
+                  fontFamily="$body"
+                  fontSize={13}
+                  fontWeight="600"
+                >
+                  {ch === GENERAL_CHANNEL ? `# ${ch}` : `# ${ch}`}
+                </Button>
+              );
+            })}
+            {addingChannel ? (
+              <XStack gap="$1" alignItems="center">
+                <Input
+                  value={channelName}
+                  onChangeText={setChannelName}
+                  onSubmitEditing={addChannel}
+                  autoFocus
+                  placeholder="Nom du point…"
+                  placeholderTextColor="$concreteLight"
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$accent"
+                  borderWidth={1}
+                  borderRadius={999}
+                  height={32}
+                  width={140}
+                  paddingHorizontal="$3"
+                  fontFamily="$body"
+                  fontSize={13}
+                  color="$color"
+                />
+                <Button
+                  onPress={addChannel}
+                  chromeless
+                  height={32}
+                  paddingHorizontal="$2"
+                  color="$accent"
+                  fontFamily="$body"
+                  fontSize={15}
+                  fontWeight="700"
+                >
+                  ✓
+                </Button>
               </XStack>
-              <Text fontFamily="$body" fontSize={14} color="$color" lineHeight={20}>
-                {c.body}
-              </Text>
-            </YStack>
-          ))}
+            ) : (
+              <Button
+                onPress={() => setAddingChannel(true)}
+                height={32}
+                paddingHorizontal="$3"
+                borderRadius={999}
+                borderWidth={1}
+                borderColor="$borderColor"
+                backgroundColor="transparent"
+                color="$colorMuted"
+                fontFamily="$body"
+                fontSize={13}
+                fontWeight="600"
+              >
+                ＋ Point
+              </Button>
+            )}
+          </XStack>
+
+          {channelComments.length === 0 ? (
+            <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+              {channel === GENERAL_CHANNEL
+                ? 'Lancez la discussion générale sur ce livre.'
+                : `Aucun message dans « ${channel} » — ouvrez le sujet.`}
+            </Text>
+          ) : (
+            channelComments.map((c) => (
+              <YStack
+                key={c.id}
+                gap={2}
+                padding="$3"
+                backgroundColor="$backgroundStrong"
+                borderColor="$borderColor"
+                borderWidth={1}
+                borderRadius={12}
+              >
+                <XStack justifyContent="space-between" alignItems="center">
+                  <Text fontFamily="$body" fontSize={12} fontWeight="600" color="$colorSoft">
+                    {names.get(c.user_id) ?? 'Membre'}
+                  </Text>
+                  {c.user_id === userId ? (
+                    <Button
+                      onPress={() => removeComment.mutate(c.id)}
+                      chromeless
+                      height={22}
+                      paddingHorizontal={0}
+                      color="$colorMuted"
+                      fontFamily="$body"
+                      fontSize={14}
+                    >
+                      ✕
+                    </Button>
+                  ) : null}
+                </XStack>
+                <Text fontFamily="$body" fontSize={14} color="$color" lineHeight={20}>
+                  {c.body}
+                </Text>
+              </YStack>
+            ))
+          )}
+
           <XStack gap="$2">
             <Input
               flex={1}
               value={text}
               onChangeText={setText}
-              onSubmitEditing={() => {
-                if (text.trim()) {
-                  add.mutate(text);
-                  setText('');
-                }
-              }}
-              placeholder="Votre commentaire…"
+              onSubmitEditing={post}
+              placeholder={`Message dans « ${channel} »…`}
               placeholderTextColor="$concreteLight"
               backgroundColor="$backgroundStrong"
               borderColor="$borderColor"
@@ -392,12 +506,7 @@ function BookPanel({
               color="$color"
             />
             <Button
-              onPress={() => {
-                if (text.trim()) {
-                  add.mutate(text);
-                  setText('');
-                }
-              }}
+              onPress={post}
               backgroundColor="$accent"
               color={palette.paper}
               borderRadius={12}
