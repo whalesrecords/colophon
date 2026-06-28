@@ -215,6 +215,52 @@ export function useProposalActions(circleId: string, userId: string | undefined)
     onSuccess: invalidate,
   });
 
+  /**
+   * Elect a proposal as the circle's next read: mark it selected, add the book to
+   * the circle's shared shelf (which opens its per-book discussion thread) and
+   * announce it in the chat. This is what "le livre choisi crée une discussion".
+   */
+  const choose = useMutation({
+    mutationFn: async (input: {
+      id: string;
+      isbn13: string;
+      title?: string | null;
+    }): Promise<void> => {
+      if (!userId) throw new Error('Vous devez être connecté.');
+      const { error: e1 } = await supabase
+        .from('circle_proposals')
+        .update({ status: 'selected' })
+        .eq('id', input.id);
+      if (e1) throw new Error(e1.message);
+
+      const { error: e2 } = await supabase.from('circle_books').upsert(
+        {
+          circle_id: circleId,
+          user_id: userId,
+          isbn13: input.isbn13,
+          reading_status: 'reading',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'circle_id,user_id,isbn13' },
+      );
+      if (e2) throw new Error(e2.message);
+
+      // Best-effort announcement — never block the election on a chat hiccup.
+      await supabase
+        .from('messages')
+        .insert({
+          circle_id: circleId,
+          user_id: userId,
+          body: `📚 Le cercle a choisi de lire « ${input.title ?? 'ce livre'} ». La discussion est ouverte dans la bibliothèque du cercle.`,
+        })
+        .then(undefined, () => undefined);
+    },
+    onSuccess: () => {
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: ['circle-library', circleId] });
+    },
+  });
+
   const remove = useMutation({
     mutationFn: async (id: string): Promise<void> => {
       const { error } = await supabase.from('circle_proposals').delete().eq('id', id);
@@ -223,5 +269,5 @@ export function useProposalActions(circleId: string, userId: string | undefined)
     onSuccess: invalidate,
   });
 
-  return { propose, toggleVote, setStatus, remove };
+  return { propose, toggleVote, setStatus, choose, remove };
 }

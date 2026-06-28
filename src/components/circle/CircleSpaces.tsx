@@ -427,9 +427,15 @@ export function CircleProposalsSection({
   isOwner: boolean;
 }) {
   const { data: proposals, isLoading } = useProposals(circleId);
-  const { propose, toggleVote, setStatus, remove } = useProposalActions(circleId, userId);
+  const { propose, toggleVote, choose, setStatus, remove } = useProposalActions(circleId, userId);
   const [adding, setAdding] = useState(false);
   const names = useMemo(() => nameMap(members), [members]);
+  // Show the most-voted proposals first so the leader is obvious.
+  const ranked = useMemo(
+    () => [...(proposals ?? [])].sort((a, b) => (b.votes?.length ?? 0) - (a.votes?.length ?? 0)),
+    [proposals],
+  );
+  const topVotes = ranked[0]?.votes?.length ?? 0;
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
@@ -465,15 +471,16 @@ export function CircleProposalsSection({
           </Text>
         ) : (
           <YStack gap="$2">
-            {(proposals ?? []).map((p) => (
+            {ranked.map((p) => (
               <ProposalRowView
                 key={p.id}
                 proposal={p}
                 userId={userId}
                 isOwner={isOwner}
                 proposer={names.get(p.proposed_by) ?? 'Membre'}
+                leading={(p.votes?.length ?? 0) > 0 && (p.votes?.length ?? 0) === topVotes}
                 onVote={() => toggleVote.mutate(p.id)}
-                onSelect={() => setStatus.mutate({ id: p.id, status: 'selected' })}
+                onChoose={() => choose.mutate({ id: p.id, isbn13: p.isbn13, title: p.book?.title })}
                 onArchive={() => setStatus.mutate({ id: p.id, status: 'archived' })}
                 onDelete={() => remove.mutate(p.id)}
               />
@@ -490,8 +497,9 @@ function ProposalRowView({
   userId,
   isOwner,
   proposer,
+  leading,
   onVote,
-  onSelect,
+  onChoose,
   onArchive,
   onDelete,
 }: {
@@ -499,8 +507,9 @@ function ProposalRowView({
   userId: string | undefined;
   isOwner: boolean;
   proposer: string;
+  leading: boolean;
   onVote: () => void;
-  onSelect: () => void;
+  onChoose: () => void;
   onArchive: () => void;
   onDelete: () => void;
 }) {
@@ -512,7 +521,7 @@ function ProposalRowView({
       gap="$2"
       padding="$3"
       backgroundColor="$backgroundStrong"
-      borderColor="$borderColor"
+      borderColor={leading ? palette.gold : '$borderColor'}
       borderWidth={1}
       borderRadius={12}
     >
@@ -524,9 +533,22 @@ function ProposalRowView({
           width={40}
         />
         <YStack flex={1} gap={2}>
-          <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
-            {proposal.book?.title ?? 'Sans titre'}
-          </Text>
+          <XStack alignItems="center" gap="$2">
+            <Text
+              fontFamily="$heading"
+              fontSize={15}
+              color="$color"
+              numberOfLines={1}
+              flexShrink={1}
+            >
+              {proposal.book?.title ?? 'Sans titre'}
+            </Text>
+            {leading ? (
+              <Text fontFamily="$body" fontSize={10} fontWeight="700" color={palette.gold}>
+                ★ EN TÊTE
+              </Text>
+            ) : null}
+          </XStack>
           <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
             Proposé par {proposer}
           </Text>
@@ -555,7 +577,7 @@ function ProposalRowView({
       {canModerate ? (
         <XStack gap="$3">
           <Button
-            onPress={onSelect}
+            onPress={onChoose}
             chromeless
             paddingHorizontal={0}
             color="$accent"
@@ -563,7 +585,7 @@ function ProposalRowView({
             fontSize={13}
             fontWeight="600"
           >
-            Choisir
+            Élire · ouvrir la discussion
           </Button>
           <Button
             onPress={onArchive}
