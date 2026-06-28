@@ -107,6 +107,15 @@ export default function LibraryScreen() {
   const items = useMemo(() => data ?? [], [data]);
   const readingItems = useMemo(() => items.filter((i) => i.status === 'reading'), [items]);
   const wishlistItems = useMemo(() => items.filter((i) => i.ownership === 'wishlist'), [items]);
+  // Newest non-wishlist books first — so a just-scanned book is visible immediately.
+  const recentItems = useMemo(
+    () =>
+      [...items]
+        .filter((i) => i.ownership !== 'wishlist')
+        .sort((a, b) => b.added_at.localeCompare(a.added_at))
+        .slice(0, 12),
+    [items],
+  );
   const wishlistCount = useMemo(
     () => items.filter((i) => i.ownership === 'wishlist').length,
     [items],
@@ -152,6 +161,7 @@ export default function LibraryScreen() {
               name={profile?.display_name}
               emailFallback={session?.user.email}
               currentRead={currentRead ?? null}
+              recent={recentItems}
               reading={readingItems}
               wishlist={wishlistItems}
               now={now}

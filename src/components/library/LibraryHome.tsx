@@ -194,6 +194,7 @@ interface LibraryHomeProps {
   name: string | null | undefined;
   emailFallback: string | undefined;
   currentRead: CurrentRead | null;
+  recent: LibraryItem[];
   reading: LibraryItem[];
   wishlist: LibraryItem[];
   now: Date;
@@ -207,6 +208,7 @@ export function LibraryHome({
   name,
   emailFallback,
   currentRead,
+  recent,
   reading,
   wishlist,
   now,
@@ -245,6 +247,7 @@ export function LibraryHome({
         <Hero read={currentRead} onPress={() => onOpenBook(currentRead.itemId)} />
       ) : null}
 
+      <Shelf title="Derniers ajouts" items={recent} onOpen={onOpenBook} />
       <Shelf title="On continue" items={continueItems} onOpen={onOpenBook} />
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
     </YStack>
