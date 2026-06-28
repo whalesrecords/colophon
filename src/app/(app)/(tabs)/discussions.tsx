@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
+import { PremiumSheet } from '@/components/circle/PremiumSheet';
 import { Screen } from '@/components/Screen';
 import { Avatar, AvatarStack } from '@/components/social/Avatar';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type CircleSummary,
+  FREE_CIRCLE_LIMIT,
   useCircles,
   useCreateCircle,
   useJoinCircle,
@@ -109,12 +111,15 @@ function CircleCard({
   accent,
   unread,
   onPress,
+  onPremium,
 }: {
   circle: CircleSummary;
   accent: string;
   unread: number;
   onPress: () => void;
+  onPremium: () => void;
 }) {
+  const full = circle.memberCount >= FREE_CIRCLE_LIMIT && !circle.isPremium;
   return (
     <Pressable onPress={onPress}>
       <XStack
@@ -132,10 +137,31 @@ function CircleCard({
               <Text fontFamily="$heading" fontSize={18} color="$color" numberOfLines={1}>
                 {circle.name}
               </Text>
-              <Text fontFamily="$body" fontSize={12.5} color="$colorMuted">
-                {circle.memberCount} membre{circle.memberCount > 1 ? 's' : ''} · code{' '}
-                {circle.invite_code}
-              </Text>
+              <XStack alignItems="center" gap="$2" flexWrap="wrap">
+                <Text fontFamily="$body" fontSize={12.5} color="$colorMuted">
+                  {circle.memberCount} membre{circle.memberCount > 1 ? 's' : ''} · code{' '}
+                  {circle.invite_code}
+                </Text>
+                {circle.isPremium ? (
+                  <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.gold}>
+                    PREMIUM
+                  </Text>
+                ) : full ? (
+                  <Text
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      onPremium();
+                    }}
+                    fontFamily="$body"
+                    fontSize={11}
+                    fontWeight="700"
+                    color={palette.gold}
+                    pressStyle={{ opacity: 0.6 }}
+                  >
+                    COMPLET · PREMIUM
+                  </Text>
+                ) : null}
+              </XStack>
             </YStack>
             {unread > 0 ? (
               <XStack
@@ -179,6 +205,8 @@ export default function DiscussionsScreen() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // null = closed; an object (with optional circle name) = the upsell sheet is open.
+  const [premium, setPremium] = useState<{ name: string | null } | null>(null);
   const { width } = useWindowDimensions();
   const padH = Math.max(20, (width - 720) / 2);
 
@@ -204,7 +232,15 @@ export default function DiscussionsScreen() {
       const circle = await joinCircle.mutateAsync(c);
       router.push(`/circle/${circle.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur');
+      const msg = e instanceof Error ? e.message : 'Erreur';
+      if (msg.includes('circle_full_free')) {
+        setError(`Ce cercle est complet (limite gratuite de ${FREE_CIRCLE_LIMIT} membres).`);
+        setPremium({ name: null });
+      } else if (msg.includes('circle_not_found')) {
+        setError("Aucun cercle avec ce code d'invitation.");
+      } else {
+        setError(msg);
+      }
     }
   };
 
@@ -318,6 +354,7 @@ export default function DiscussionsScreen() {
                   accent={TRANCHES[i % TRANCHES.length]}
                   unread={unread?.get(circle.id) ?? 0}
                   onPress={() => router.push(`/circle/${circle.id}`)}
+                  onPremium={() => setPremium({ name: circle.name })}
                 />
               ))}
             </YStack>
@@ -329,6 +366,10 @@ export default function DiscussionsScreen() {
           )}
         </YStack>
       </ScrollView>
+
+      {premium ? (
+        <PremiumSheet circleName={premium.name ?? undefined} onClose={() => setPremium(null)} />
+      ) : null}
     </Screen>
   );
 }

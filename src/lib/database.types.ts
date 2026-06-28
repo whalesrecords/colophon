@@ -300,22 +300,28 @@ export type Database = {
           created_at: string;
           id: string;
           invite_code: string;
+          is_premium: boolean;
           name: string;
           owner_id: string;
+          premium_until: string | null;
         };
         Insert: {
           created_at?: string;
           id?: string;
           invite_code?: string;
+          is_premium?: boolean;
           name: string;
           owner_id: string;
+          premium_until?: string | null;
         };
         Update: {
           created_at?: string;
           id?: string;
           invite_code?: string;
+          is_premium?: boolean;
           name?: string;
           owner_id?: string;
+          premium_until?: string | null;
         };
         Relationships: [];
       };

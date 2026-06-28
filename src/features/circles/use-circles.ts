@@ -9,11 +9,15 @@ export interface CircleMemberPreview {
   avatar_path: string | null;
 }
 
+/** Free circles cap at this many members; beyond it requires premium. */
+export const FREE_CIRCLE_LIMIT = 5;
+
 export interface CircleSummary {
   id: string;
   name: string;
   invite_code: string;
   memberCount: number;
+  isPremium: boolean;
   members: CircleMemberPreview[]; // for the avatar stack in the Échanges overview
 }
 
@@ -45,7 +49,7 @@ export function useCircles(userId: string | undefined) {
       const { data, error } = await supabase
         .from('circles')
         .select(
-          'id, name, invite_code, created_at, members:circle_members(count), member_rows:circle_members(user_id, display_name, joined_at)',
+          'id, name, invite_code, created_at, is_premium, members:circle_members(count), member_rows:circle_members(user_id, display_name, joined_at)',
         )
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -54,6 +58,7 @@ export function useCircles(userId: string | undefined) {
         id: string;
         name: string;
         invite_code: string;
+        is_premium: boolean | null;
         members: { count: number }[] | null;
         member_rows: { user_id: string; display_name: string | null; joined_at: string }[] | null;
       }[];
@@ -74,6 +79,7 @@ export function useCircles(userId: string | undefined) {
         name: c.name,
         invite_code: c.invite_code,
         memberCount: c.members?.[0]?.count ?? 0,
+        isPremium: c.is_premium ?? false,
         members: (c.member_rows ?? [])
           .sort((a, b) => a.joined_at.localeCompare(b.joined_at))
           .map((m) => ({
