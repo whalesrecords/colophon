@@ -434,6 +434,47 @@ export default function BookDetailScreen() {
             onSave={(v) => update.mutate({ notes: v || null })}
           />
 
+          {/* share the review into followers' feeds */}
+          {item.notes ? (
+            <Pressable onPress={() => update.mutate({ review_shared: !item.review_shared })}>
+              <XStack
+                alignItems="center"
+                justifyContent="space-between"
+                gap="$3"
+                backgroundColor="$backgroundStrong"
+                borderColor="$borderColor"
+                borderWidth={1}
+                borderRadius={12}
+                padding="$3"
+              >
+                <YStack flex={1} gap="$1">
+                  <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color">
+                    Partager mon avis dans le fil
+                  </Text>
+                  <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+                    Tes abonnés verront cet avis (une fois le livre terminé).
+                  </Text>
+                </YStack>
+                <YStack
+                  width={46}
+                  height={28}
+                  borderRadius={999}
+                  padding={3}
+                  justifyContent="center"
+                  alignItems={item.review_shared ? 'flex-end' : 'flex-start'}
+                  backgroundColor={item.review_shared ? '$accent' : '$borderColor'}
+                >
+                  <YStack
+                    width={22}
+                    height={22}
+                    borderRadius={999}
+                    backgroundColor={palette.paper}
+                  />
+                </YStack>
+              </XStack>
+            </Pressable>
+          ) : null}
+
           {/* exemplaire */}
           <YStack gap="$3">
             <Label>{t('book.thisCopy')}</Label>

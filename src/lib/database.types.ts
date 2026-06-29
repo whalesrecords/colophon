@@ -497,6 +497,7 @@ export type Database = {
           purchase_store: string | null;
           queue_position: number | null;
           rating: number | null;
+          review_shared: boolean;
           status: string;
           updated_at: string;
           user_id: string;
@@ -517,6 +518,7 @@ export type Database = {
           purchase_store?: string | null;
           queue_position?: number | null;
           rating?: number | null;
+          review_shared?: boolean;
           status?: string;
           updated_at?: string;
           user_id: string;
@@ -537,6 +539,7 @@ export type Database = {
           purchase_store?: string | null;
           queue_position?: number | null;
           rating?: number | null;
+          review_shared?: boolean;
           status?: string;
           updated_at?: string;
           user_id?: string;
@@ -1040,6 +1043,7 @@ export type Database = {
           isbn13: string | null;
           rating: number | null;
           finished_on: string;
+          body: string | null;
         }[];
       };
       friends_current_reading: {

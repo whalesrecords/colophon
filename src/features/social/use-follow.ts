@@ -12,6 +12,7 @@ export interface FeedEntry {
   isbn13: string | null;
   rating: number | null;
   finished_on: string;
+  body: string | null;
 }
 
 /** Do I follow this reader? */

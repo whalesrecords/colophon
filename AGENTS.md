@@ -268,14 +268,17 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   (RLS via `is_circle_member`); a **"Défis" tab** in each circle — create (titre, Pages/
   Livres, objectif, 7/14/30 j), Rejoindre/Quitter (creator auto-joins), live ranking via
   `challenge_progress(p_challenge)` (pages from `daily_reading` or books finished in the
-  window, target bar + ✓ when reached). **Next:** friends-scoped challenges, a declared
-  winner at the end, tie-in to badges/celebration.
+  window, target bar + ✓ when reached). **Winner SHIPPED:** ended challenges move to a
+  "Défis terminés" section with a 🏆 winner banner (green "Tu remportes ce défi !" when it's
+  you) + final ranking. **Next:** friends-scoped challenges, tie-in to badges/celebration.
 - **P2 — reading feed + follow. v1 SHIPPED.** One-way **follow** (`follows(follower_id,
   followee_id)`, RLS self-scoped) — a "Suivre/Suivi ✓" button on `/u/[id]`. A **`/feed`
   screen** ("Ce que lit ton réseau", reached from the Échanges header "Fil" chip) lists
   books recently **finished by people you follow** (cover, title, ★ rating, date) via the
-  `reading_feed()` SECURITY DEFINER RPC. **Next:** free-text mini-reviews/posts in the
-  feed; follower/following counts on profiles; merge in friends' activity.
+  `reading_feed()` SECURITY DEFINER RPC. **Mini-reviews SHIPPED:** `items.review_shared`
+  opt-in (a "Partager mon avis dans le fil" toggle under the review in book detail) surfaces
+  the written review (`items.notes`) as an italic quote in the feed entry. **Next:**
+  winner→badge tie-in; follower/following counts; merge in friends' activity; free posts.
 
 ## Roadmap — revente, dons & valeur de revente
 Own the *exit* of possession too: help a reader resell, give, or buy second-hand —

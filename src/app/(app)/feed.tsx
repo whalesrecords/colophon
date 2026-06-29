@@ -57,6 +57,18 @@ function FeedRow({ entry, onActor }: { entry: FeedEntry; onActor: () => void }) 
         <Text fontFamily="$heading" fontSize={15} fontWeight="600" color="$color" numberOfLines={2}>
           {entry.title ?? 'Sans titre'}
         </Text>
+        {entry.body ? (
+          <Text
+            fontFamily="$body"
+            fontSize={13}
+            color="$colorSoft"
+            lineHeight={19}
+            numberOfLines={4}
+            fontStyle="italic"
+          >
+            « {entry.body} »
+          </Text>
+        ) : null}
         <XStack alignItems="center" justifyContent="space-between">
           {entry.rating ? (
             <Text fontFamily="$body" fontSize={12.5} fontWeight="600" color={palette.gold}>
