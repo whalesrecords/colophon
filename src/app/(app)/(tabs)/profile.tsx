@@ -844,46 +844,116 @@ function ExportSection({ items }: { items: LibraryItem[] }) {
   );
 }
 
+function ModeCard({
+  active,
+  title,
+  desc,
+  onPress,
+}: {
+  active: boolean;
+  title: string;
+  desc: string;
+  onPress: () => void;
+}) {
+  return (
+    <YStack
+      flex={1}
+      onPress={onPress}
+      cursor="pointer"
+      pressStyle={{ opacity: 0.85 }}
+      gap="$1"
+      padding="$3"
+      borderRadius={12}
+      borderWidth={active ? 2 : 1}
+      borderColor={active ? '$accent' : '$borderColor'}
+      backgroundColor={active ? palette.surfaceWarmAlt : '$backgroundStrong'}
+    >
+      <XStack alignItems="center" gap="$1.5">
+        <Text
+          fontFamily="$body"
+          fontSize={15}
+          fontWeight="700"
+          color={active ? '$accent' : '$color'}
+        >
+          {title}
+        </Text>
+        {active ? (
+          <Text fontSize={13} color="$accent">
+            ✓
+          </Text>
+        ) : null}
+      </XStack>
+      <Text fontFamily="$body" fontSize={11.5} color="$colorMuted" lineHeight={16}>
+        {desc}
+      </Text>
+    </YStack>
+  );
+}
+
 function PrivacySection({ userId }: { userId: string | undefined }) {
   const { data: profile } = useProfile(userId);
   const update = useUpdateProfile(userId);
+  const isPrivate = profile?.is_private ?? false;
   const shared = profile?.share_current_reading ?? true;
 
   return (
-    <YStack gap="$2" marginTop="$6">
+    <YStack gap="$3" marginTop="$6">
       <Label>Confidentialité</Label>
-      <Pressable onPress={() => update.mutate({ share_current_reading: !shared })}>
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          gap="$3"
-          backgroundColor="$backgroundStrong"
-          borderColor="$borderColor"
-          borderWidth={1}
-          borderRadius={12}
-          padding="$3"
-        >
-          <YStack flex={1} gap="$1">
-            <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color">
-              Partager ma lecture du moment
-            </Text>
-            <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
-              Tes amis voient le livre que tu lis en ce moment. Désactive pour le garder privé.
-            </Text>
-          </YStack>
-          <YStack
-            width={46}
-            height={28}
-            borderRadius={999}
-            padding={3}
-            justifyContent="center"
-            alignItems={shared ? 'flex-end' : 'flex-start'}
-            backgroundColor={shared ? '$accent' : '$borderColor'}
+
+      <XStack gap="$2">
+        <ModeCard
+          active={!isPrivate}
+          title="Social"
+          desc="Visible en découverte, fil et classements."
+          onPress={() => update.mutate({ is_private: false })}
+        />
+        <ModeCard
+          active={isPrivate}
+          title="Secret"
+          desc="Invisible — rien ne sort de ton compte."
+          onPress={() => update.mutate({ is_private: true, share_current_reading: false })}
+        />
+      </XStack>
+
+      {isPrivate ? (
+        <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+          En mode Secret, tout partage social est coupé (profil, découverte, fil, classements,
+          lecture en cours). Repasse en Social pour choisir au cas par cas.
+        </Text>
+      ) : (
+        <Pressable onPress={() => update.mutate({ share_current_reading: !shared })}>
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            gap="$3"
+            backgroundColor="$backgroundStrong"
+            borderColor="$borderColor"
+            borderWidth={1}
+            borderRadius={12}
+            padding="$3"
           >
-            <YStack width={22} height={22} borderRadius={999} backgroundColor={palette.paper} />
-          </YStack>
-        </XStack>
-      </Pressable>
+            <YStack flex={1} gap="$1">
+              <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color">
+                Partager ma lecture du moment
+              </Text>
+              <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+                Tes amis voient le livre que tu lis en ce moment. Désactive pour le garder privé.
+              </Text>
+            </YStack>
+            <YStack
+              width={46}
+              height={28}
+              borderRadius={999}
+              padding={3}
+              justifyContent="center"
+              alignItems={shared ? 'flex-end' : 'flex-start'}
+              backgroundColor={shared ? '$accent' : '$borderColor'}
+            >
+              <YStack width={22} height={22} borderRadius={999} backgroundColor={palette.paper} />
+            </YStack>
+          </XStack>
+        </Pressable>
+      )}
     </YStack>
   );
 }

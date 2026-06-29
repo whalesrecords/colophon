@@ -803,6 +803,7 @@ export type Database = {
           created_at: string;
           daily_goal: number | null;
           display_name: string | null;
+          is_private: boolean;
           pseudo: string | null;
           share_current_reading: boolean;
           updated_at: string;
@@ -815,6 +816,7 @@ export type Database = {
           created_at?: string;
           daily_goal?: number | null;
           display_name?: string | null;
+          is_private?: boolean;
           pseudo?: string | null;
           share_current_reading?: boolean;
           updated_at?: string;
@@ -827,6 +829,7 @@ export type Database = {
           created_at?: string;
           daily_goal?: number | null;
           display_name?: string | null;
+          is_private?: boolean;
           pseudo?: string | null;
           share_current_reading?: boolean;
           updated_at?: string;

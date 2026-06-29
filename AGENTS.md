@@ -324,11 +324,14 @@ and surface what their collection is worth now (not just what it cost).
   library + catalogue — the substrate for future recommendations.
 - **Recommandations par humeur (P2, façon StoryGraph).** mood/pace tags on books; "envie de
   quoi ce soir ?" → suggestions filtered by mood.
-- **Modes de confidentialité (P0).** A master **Secret ⇄ Social** switch in Settings + per-
-  surface toggles (public profile, discovery/`suggested_readers`, current reading, feed
-  presence, leaderboards) — all reversible anytime. Secret = nothing leaves the account.
-  Reuses `share_current_reading` + a new `profiles.is_private` gating the authenticated
-  profile-SELECT policy and every social RPC.
+- **Modes de confidentialité (P0). v1 SHIPPED.** `profiles.is_private` + a master **Secret ⇄
+  Social** control in Profil → Confidentialité (picking Secret also forces
+  `share_current_reading=false`). Secret = excluded from every social surface — gated in
+  `suggested_readers` (discovery), `reader_profile` (profile returns null to others),
+  `friends_current_reading` ("En ce moment"), `reading_feed` (followers' feed),
+  `friends_leaderboard` + `circle_leaderboard` (self still visible to self). Verified
+  cross-user on web: a private reader vanishes from the feed + their profile is "introuvable".
+  **Next:** per-surface granular toggles beyond the master switch; tie into the onboarding persona.
 - **Récap hebdo par email (P1).** Opt-in weekly reading summary, emailed automatically — an
   edge function on a `pg_cron` schedule + an email provider (Resend). Quiet, gentle, opt-out.
 - **Sécurité ULTRA (P0, transverse).** Full RLS audit + access tests; enable Auth leaked-

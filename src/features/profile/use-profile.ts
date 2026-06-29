@@ -50,6 +50,7 @@ export interface ProfilePatch {
   avatar_path?: string | null;
   annual_goal?: number | null;
   share_current_reading?: boolean;
+  is_private?: boolean;
 }
 
 export function useUpdateProfile(userId: string | undefined) {
