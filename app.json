@@ -16,9 +16,6 @@
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "entitlements": {
-        "com.apple.security.application-groups": ["group.com.whalesrecords.colophon"]
       }
     },
     "android": {
@@ -58,8 +55,7 @@
           }
         }
       ],
-      "expo-notifications",
-      "@bacons/apple-targets"
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true

@@ -16,9 +16,23 @@ progress), via [`@bacons/apple-targets`](https://github.com/EvanBacon/expo-apple
   native module is absent there), so it's safe in every build.
 - **`app.json`** — the `@bacons/apple-targets` plugin + the app's App Group entitlement.
 
-## Activating it (needs a native build — NOT Expo Go / web)
+## ⚠️ Status: code ready, currently DISABLED in app.json
 
-1. `pnpm install` (already adds `@bacons/apple-targets`).
+The `@bacons/apple-targets` plugin + the app's App Group entitlement were removed
+from `app.json` so headless EAS builds keep working. Reason: a brand-new app
+extension (the widget) needs its **own provisioning profile**, and EAS can only
+create that in **interactive** mode the first time ("Distribution Certificate is not
+validated for non-interactive builds"). The App Group capability + the widget bundle
+id `com.whalesrecords.colophon.widget` were already registered by the first attempt.
+
+## Activating it (one interactive build, then headless works)
+
+1. Re-add to `app.json`: the `@bacons/apple-targets` plugin, and under `ios` the
+   `"entitlements": { "com.apple.security.application-groups": ["group.com.whalesrecords.colophon"] }`.
+2. Run **one interactive build** to create the widget's provisioning profile:
+   `EXPO_TOKEN=… npx eas-cli build -p ios --profile production` (no `--non-interactive`),
+   and accept the credential prompts for the `ColophonLecture` target. After this,
+   `--non-interactive` builds work again.
 2. **Register the App Group** `group.com.whalesrecords.colophon` in the Apple Developer
    portal (Certificates, Identifiers & Profiles → Identifiers → App Groups), and make
    sure it's enabled on both the app id `com.whalesrecords.colophon` and the widget id
