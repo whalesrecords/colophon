@@ -518,6 +518,16 @@ export default function BookDetailScreen() {
               placeholder={t('book.purchaseStorePlaceholder')}
               onSave={(v) => update.mutate({ purchase_store: v || null })}
             />
+            <EditableText
+              label="Valeur de revente estimée (€)"
+              value={item.estimated_value != null ? String(item.estimated_value) : null}
+              placeholder="0,00"
+              numeric
+              onSave={(v) => {
+                const n = parseFloat(v.replace(',', '.'));
+                update.mutate({ estimated_value: Number.isFinite(n) ? n : null });
+              }}
+            />
           </YStack>
 
           {/* loan */}

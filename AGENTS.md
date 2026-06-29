@@ -277,8 +277,9 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   books recently **finished by people you follow** (cover, title, ★ rating, date) via the
   `reading_feed()` SECURITY DEFINER RPC. **Mini-reviews SHIPPED:** `items.review_shared`
   opt-in (a "Partager mon avis dans le fil" toggle under the review in book detail) surfaces
-  the written review (`items.notes`) as an italic quote in the feed entry. **Next:**
-  winner→badge tie-in; follower/following counts; merge in friends' activity; free posts.
+  the written review (`items.notes`) as an italic quote in the feed entry. **Follower count
+  SHIPPED** (`follow_counts()` RPC → an "abonnés" stat on `/u/[id]`). **Next:** winner→badge
+  tie-in; merge in friends' activity; free-standing posts (not tied to a finished book).
 
 ## Roadmap — revente, dons & valeur de revente
 Own the *exit* of possession too: help a reader resell, give, or buy second-hand —
@@ -294,9 +295,11 @@ and surface what their collection is worth now (not just what it cost).
   + `estimated_value`; auto-fetch resale price by ISBN+condition. Needs a real pricing
   source — **momox partner API** (gives price-by-condition), ISBNdb (paid, deferred),
   or comps scraping (fragile/ToS). Until then, manual value entry feeds the same field.
-- **Resale value in the library.** Extend the Profil **Collection** card (today: sum of
-  `purchase_price` = what you paid) with an estimated **valeur de revente** (sum of
-  `estimated_value`) — "ce que ça vaut aujourd'hui" vs "ce que ça a coûté".
+- **Resale value in the library. v1 SHIPPED.** `items.estimated_value` (manual entry in
+  book detail, "Valeur de revente estimée"); `use-stats` sums it over owned copies
+  (`resaleValue`/`resaleCount`); the Profil **Collection** card gains a gold "Revente · N
+  chiffrés" row — "ce que ça vaut aujourd'hui" vs "ce que ça a coûté" (`purchase_price`).
+  Auto price-by-condition (momox API) still pending; manual entry feeds the same field.
 - **Dons.** A clear "donner" path (Leboncoin *donnons* / Recyclivre / Emmaüs) for books
   you won't resell — aligned with the indie/never-Amazon ethos.
 - **Boîtes à livres (little free libraries) — v1 SHIPPED.** A community map of book

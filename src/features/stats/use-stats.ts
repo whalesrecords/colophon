@@ -14,6 +14,8 @@ export interface LibraryStats {
   pricedCount: number; // how many owned items have a price
   acquiredThisYear: number; // owned items bought this year (by purchase_date)
   spentThisYear: number; // total spent this year
+  resaleValue: number; // sum of estimated resale values of OWNED items
+  resaleCount: number; // how many owned items have an estimated value
 }
 
 interface ItemRow {
@@ -22,6 +24,7 @@ interface ItemRow {
   ownership: string;
   purchase_price: number | null;
   purchase_date: string | null;
+  estimated_value: number | null;
   book: { page_count: number | null; authors: string[] | null } | null;
 }
 
@@ -41,7 +44,7 @@ export function useStats(userId: string | undefined) {
         supabase
           .from('items')
           .select(
-            'id, status, ownership, purchase_price, purchase_date, book:book_metadata(page_count, authors)',
+            'id, status, ownership, purchase_price, purchase_date, estimated_value, book:book_metadata(page_count, authors)',
           ),
         supabase.from('reading_sessions').select('item_id, status, finished_on'),
       ]);
@@ -66,6 +69,8 @@ export function useStats(userId: string | undefined) {
         pricedCount: 0,
         acquiredThisYear: 0,
         spentThisYear: 0,
+        resaleValue: 0,
+        resaleCount: 0,
       };
 
       const yearPrefix = String(stats.year);
@@ -85,6 +90,11 @@ export function useStats(userId: string | undefined) {
           if (row.purchase_date?.startsWith(yearPrefix)) {
             stats.acquiredThisYear += 1;
             if (price != null && Number.isFinite(price)) stats.spentThisYear += price;
+          }
+          const resale = row.estimated_value != null ? Number(row.estimated_value) : null;
+          if (resale != null && Number.isFinite(resale)) {
+            stats.resaleValue += resale;
+            stats.resaleCount += 1;
           }
         }
       }

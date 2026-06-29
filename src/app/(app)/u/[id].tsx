@@ -7,7 +7,7 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
 import { useAuth } from '@/features/auth/auth-context';
-import { useFollowActions, useIsFollowing } from '@/features/social/use-follow';
+import { useFollowActions, useFollowCounts, useIsFollowing } from '@/features/social/use-follow';
 import { avatarUrl, useFriendActions, useReaderProfile } from '@/features/social/use-friends';
 import { palette } from '@/theme/tokens';
 
@@ -56,6 +56,7 @@ export default function ReaderProfileScreen() {
   const { data: profile, isLoading } = useReaderProfile(id);
   const { sendRequest, accept, remove } = useFriendActions(session?.user.id);
   const { data: following } = useIsFollowing(id, session?.user.id);
+  const { data: followCounts } = useFollowCounts(id);
   const { follow, unfollow } = useFollowActions(session?.user.id);
 
   const url = profile ? avatarUrl(profile.avatar_path) : null;
@@ -179,6 +180,15 @@ export default function ReaderProfileScreen() {
                 </Text>
                 <Text fontFamily="$body" fontSize={13} color="$colorMuted">
                   lus
+                </Text>
+              </YStack>
+              <YStack width={1} height={40} backgroundColor="$borderColor" />
+              <YStack alignItems="center">
+                <Text fontFamily="$heading" fontSize={28} color={palette.sage}>
+                  {followCounts?.followers ?? 0}
+                </Text>
+                <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+                  abonnés
                 </Text>
               </YStack>
             </XStack>

@@ -465,7 +465,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
         <KPITile value={formatCount(stats.pagesRead)} label={t('profile.pagesRead')} />
       </KPIRow>
 
-      {stats.pricedCount > 0 || stats.acquiredThisYear > 0 ? (
+      {stats.pricedCount > 0 || stats.acquiredThisYear > 0 || stats.resaleCount > 0 ? (
         <YStack gap="$3">
           <Label>Collection</Label>
           <KPIRow>
@@ -473,8 +473,8 @@ function Stats({ stats }: { stats: LibraryStats }) {
               value={euro(stats.collectionValue)}
               label={
                 stats.pricedCount < stats.total
-                  ? `Valeur · ${stats.pricedCount} chiffrés`
-                  : 'Valeur estimée'
+                  ? `Payé · ${stats.pricedCount} chiffrés`
+                  : 'Ce que ça a coûté'
               }
               accent={palette.prussian}
             />
@@ -484,6 +484,19 @@ function Stats({ stats }: { stats: LibraryStats }) {
             />
             <KPITile value={euro(stats.spentThisYear)} label={`Dépensé en ${stats.year}`} />
           </KPIRow>
+          {stats.resaleCount > 0 ? (
+            <KPIRow>
+              <KPITile
+                value={euro(stats.resaleValue)}
+                label={
+                  stats.resaleCount < stats.total
+                    ? `Revente · ${stats.resaleCount} chiffrés`
+                    : 'Ce que ça vaut aujourd’hui'
+                }
+                accent={palette.gold}
+              />
+            </KPIRow>
+          ) : null}
         </YStack>
       ) : null}
 

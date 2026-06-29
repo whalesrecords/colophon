@@ -486,6 +486,7 @@ export type Database = {
           borrowed_from: string | null;
           condition: string | null;
           cover_override: string | null;
+          estimated_value: number | null;
           format: string | null;
           id: string;
           isbn13: string;
@@ -507,6 +508,7 @@ export type Database = {
           borrowed_from?: string | null;
           condition?: string | null;
           cover_override?: string | null;
+          estimated_value?: number | null;
           format?: string | null;
           id?: string;
           isbn13: string;
@@ -528,6 +530,7 @@ export type Database = {
           borrowed_from?: string | null;
           condition?: string | null;
           cover_override?: string | null;
+          estimated_value?: number | null;
           format?: string | null;
           id?: string;
           isbn13?: string;
@@ -1030,6 +1033,10 @@ export type Database = {
           avatar_path: string | null;
           value: number;
         }[];
+      };
+      follow_counts: {
+        Args: { p_user: string };
+        Returns: { followers: number; following: number }[];
       };
       reading_feed: {
         Args: Record<string, never>;

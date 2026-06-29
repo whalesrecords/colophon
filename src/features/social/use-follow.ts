@@ -15,6 +15,25 @@ export interface FeedEntry {
   body: string | null;
 }
 
+export interface FollowCounts {
+  followers: number;
+  following: number;
+}
+
+/** Follower + following counts for any reader. */
+export function useFollowCounts(targetId: string | undefined) {
+  return useQuery({
+    queryKey: ['follow-counts', targetId],
+    enabled: !!targetId,
+    queryFn: async (): Promise<FollowCounts> => {
+      const { data, error } = await supabase.rpc('follow_counts', { p_user: targetId as string });
+      if (error) throw error;
+      const row = (data ?? [])[0];
+      return { followers: row?.followers ?? 0, following: row?.following ?? 0 };
+    },
+  });
+}
+
 /** Do I follow this reader? */
 export function useIsFollowing(targetId: string | undefined, userId: string | undefined) {
   return useQuery({
@@ -38,7 +57,10 @@ export function useFollowActions(userId: string | undefined) {
   const invalidate = (target?: string) => {
     qc.invalidateQueries({ queryKey: ['following', userId] });
     qc.invalidateQueries({ queryKey: ['reading-feed', userId] });
-    if (target) qc.invalidateQueries({ queryKey: ['following', userId, target] });
+    if (target) {
+      qc.invalidateQueries({ queryKey: ['following', userId, target] });
+      qc.invalidateQueries({ queryKey: ['follow-counts', target] });
+    }
   };
 
   const follow = useMutation({
