@@ -260,8 +260,11 @@ and surface what their collection is worth now (not just what it cost).
   (`book_box_donations`). RLS: authenticated read-all, owner-write. Screen `/boites`
   (reached from the carte header) — browse with photo + donation count, add a box
   (photo + "📍 ma position" geolocation + note), open a box → "Y aller" + drop-a-book
-  log. **Next: pin the boxes on the Leaflet carte** (a distinct 📚 marker layer
-  fetched from `book_boxes`), and let "ajouter ici" drop a box at a tapped map point.
+  log. **Pins on the carte SHIPPED (web)**: a 📚 square gold marker layer fetched from
+  `book_boxes` + a "Boîtes à livres" filter toggle; tap a pin → popup (photo, note,
+  "Y aller"). **Next: native-map parity** (the native WebView map needs the boxes
+  passed in) + "ajouter ici" by tapping a map point. Carte refonte also done: warm
+  pastille clusters + tranche filter pills.
 
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.

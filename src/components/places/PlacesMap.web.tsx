@@ -3,8 +3,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { useAuth } from '@/features/auth/auth-context';
+import { boxPhotoUrl, useBookBoxes } from '@/features/places/use-book-boxes';
 import { useUserPlaceActions, useUserPlaces } from '@/features/places/use-places';
 import { palette } from '@/theme/tokens';
+
+/** Escape user-provided text before putting it in a Leaflet popup's innerHTML. */
+function esc(s?: string | null): string {
+  return (s || '').replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+  );
+}
 
 // Leaflet is loaded from a CDN at runtime (web only) so we don't bundle a DOM map
 // lib into the native graph. 5 700+ points are clustered for performance.
@@ -22,7 +31,7 @@ const TYPES = [
   { key: 'festival', label: 'Festivals', color: palette.gold, glyph: '🎪' },
   { key: 'cafe_philo', label: 'Cafés philo', color: palette.prussian, glyph: '☕' },
   { key: 'cercle_lecture', label: 'Cercles', color: palette.forest, glyph: '👥' },
-  { key: 'atelier_ecriture', label: 'Ateliers', color: '#6B5B95', glyph: '✍️' },
+  { key: 'atelier_ecriture', label: 'Ateliers', color: palette.concrete, glyph: '✍️' },
 ] as const;
 const COLOR: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.color]));
 const TYPE_LABEL: Record<string, string> = Object.fromEntries(TYPES.map((t) => [t.key, t.label]));
@@ -399,12 +408,15 @@ export function PlacesMap() {
   const userId = session?.user.id;
   const { data: marks } = useUserPlaces(userId);
   const { toggle, setNote } = useUserPlaceActions(userId);
+  const { data: boxes } = useBookBoxes();
 
   const hostRef = useRef<HTMLElement | null>(null);
   const mapRef = useRef<any>(null);
   const LRef = useRef<any>(null);
   const featuresRef = useRef<any[]>([]);
   const layerRef = useRef<any>(null);
+  const boxesLayerRef = useRef<any>(null);
+  const [showBoxes, setShowBoxes] = useState(true);
   const [active, setActive] = useState<Record<string, boolean>>(
     Object.fromEntries(TYPES.map((t) => [t.key, true])),
   );
@@ -422,7 +434,21 @@ export function PlacesMap() {
     if (layerRef.current) map.removeLayer(layerRef.current);
     const activeSpec = Object.keys(specialties).filter((k) => specialties[k]);
     const mineOnly = mineFav || mineVisited;
-    const cluster = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 });
+    // Warm-pastille cluster bubbles (refonte) — green → ochre → orange by size.
+    const cluster = L.markerClusterGroup({
+      chunkedLoading: true,
+      maxClusterRadius: 50,
+      iconCreateFunction: (c: any) => {
+        const n = c.getChildCount();
+        const size = n < 10 ? 34 : n < 100 ? 40 : 48;
+        const bg = n < 10 ? '#5FA85C' : n < 100 ? '#E0A24B' : '#E08A4B';
+        return L.divIcon({
+          className: '',
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:3px solid rgba(255,255,255,.75);box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:sans-serif;font-size:13px">${n}</div>`,
+          iconSize: [size, size],
+        });
+      },
+    });
     let n = 0;
     for (const f of featuresRef.current) {
       const p = f.properties;
@@ -471,7 +497,36 @@ export function PlacesMap() {
     map.addLayer(cluster);
     layerRef.current = cluster;
     setCount(n);
-  }, [active, specialties, marks, mineFav, mineVisited]);
+
+    // Boîtes à livres — a separate (un-clustered) layer of square gold markers, so
+    // they read as "boxes" (vs the round place pins) and stay visible at any zoom.
+    if (boxesLayerRef.current) map.removeLayer(boxesLayerRef.current);
+    boxesLayerRef.current = null;
+    if (showBoxes && boxes && boxes.length > 0) {
+      const bl = L.layerGroup();
+      for (const b of boxes) {
+        if (typeof b.lat !== 'number' || typeof b.lng !== 'number') continue;
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="width:26px;height:26px;border-radius:6px;background:${palette.gold};border:2px solid rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1">📚</div>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
+        });
+        const photo = boxPhotoUrl(b.photo_path);
+        const dir = `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`;
+        const html = `<div style="font:13px/1.4 -apple-system,sans-serif;max-width:200px">${
+          photo
+            ? `<img src="${esc(photo)}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:6px"/>`
+            : ''
+        }<strong>${esc(b.name)}</strong>${
+          b.city ? `<div style="color:#8C8479">${esc(b.city)}</div>` : ''
+        }${b.note ? `<div style="margin-top:4px">${esc(b.note)}</div>` : ''}<a href="${dir}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;color:#AE4133;font-weight:600">Y aller ↗</a></div>`;
+        L.marker([b.lat, b.lng], { icon }).bindPopup(html).addTo(bl);
+      }
+      bl.addTo(map);
+      boxesLayerRef.current = bl;
+    }
+  }, [active, specialties, marks, mineFav, mineVisited, boxes, showBoxes]);
 
   useEffect(() => {
     let cancelled = false;
@@ -546,6 +601,30 @@ export function PlacesMap() {
             </XStack>
           );
         })}
+        <XStack
+          onPress={() => setShowBoxes((v) => !v)}
+          alignItems="center"
+          gap="$1.5"
+          paddingHorizontal="$2.5"
+          height={30}
+          borderRadius={999}
+          borderWidth={1}
+          borderColor={showBoxes ? palette.gold : '$borderColor'}
+          backgroundColor={showBoxes ? palette.gold : 'transparent'}
+          {...({ style: { cursor: 'pointer' } } as any)}
+        >
+          <Text fontSize={12} lineHeight={14}>
+            📚
+          </Text>
+          <Text
+            fontFamily="$body"
+            fontSize={12.5}
+            fontWeight="600"
+            color={showBoxes ? palette.paper : '$colorSoft'}
+          >
+            Boîtes à livres
+          </Text>
+        </XStack>
         {userId ? (
           <XStack gap="$2" marginLeft="$2" alignItems="center">
             <XStack
