@@ -926,6 +926,26 @@ export type Database = {
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       log_daily_pages: { Args: { p_pages: number }; Returns: undefined };
       record_reading_page: { Args: { p_session: string; p_page: number }; Returns: undefined };
+      friends_leaderboard: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          display_name: string | null;
+          pseudo: string | null;
+          avatar_path: string | null;
+          pages: number;
+        }[];
+      };
+      circle_leaderboard: {
+        Args: { p_circle: string };
+        Returns: {
+          user_id: string;
+          display_name: string | null;
+          pseudo: string | null;
+          avatar_path: string | null;
+          pages: number;
+        }[];
+      };
       friends_current_reading: {
         Args: Record<string, never>;
         Returns: {

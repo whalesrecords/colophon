@@ -7,6 +7,7 @@ import { PremiumSheet } from '@/components/circle/PremiumSheet';
 import { Screen } from '@/components/Screen';
 import { Avatar, AvatarStack } from '@/components/social/Avatar';
 import { FriendsReadingNow } from '@/components/social/FriendsReadingNow';
+import { Leaderboard } from '@/components/social/Leaderboard';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type CircleSummary,
@@ -17,6 +18,7 @@ import {
   useUnreadCounts,
 } from '@/features/circles/use-circles';
 import { type FriendPerson, useFriendships } from '@/features/social/use-friends';
+import { useFriendsLeaderboard } from '@/features/social/use-leaderboard';
 import { palette } from '@/theme/tokens';
 
 /** Each circle gets one of the four "tranches" as its accent, by position. */
@@ -201,6 +203,7 @@ export default function DiscussionsScreen() {
   const { data: circles, isLoading } = useCircles(userId);
   const { data: unread } = useUnreadCounts(userId);
   const { data: friendships } = useFriendships(userId);
+  const { data: leaderboard } = useFriendsLeaderboard(userId);
   const incomingCount = friendships?.incoming.length ?? 0;
   const createCircle = useCreateCircle(userId);
   const joinCircle = useJoinCircle(userId);
@@ -302,6 +305,13 @@ export default function DiscussionsScreen() {
         />
 
         <FriendsReadingNow userId={userId} />
+
+        {(leaderboard?.length ?? 0) >= 2 ? (
+          <YStack gap="$3" marginBottom="$5">
+            <Label>Classement · cette semaine</Label>
+            <Leaderboard rows={leaderboard} myId={userId} />
+          </YStack>
+        ) : null}
 
         <YStack gap="$3" marginBottom="$5">
           <Label>Nouveau cercle</Label>

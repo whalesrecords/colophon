@@ -14,6 +14,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { CircleLibrarySection, CircleProposalsSection } from '@/components/circle/CircleSpaces';
+import { Leaderboard } from '@/components/social/Leaderboard';
+import { useCircleLeaderboard } from '@/features/social/use-leaderboard';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type CircleEvent,
@@ -55,7 +57,9 @@ export default function CircleScreen() {
   const { report, block, unblock } = useModeration(userId);
   const [text, setText] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
-  const [section, setSection] = useState<'chat' | 'library' | 'proposals' | 'agenda'>('chat');
+  const [section, setSection] = useState<
+    'chat' | 'library' | 'proposals' | 'agenda' | 'leaderboard'
+  >('chat');
   const scrollRef = useRef<ScrollView>(null);
 
   // Mark the discussion read while it's open (clears the unread badge), and again
@@ -260,11 +264,18 @@ export default function CircleScreen() {
               active={section === 'agenda'}
               onPress={() => setSection('agenda')}
             />
+            <SegTab
+              label="Classement"
+              active={section === 'leaderboard'}
+              onPress={() => setSection('leaderboard')}
+            />
           </XStack>
         </ScrollView>
       </XStack>
 
-      {section === 'agenda' ? (
+      {section === 'leaderboard' ? (
+        <CircleLeaderboardSection circleId={id} userId={userId} />
+      ) : section === 'agenda' ? (
         <AgendaSection circleId={id} userId={userId} />
       ) : section === 'library' ? (
         <CircleLibrarySection circleId={id} userId={userId} members={members} />
@@ -443,6 +454,34 @@ function SegTab({
     >
       {label}
     </Button>
+  );
+}
+
+function CircleLeaderboardSection({
+  circleId,
+  userId,
+}: {
+  circleId: string;
+  userId: string | undefined;
+}) {
+  const { data: rows, isLoading } = useCircleLeaderboard(circleId);
+  return (
+    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 14 }}>
+      <Text
+        fontFamily="$body"
+        fontSize={11}
+        fontWeight="700"
+        letterSpacing={1.8}
+        textTransform="uppercase"
+        color="$color"
+      >
+        Classement · cette semaine
+      </Text>
+      {isLoading ? <Spinner color="$accent" /> : <Leaderboard rows={rows} myId={userId} />}
+      <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+        Pages lues ces 7 derniers jours par les membres du cercle.
+      </Text>
+    </ScrollView>
   );
 }
 

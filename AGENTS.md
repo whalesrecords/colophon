@@ -247,11 +247,14 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   earned (gold ring) vs locked (dimmed + progress), "N/M". **Next:** persist + celebrate
   the moment one is earned, surface on the widget / public profile, add stars/XP +
   cosmetic flair (never pay-to-win) via `achievements` + `user_achievements` tables.
-- **P1 — leaderboards vs friends & circles.** Weekly pages / streak ranking scoped
-  to a user's friends or a circle (a `SECURITY DEFINER` RPC like
-  `circle_leaderboard(circle_id)` / `friends_leaderboard()`, RLS-safe, no private
-  data). Friends can see each other's goals/streaks (privacy toggle, default
-  friends-only).
+- **P1 — leaderboards vs friends & circles. v1 SHIPPED.** Weekly-pages ranking (sum of
+  `daily_reading` over the last 7 days) scoped to friends or a circle, via `SECURITY
+  DEFINER` RPCs `friends_leaderboard()` (me + accepted friends) and
+  `circle_leaderboard(p_circle)` (members only, `is_circle_member` gate) — RLS-safe,
+  aggregate pages only. `Leaderboard` component (rank medals, avatar, pages bar, "Toi"
+  highlighted): a "Classement · cette semaine" card on Échanges + a "Classement" tab
+  inside each circle. **Next:** streak-based ranking too; a per-stat privacy toggle;
+  time-boxed challenges on top.
 - **P1 — challenges.** Time-boxed, sport-app-style ("500 pages cette semaine",
   "finis un tome par jour"): `challenges` + `challenge_participants`; create within a
   circle or among friends, live progress, a winner. Ties into badges.
