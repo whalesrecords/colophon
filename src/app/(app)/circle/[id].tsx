@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
+import { ChallengesSection } from '@/components/circle/ChallengesSection';
 import { CircleLibrarySection, CircleProposalsSection } from '@/components/circle/CircleSpaces';
 import { Leaderboard } from '@/components/social/Leaderboard';
 import { useCircleLeaderboard } from '@/features/social/use-leaderboard';
@@ -58,7 +59,7 @@ export default function CircleScreen() {
   const [text, setText] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
   const [section, setSection] = useState<
-    'chat' | 'library' | 'proposals' | 'agenda' | 'leaderboard'
+    'chat' | 'library' | 'proposals' | 'agenda' | 'leaderboard' | 'challenges'
   >('chat');
   const scrollRef = useRef<ScrollView>(null);
 
@@ -269,11 +270,18 @@ export default function CircleScreen() {
               active={section === 'leaderboard'}
               onPress={() => setSection('leaderboard')}
             />
+            <SegTab
+              label="Défis"
+              active={section === 'challenges'}
+              onPress={() => setSection('challenges')}
+            />
           </XStack>
         </ScrollView>
       </XStack>
 
-      {section === 'leaderboard' ? (
+      {section === 'challenges' ? (
+        <ChallengesSection circleId={id} userId={userId} />
+      ) : section === 'leaderboard' ? (
         <CircleLeaderboardSection circleId={id} userId={userId} />
       ) : section === 'agenda' ? (
         <AgendaSection circleId={id} userId={userId} />

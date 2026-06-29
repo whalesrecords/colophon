@@ -717,6 +717,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      challenges: {
+        Row: {
+          id: string;
+          circle_id: string;
+          created_by: string;
+          title: string;
+          goal_type: string;
+          target: number;
+          starts_on: string;
+          ends_on: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          circle_id: string;
+          created_by?: string;
+          title: string;
+          goal_type?: string;
+          target: number;
+          starts_on?: string;
+          ends_on: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          circle_id?: string;
+          created_by?: string;
+          title?: string;
+          goal_type?: string;
+          target?: number;
+          starts_on?: string;
+          ends_on?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      challenge_participants: {
+        Row: {
+          challenge_id: string;
+          user_id: string;
+          joined_at: string;
+        };
+        Insert: {
+          challenge_id: string;
+          user_id?: string;
+          joined_at?: string;
+        };
+        Update: {
+          challenge_id?: string;
+          user_id?: string;
+          joined_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           annual_goal: number | null;
@@ -944,6 +998,16 @@ export type Database = {
           pseudo: string | null;
           avatar_path: string | null;
           pages: number;
+        }[];
+      };
+      challenge_progress: {
+        Args: { p_challenge: string };
+        Returns: {
+          user_id: string;
+          display_name: string | null;
+          pseudo: string | null;
+          avatar_path: string | null;
+          value: number;
         }[];
       };
       friends_current_reading: {

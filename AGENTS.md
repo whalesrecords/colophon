@@ -263,9 +263,13 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   highlighted): a "Classement · cette semaine" card on Échanges + a "Classement" tab
   inside each circle. **Next:** streak-based ranking too; a per-stat privacy toggle;
   time-boxed challenges on top.
-- **P1 — challenges.** Time-boxed, sport-app-style ("500 pages cette semaine",
-  "finis un tome par jour"): `challenges` + `challenge_participants`; create within a
-  circle or among friends, live progress, a winner. Ties into badges.
+- **P1 — challenges. v1 SHIPPED (circle-scoped).** Time-boxed, sport-app-style
+  ("500 pages cette semaine", "un tome par jour"): `challenges` + `challenge_participants`
+  (RLS via `is_circle_member`); a **"Défis" tab** in each circle — create (titre, Pages/
+  Livres, objectif, 7/14/30 j), Rejoindre/Quitter (creator auto-joins), live ranking via
+  `challenge_progress(p_challenge)` (pages from `daily_reading` or books finished in the
+  window, target bar + ✓ when reached). **Next:** friends-scoped challenges, a declared
+  winner at the end, tie-in to badges/celebration.
 - **P2 — reading feed + follow.** A feed of book comments/mini-reviews anyone can
   post; **follow** specific readers (one-way, lighter than `friendships`) to curate
   your feed — `follows(follower_id, followee_id)` + a feed RPC merging followed users'
