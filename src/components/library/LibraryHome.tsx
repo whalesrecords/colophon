@@ -2,6 +2,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { RecommendationsShelf } from '@/components/library/RecommendationsShelf';
 import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
 import { KPIRow, KPITile } from '@/components/ui';
 import type { CurrentRead } from '@/features/reading/use-reading-sessions';
@@ -278,6 +279,8 @@ export function LibraryHome({
       <Shelf title="On continue" items={continueItems} onOpen={onOpenBook} />
       <Shelf title="Pile à lire" items={toRead} onOpen={onOpenBook} onSeeAll={onSeeQueue} />
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
+
+      <RecommendationsShelf userId={userId} />
     </YStack>
   );
 }

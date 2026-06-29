@@ -320,8 +320,11 @@ and surface what their collection is worth now (not just what it cost).
 - **Chemin de lecteur à l'inscription (P1).** First-run persona pick — **Collectionneur**
   (possession-first home), **Social** (sharing + discovery on), **Secret** (private by
   default). Sets the privacy defaults below and tailors the first screen.
-- **Découverte façon Netflix (P1).** Horizontal rows by **genre / thème / type** across the
-  library + catalogue — the substrate for future recommendations.
+- **Découverte façon Netflix (P1). First row SHIPPED.** A **"Dans ton style"** shelf at the
+  bottom of the home (`RecommendationsShelf` + `useRecommendations`): up to 5 books to
+  discover from the reader's most-owned authors (max 2/author for variety, excludes what
+  they own), via the `book-search` edge function; tap → lookup + add to Envies. **Next:**
+  more rows by **genre / thème / type**; a real recommendation engine.
 - **Recommandations par humeur (P2, façon StoryGraph).** mood/pace tags on books; "envie de
   quoi ce soir ?" → suggestions filtered by mood.
 - **Modes de confidentialité (P0). v1 SHIPPED.** `profiles.is_private` + a master **Secret ⇄
