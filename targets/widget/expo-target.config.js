@@ -6,7 +6,10 @@
  */
 module.exports = {
   type: 'widget',
-  name: 'Colophon — Lecture',
+  // Must be sanitized (no spaces/punctuation): EAS looks up the target by this exact
+  // name, while the Xcode target name keeps it verbatim — a mismatch breaks the build.
+  // The user-facing widget title is set in index.swift (configurationDisplayName).
+  name: 'ColophonLecture',
   entitlements: {
     'com.apple.security.application-groups': ['group.com.whalesrecords.colophon'],
   },
