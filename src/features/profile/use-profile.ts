@@ -49,6 +49,7 @@ export interface ProfilePatch {
   bio?: string | null;
   avatar_path?: string | null;
   annual_goal?: number | null;
+  share_current_reading?: boolean;
 }
 
 export function useUpdateProfile(userId: string | undefined) {

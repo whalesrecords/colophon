@@ -726,6 +726,7 @@ export type Database = {
           daily_goal: number | null;
           display_name: string | null;
           pseudo: string | null;
+          share_current_reading: boolean;
           updated_at: string;
           user_id: string;
         };
@@ -737,6 +738,7 @@ export type Database = {
           daily_goal?: number | null;
           display_name?: string | null;
           pseudo?: string | null;
+          share_current_reading?: boolean;
           updated_at?: string;
           user_id: string;
         };
@@ -748,6 +750,7 @@ export type Database = {
           daily_goal?: number | null;
           display_name?: string | null;
           pseudo?: string | null;
+          share_current_reading?: boolean;
           updated_at?: string;
           user_id?: string;
         };
@@ -923,6 +926,20 @@ export type Database = {
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       log_daily_pages: { Args: { p_pages: number }; Returns: undefined };
       record_reading_page: { Args: { p_session: string; p_page: number }; Returns: undefined };
+      friends_current_reading: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          display_name: string | null;
+          pseudo: string | null;
+          avatar_path: string | null;
+          title: string | null;
+          cover_url: string | null;
+          isbn13: string | null;
+          current_page: number | null;
+          total_pages: number | null;
+        }[];
+      };
       suggested_readers: {
         Args: { p_limit?: number };
         Returns: {

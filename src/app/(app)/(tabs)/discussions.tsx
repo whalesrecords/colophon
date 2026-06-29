@@ -6,6 +6,7 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 import { PremiumSheet } from '@/components/circle/PremiumSheet';
 import { Screen } from '@/components/Screen';
 import { Avatar, AvatarStack } from '@/components/social/Avatar';
+import { FriendsReadingNow } from '@/components/social/FriendsReadingNow';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type CircleSummary,
@@ -299,6 +300,8 @@ export default function DiscussionsScreen() {
           onOpenReaders={() => router.push('/readers')}
           onOpenFriend={(id) => router.push(`/u/${id}`)}
         />
+
+        <FriendsReadingNow userId={userId} />
 
         <YStack gap="$3" marginBottom="$5">
           <Label>Nouveau cercle</Label>

@@ -167,7 +167,12 @@ identifiers: English.
   insert → trigger → 200 `{"sent":0}` until a native device registers a token.
   **Real delivery still needs a native EAS build + push credentials — APNs (iOS) /
   FCM (Android).**); **"Trouver chez un libraire"** (book detail link → leslibraires.fr
-  search by ISBN/title — FR indie co-op, never Amazon; `bookshopUrl` helper).
+  search by ISBN/title — FR indie co-op, never Amazon; `bookshopUrl` helper);
+  **friends' current reads** ("En ce moment" strip on Échanges — each friend's most
+  recent in-progress read, cover + avatar, tap → their profile; opt-out via
+  `profiles.share_current_reading` toggle in Profil → Confidentialité. RLS-safe
+  `friends_current_reading()` SECURITY DEFINER RPC: only accepted friends who kept
+  sharing on, one row per friend, no private notes).
 
 ## Roadmap — ownership-first (from the strategy dossier in `Etudes/`)
 The dossier's thesis: own the **possession** axis (what a reader *has*) for ALL

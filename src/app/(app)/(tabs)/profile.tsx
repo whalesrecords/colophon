@@ -135,6 +135,8 @@ export default function ProfileScreen() {
 
         <ShareSection userId={session?.user.id} />
 
+        <PrivacySection userId={session?.user.id} />
+
         <ExportSection items={items} />
 
         <AppearanceSection />
@@ -813,6 +815,50 @@ function ExportSection({ items }: { items: LibraryItem[] }) {
       <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
         {Platform.OS === 'web' ? t('profile.exportHintWeb') : t('profile.exportHintNative')}
       </Text>
+    </YStack>
+  );
+}
+
+function PrivacySection({ userId }: { userId: string | undefined }) {
+  const { data: profile } = useProfile(userId);
+  const update = useUpdateProfile(userId);
+  const shared = profile?.share_current_reading ?? true;
+
+  return (
+    <YStack gap="$2" marginTop="$6">
+      <Label>Confidentialité</Label>
+      <Pressable onPress={() => update.mutate({ share_current_reading: !shared })}>
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          gap="$3"
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          borderRadius={12}
+          padding="$3"
+        >
+          <YStack flex={1} gap="$1">
+            <Text fontFamily="$body" fontSize={14} fontWeight="600" color="$color">
+              Partager ma lecture du moment
+            </Text>
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted" lineHeight={18}>
+              Tes amis voient le livre que tu lis en ce moment. Désactive pour le garder privé.
+            </Text>
+          </YStack>
+          <YStack
+            width={46}
+            height={28}
+            borderRadius={999}
+            padding={3}
+            justifyContent="center"
+            alignItems={shared ? 'flex-end' : 'flex-start'}
+            backgroundColor={shared ? '$accent' : '$borderColor'}
+          >
+            <YStack width={22} height={22} borderRadius={999} backgroundColor={palette.paper} />
+          </YStack>
+        </XStack>
+      </Pressable>
     </YStack>
   );
 }

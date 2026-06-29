@@ -32,6 +32,32 @@ export interface ReaderProfile {
   friend_status: FriendStatus;
 }
 
+export interface FriendReading {
+  user_id: string;
+  display_name: string | null;
+  pseudo: string | null;
+  avatar_path: string | null;
+  title: string | null;
+  cover_url: string | null;
+  isbn13: string | null;
+  current_page: number | null;
+  total_pages: number | null;
+}
+
+/** What my friends are reading right now — only those who opted to share it. */
+export function useFriendsCurrentReading(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['friends-current-reading', userId],
+    enabled: !!userId,
+    staleTime: 60_000,
+    queryFn: async (): Promise<FriendReading[]> => {
+      const { data, error } = await supabase.rpc('friends_current_reading');
+      if (error) throw error;
+      return (data ?? []) as FriendReading[];
+    },
+  });
+}
+
 export interface FriendPerson {
   user_id: string;
   display_name: string | null;
