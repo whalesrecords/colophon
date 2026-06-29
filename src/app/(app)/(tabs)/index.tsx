@@ -31,6 +31,7 @@ import { copiesByIsbn } from '@/features/library/duplicates';
 import { groupBySeries, type SeriesGroup } from '@/features/library/group-series';
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
 import { useShelves } from '@/features/shelves/use-shelves';
+import { parseSeries } from '@/lib/series';
 import { composedPalette } from '@/theme/cover-palettes';
 import { OWNERSHIP_LABELS, palette, statusColors } from '@/theme/tokens';
 
@@ -553,6 +554,14 @@ export default function LibraryScreen() {
                     openSeries.items.map((i) => i.book?.isbn13).filter((x): x is string => !!x),
                   )
                 }
+                ownedVolumes={
+                  new Set(
+                    openSeries.items
+                      .map((i) => parseSeries(i.book?.title ?? '')?.volume)
+                      .filter((v): v is number => v != null),
+                  )
+                }
+                ownedTomeCount={openSeries.distinctCount}
                 userId={session?.user.id}
                 coverWidth={coverWidth}
               />

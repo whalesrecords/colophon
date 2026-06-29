@@ -22,11 +22,17 @@ import { palette } from '@/theme/tokens';
 export function SeriesCompletion({
   seriesName,
   ownedIsbns,
+  ownedVolumes,
+  ownedTomeCount,
   userId,
   coverWidth,
 }: {
   seriesName: string;
   ownedIsbns: Set<string>;
+  /** Distinct tome numbers owned — used to match by tome across editions. */
+  ownedVolumes: Set<number>;
+  /** Distinct tomes owned (not physical copies) — the X in "X/Y". */
+  ownedTomeCount: number;
   userId: string | undefined;
   coverWidth: number;
 }) {
@@ -48,12 +54,17 @@ export function SeriesCompletion({
   const key = seriesKey(seriesName);
   const override = totals?.get(key) ?? null;
   const volumes = fetchVols.data ?? [];
-  const ownedCount = ownedIsbns.size;
+  // Count distinct tomes owned, not physical copies — two editions of one tome
+  // share a volume number but have different ISBNs.
+  const ownedCount = ownedTomeCount;
+  // A searched tome is owned if we hold its volume number (any edition) or its ISBN.
+  const isOwned = (v: { isbn13: string; volume: number | null }) =>
+    (v.volume != null && ownedVolumes.has(v.volume)) || ownedIsbns.has(v.isbn13);
   const totalKnown = override != null || volumes.length > 0;
   const effectiveTotal = override ?? Math.max(volumes.length, ownedCount);
   const isComplete = totalKnown && ownedCount >= effectiveTotal;
-  const ownedInList = volumes.filter((v) => ownedIsbns.has(v.isbn13)).length;
-  const missingAll = volumes.filter((v) => !ownedIsbns.has(v.isbn13) && !added.has(v.isbn13));
+  const ownedInList = volumes.filter(isOwned).length;
+  const missingAll = volumes.filter((v) => !isOwned(v) && !added.has(v.isbn13));
   // Cap to the gap measured WITHIN the search list, so genuinely-missing tomes
   // aren't hidden when the stack owns copies that the search didn't return.
   const missing = isComplete ? [] : missingAll.slice(0, Math.max(0, effectiveTotal - ownedInList));

@@ -91,7 +91,7 @@ export function SeriesMarkRead({
         </Text>
       ) : null}
 
-      <XStack alignItems="center" gap="$2">
+      <XStack alignItems="center" gap="$2" flexWrap="wrap" rowGap="$2">
         <Button
           onPress={() => {
             setCount((c) => Math.max(1, c - 1));
@@ -110,7 +110,8 @@ export function SeriesMarkRead({
           −
         </Button>
         <YStack
-          minWidth={96}
+          minWidth={92}
+          flex={1}
           height={40}
           alignItems="center"
           justifyContent="center"

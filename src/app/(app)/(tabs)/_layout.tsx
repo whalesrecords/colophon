@@ -51,12 +51,17 @@ export default function AppTabsLayout() {
         tabBarStyle: {
           backgroundColor: dark ? 'rgba(21,19,14,0.96)' : 'rgba(244,241,234,0.96)',
           borderTopColor: dark ? '#332F26' : palette.hairline,
-          // Android: add the gesture-nav / nav-bar inset so labels clear the system bar.
-          height: Platform.select({ ios: 86, default: 60 + insets.bottom }),
+          // Android/web: add the gesture-nav / nav-bar inset so labels clear the
+          // system bar. Tall enough that the 11px label isn't vertically clipped.
+          height: Platform.select({ ios: 86, default: 68 + insets.bottom }),
           paddingTop: 8,
-          paddingBottom: Platform.select({ ios: 28, default: 8 + insets.bottom }),
+          paddingBottom: Platform.select({ ios: 28, default: 12 + insets.bottom }),
         },
-        tabBarLabelStyle: { fontFamily: 'SchibstedGrotesk_500Medium', fontSize: 11 },
+        tabBarLabelStyle: {
+          fontFamily: 'SchibstedGrotesk_500Medium',
+          fontSize: 11,
+          lineHeight: 14,
+        },
       }}
     >
       <Tabs.Screen

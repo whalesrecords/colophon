@@ -529,10 +529,6 @@ function Stats({ stats }: { stats: LibraryStats }) {
           {stats.authors}
         </Text>
       </XStack>
-
-      <Text fontFamily="$body" fontSize={13} color="$colorMuted" lineHeight={20}>
-        {t('profile.goalHint')}
-      </Text>
     </YStack>
   );
 }
