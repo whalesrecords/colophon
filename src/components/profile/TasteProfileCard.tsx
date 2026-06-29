@@ -26,7 +26,7 @@ function Donut({ clusters }: { clusters: TasteCluster[] }) {
   let acc = 0;
   return (
     <Svg width={size} height={size}>
-      <G rotation={-90} originX={c} originY={c}>
+      <G transform={`rotate(-90 ${c} ${c})`}>
         <Circle cx={c} cy={c} r={r} stroke={TRACK} strokeWidth={sw} fill="none" />
         {clusters.map((cl, i) => {
           const len = (Math.max(0, cl.percent) / total) * circ;
