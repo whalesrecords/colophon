@@ -32,6 +32,13 @@ export function FriendsReadingNow({ userId }: { userId: string | undefined }) {
         <XStack gap="$3" paddingRight="$3">
           {data.map((fr) => {
             const name = fr.display_name || fr.pseudo || 'Un lecteur';
+            const page = fr.current_page ?? 0;
+            const progress =
+              page > 0
+                ? fr.total_pages && fr.total_pages > 0
+                  ? `p. ${page} / ${fr.total_pages}`
+                  : `p. ${page}`
+                : null;
             return (
               <Pressable key={fr.user_id} onPress={() => router.push(`/u/${fr.user_id}`)}>
                 <YStack width={88} gap="$2" alignItems="center">
@@ -54,6 +61,17 @@ export function FriendsReadingNow({ userId }: { userId: string | undefined }) {
                       {name}
                     </Text>
                   </XStack>
+                  {progress ? (
+                    <Text
+                      fontFamily="$body"
+                      fontSize={10.5}
+                      color="$colorMuted"
+                      numberOfLines={1}
+                      marginTop={-4}
+                    >
+                      {progress}
+                    </Text>
+                  ) : null}
                 </YStack>
               </Pressable>
             );
