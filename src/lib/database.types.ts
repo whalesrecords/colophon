@@ -271,6 +271,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      daily_reading: {
+        Row: {
+          day: string;
+          pages: number;
+          user_id: string;
+        };
+        Insert: {
+          day?: string;
+          pages?: number;
+          user_id?: string;
+        };
+        Update: {
+          day?: string;
+          pages?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       friendships: {
         Row: {
           requester: string;
@@ -705,6 +723,7 @@ export type Database = {
           avatar_path: string | null;
           bio: string | null;
           created_at: string;
+          daily_goal: number | null;
           display_name: string | null;
           pseudo: string | null;
           updated_at: string;
@@ -715,6 +734,7 @@ export type Database = {
           avatar_path?: string | null;
           bio?: string | null;
           created_at?: string;
+          daily_goal?: number | null;
           display_name?: string | null;
           pseudo?: string | null;
           updated_at?: string;
@@ -725,6 +745,7 @@ export type Database = {
           avatar_path?: string | null;
           bio?: string | null;
           created_at?: string;
+          daily_goal?: number | null;
           display_name?: string | null;
           pseudo?: string | null;
           updated_at?: string;
@@ -900,6 +921,7 @@ export type Database = {
         Returns: { circle_id: string; unread: number }[];
       };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
+      log_daily_pages: { Args: { p_pages: number }; Returns: undefined };
       suggested_readers: {
         Args: { p_limit?: number };
         Returns: {

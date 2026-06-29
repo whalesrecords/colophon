@@ -109,6 +109,7 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
     queryClient.invalidateQueries({ queryKey: ['library'] });
     queryClient.invalidateQueries({ queryKey: ['currently-reading', userId] });
     queryClient.invalidateQueries({ queryKey: ['stats', userId] });
+    queryClient.invalidateQueries({ queryKey: ['daily-goal', userId] });
     // A date edit can move a read into/out of a year — clear all year recaps.
     queryClient.invalidateQueries({ queryKey: ['year-recap'] });
   };
@@ -130,11 +131,22 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
 
   const setPage = useMutation({
     mutationFn: async ({ sessionId, page }: { sessionId: string; page: number }): Promise<void> => {
+      const newPage = Math.max(0, page);
+      // Read the previous page first so we can credit only the pages actually read
+      // today to the daily goal (a forward delta — going back doesn't subtract).
+      const { data: prev } = await supabase
+        .from('reading_sessions')
+        .select('current_page')
+        .eq('id', sessionId)
+        .maybeSingle();
+      const before = prev?.current_page ?? 0;
       const { error } = await supabase
         .from('reading_sessions')
-        .update({ current_page: Math.max(0, page) })
+        .update({ current_page: newPage })
         .eq('id', sessionId);
       if (error) throw new Error(error.message);
+      const delta = newPage - before;
+      if (delta > 0) await supabase.rpc('log_daily_pages', { p_pages: delta });
     },
     onSuccess: invalidate,
   });

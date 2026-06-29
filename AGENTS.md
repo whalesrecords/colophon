@@ -210,11 +210,14 @@ mechanics + social accountability — building on what ships (`profiles.annual_g
 `reading_sessions` page progress, circles, `friendships`, push foundation,
 `circle_book_comments`). Keep it opt-in & non-anxiety-inducing (the dossier's
 neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
-- **P0 — daily goal + streak.** A **daily pages target** (e.g. 20 p/j) on top of the
-  annual goal; a per-day reading log (derive from `reading_sessions` page deltas, or
-  a new `daily_reading(user_id, day, pages)` rollup). **Streak** = consecutive days
-  hitting the target, with a "freeze"/grace day so one miss doesn't wipe months.
-  Home + Profil show today's ring + current streak. Reuses the refonte KPITile/ring.
+- **P0 — daily goal + streak. v1 SHIPPED.** `profiles.daily_goal` (pages/day, default
+  20) + a `daily_reading(user_id, day, pages)` rollup fed by the page-progress
+  mutation (a `log_daily_pages(p_pages)` SECURITY DEFINER upsert credits the forward
+  delta to today). `useDailyGoal` returns today's pages + a **streak** (consecutive
+  days meeting the goal, ending today/yesterday so an in-progress day never breaks it,
+  with one grace day so a single miss doesn't wipe months). `DailyGoalCard`
+  (react-native-svg ring + 🔥 streak pill + 10/20/30/50 presets) is on Profil. **Next:
+  a compact ring on Home + the daily reminder push.**
 - **P0 — reminders.** Opt-in daily push ("il te reste 12 pages pour ta série du
   jour") via the existing push pipeline. **Needs FCM on Android** (see pending).
   Quiet hours + a single, gentle reminder (no spam).

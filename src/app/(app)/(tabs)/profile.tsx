@@ -28,6 +28,7 @@ import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { LOCALES, type TranslationKey, useT } from '@/i18n';
 import { THEME_OPTIONS, useThemePref } from '@/theme/theme-pref';
+import { DailyGoalCard } from '@/components/reading/DailyGoalCard';
 import { BarList, KPIRow, KPITile, StatusDot } from '@/components/ui';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
 
@@ -81,6 +82,8 @@ export default function ProfileScreen() {
         ) : (
           <Stats stats={stats} />
         )}
+
+        <DailyGoalCard userId={session?.user.id} />
 
         {stats ? (
           <GoalSection
