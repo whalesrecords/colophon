@@ -254,6 +254,14 @@ and surface what their collection is worth now (not just what it cost).
   `estimated_value`) — "ce que ça vaut aujourd'hui" vs "ce que ça a coûté".
 - **Dons.** A clear "donner" path (Leboncoin *donnons* / Recyclivre / Emmaüs) for books
   you won't resell — aligned with the indie/never-Amazon ethos.
+- **Boîtes à livres (little free libraries) — v1 SHIPPED.** A community map of book
+  boxes: any reader signals one (`book_boxes`: name, lat/lng, city, photo in the
+  `book-boxes` storage bucket, note) and logs the books they've dropped there
+  (`book_box_donations`). RLS: authenticated read-all, owner-write. Screen `/boites`
+  (reached from the carte header) — browse with photo + donation count, add a box
+  (photo + "📍 ma position" geolocation + note), open a box → "Y aller" + drop-a-book
+  log. **Next: pin the boxes on the Leaflet carte** (a distinct 📚 marker layer
+  fetched from `book_boxes`), and let "ajouter ici" drop a box at a tapped map point.
 
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.

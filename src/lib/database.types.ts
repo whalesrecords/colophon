@@ -8,6 +8,80 @@ export type Database = {
   };
   public: {
     Tables: {
+      book_box_donations: {
+        Row: {
+          box_id: string;
+          created_at: string;
+          donated_on: string;
+          id: string;
+          isbn13: string | null;
+          title: string;
+          user_id: string;
+        };
+        Insert: {
+          box_id: string;
+          created_at?: string;
+          donated_on?: string;
+          id?: string;
+          isbn13?: string | null;
+          title: string;
+          user_id?: string;
+        };
+        Update: {
+          box_id?: string;
+          created_at?: string;
+          donated_on?: string;
+          id?: string;
+          isbn13?: string | null;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'book_box_donations_box_id_fkey';
+            columns: ['box_id'];
+            isOneToOne: false;
+            referencedRelation: 'book_boxes';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      book_boxes: {
+        Row: {
+          city: string | null;
+          created_at: string;
+          created_by: string;
+          id: string;
+          lat: number;
+          lng: number;
+          name: string;
+          note: string | null;
+          photo_path: string | null;
+        };
+        Insert: {
+          city?: string | null;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          lat: number;
+          lng: number;
+          name: string;
+          note?: string | null;
+          photo_path?: string | null;
+        };
+        Update: {
+          city?: string | null;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          lat?: number;
+          lng?: number;
+          name?: string;
+          note?: string | null;
+          photo_path?: string | null;
+        };
+        Relationships: [];
+      };
       book_metadata: {
         Row: {
           authors: string[] | null;

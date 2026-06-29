@@ -47,6 +47,22 @@ export default function CarteScreen() {
         >
           ♥ Mes lieux
         </Button>
+        <Button
+          onPress={() => router.push('/boites')}
+          height={32}
+          paddingHorizontal="$3"
+          borderRadius={999}
+          borderWidth={1}
+          borderColor="$borderColor"
+          backgroundColor="transparent"
+          color="$color"
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+          pressStyle={{ opacity: 0.7 }}
+        >
+          📚 Boîtes
+        </Button>
       </XStack>
       <PlacesMap />
     </YStack>
