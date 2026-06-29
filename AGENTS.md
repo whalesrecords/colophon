@@ -322,9 +322,12 @@ and surface what their collection is worth now (not just what it cost).
   default). Sets the privacy defaults below and tailors the first screen.
 - **Découverte façon Netflix (P1). First row SHIPPED.** A **"Dans ton style"** shelf at the
   bottom of the home (`RecommendationsShelf` + `useRecommendations`): up to 5 books to
-  discover from the reader's most-owned authors (max 2/author for variety, excludes what
-  they own), via the `book-search` edge function; tap → lookup + add to Envies. **Next:**
-  more rows by **genre / thème / type**; a real recommendation engine.
+  **discover (not owned)** in the reader's vein — searches `book-search` by their top
+  **genres + authors**, then **excludes series they already collect** (via `seriesKey`/
+  `parseSeries`) and keeps one book per series, so you get new series (Blue Lock, Tintin…)
+  not "5 more Berserk". Tap → a **`/discover/[isbn]` preview** (cover + **résumé up top** +
+  genres + one-tap add Possédé/Envie/Emprunté + status), via `useIsbnLookup` + `useAddItem`.
+  **Next:** prefer volume 1 of a suggested series; more rows by genre/thème/type; mood search.
 - **Recommandations par humeur (P2, façon StoryGraph).** mood/pace tags on books; "envie de
   quoi ce soir ?" → suggestions filtered by mood.
 - **Modes de confidentialité (P0). v1 SHIPPED.** `profiles.is_private` + a master **Secret ⇄
