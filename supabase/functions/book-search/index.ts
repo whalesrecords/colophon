@@ -28,6 +28,8 @@ interface SearchParams {
   subject?: string;
   /** Series mode: fetch several pages so long runs (e.g. Berserk, 40+ vol.) surface. */
   deep?: boolean;
+  /** Restrict to a language (e.g. 'fr') — used for recommendations so résumés are FR. */
+  lang?: string;
 }
 
 function withTimeout(ms: number): { signal: AbortSignal; done: () => void } {
@@ -53,6 +55,9 @@ async function searchOpenLibrary(p: SearchParams, limit: number): Promise<BookSe
   if (p.publisher?.trim()) q.push(`publisher:${phrase(p.publisher)}`);
   if (p.subject?.trim()) q.push(`subject:${phrase(p.subject)}`);
   if (q.length) url.searchParams.set('q', q.join(' '));
+  // Open Library uses ISO 639-2 ('fre' for French).
+  if (p.lang?.trim())
+    url.searchParams.set('language', p.lang.trim() === 'fr' ? 'fre' : p.lang.trim());
   url.searchParams.set('limit', String(limit));
   url.searchParams.set('fields', 'title,author_name,publisher,first_publish_year,isbn,cover_i');
 
@@ -89,7 +94,8 @@ async function searchGoogleBooks(
   for (let page = 0; page < pages; page++) {
     const url =
       `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}` +
-      `&startIndex=${page * 40}&maxResults=40&printType=books&key=${key}`;
+      `&startIndex=${page * 40}&maxResults=40&printType=books&key=${key}` +
+      (p.lang?.trim() ? `&langRestrict=${encodeURIComponent(p.lang.trim())}` : '');
     const t = withTimeout(9000);
     try {
       const res = await fetch(url, {

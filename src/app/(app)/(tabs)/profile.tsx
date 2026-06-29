@@ -30,6 +30,7 @@ import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { LOCALES, type TranslationKey, useT } from '@/i18n';
 import { THEME_OPTIONS, useThemePref } from '@/theme/theme-pref';
 import { BadgesCard } from '@/components/profile/BadgesCard';
+import { TasteProfileCard } from '@/components/profile/TasteProfileCard';
 import { DailyGoalCard } from '@/components/reading/DailyGoalCard';
 import { BarList, KPIRow, KPITile, StatusDot } from '@/components/ui';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
@@ -95,6 +96,8 @@ export default function ProfileScreen() {
         ) : (
           <Stats stats={stats} />
         )}
+
+        <TasteProfileCard userId={session?.user.id} />
 
         <DailyGoalCard userId={session?.user.id} />
 
