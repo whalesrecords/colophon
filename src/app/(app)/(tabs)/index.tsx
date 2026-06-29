@@ -176,6 +176,7 @@ export default function LibraryScreen() {
               toRead={toReadItems}
               wishlist={wishlistItems}
               stats={homeStats}
+              userId={session?.user.id}
               now={now}
               onOpenBook={(id) => router.push(`/book/${id}`)}
               onSeeWishlist={() => toggleFacet('ownership', 'wishlist')}

@@ -2,6 +2,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
 import { KPIRow, KPITile } from '@/components/ui';
 import type { CurrentRead } from '@/features/reading/use-reading-sessions';
 import type { LibraryItem } from '@/features/library/use-library';
@@ -204,6 +205,7 @@ interface LibraryHomeProps {
   toRead: LibraryItem[];
   wishlist: LibraryItem[];
   stats: { read: number; total: number };
+  userId: string | undefined;
   now: Date;
   onOpenBook: (id: string) => void;
   onSeeWishlist: () => void;
@@ -222,6 +224,7 @@ export function LibraryHome({
   toRead,
   wishlist,
   stats,
+  userId,
   now,
   onOpenBook,
   onSeeWishlist,
@@ -255,6 +258,8 @@ export function LibraryHome({
         </YStack>
         <Avatar initial={initial} onPress={onOpenProfile} />
       </XStack>
+
+      <DailyGoalMini userId={userId} onPress={onOpenProfile} />
 
       {currentRead ? (
         <Hero read={currentRead} onPress={() => onOpenBook(currentRead.itemId)} />
