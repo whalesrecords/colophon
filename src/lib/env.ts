@@ -15,4 +15,8 @@ export const env = {
   supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? FALLBACK_SUPABASE_ANON_KEY,
   // Base URL of the deployed web app — used for password-reset redirect links.
   webUrl: process.env.EXPO_PUBLIC_WEB_URL ?? FALLBACK_WEB_URL,
+  // Affiliate / partner tags (set per-program once registered; empty = plain links).
+  amazonTag: process.env.EXPO_PUBLIC_AMAZON_TAG ?? '',
+  // leslibraires.fr partner id (their affiliate "ref"/partenaire param), if enrolled.
+  librairesPartner: process.env.EXPO_PUBLIC_LESLIBRAIRES_PARTNER ?? '',
 } as const;
