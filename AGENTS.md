@@ -241,6 +241,14 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   a **map** mini (nearest book box / reading place). Each reads a snapshot pushed to
   the App Group via `widget-sync` (extend the payload). Could use WidgetKit
   configuration intents so one widget exposes several "kinds".
+- **Mascottes (design).** `design/` references (`MASCOTTES-CHALLENGE.svg` = le marque-page
+  + la tour de tomes, 3 états chacun) drive the widget/challenge art. Proposed extras:
+  la pousse (série, anti-pression), le médaillon § (badges), l'escargot (lecture lente).
+  **La tasse "session" se décline par genre** (`MASCOTTE-TASSE-VARIANTES.svg`): espresso
+  (défaut) · tasse anglaise (romance/historique, Bridgerton) · gros mug (thriller/SF US) ·
+  yunomi (manga/litt. japonaise) · tasse rose (feel-good/girly) · bol (classiques FR/BD).
+  Mapping `cupForGenre(genre)` à implémenter quand la tasse est intégrée (widget Swift ou
+  une déco "En ce moment" — exposerait alors le genre du livre en cours).
 - **P1 — bonuses, étoiles & badges. v1 SHIPPED (computed).** `features/profile/badges.ts`
   defines a catalogue (collection size, books finished, pages, breadth, streak tiers)
   evaluated on the fly from the stats we already have — `BadgesCard` on Profil shows
