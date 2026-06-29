@@ -204,6 +204,37 @@ only fills for manga. Prioritized, grounded against what already ships:
   authors/subjects as authority entities (data.bnf.fr RAMEAU); anti-spoiler
   page-anchored buddy reads; FR indie-bookseller affiliation (never Amazon).
 
+## Roadmap — Objectifs & engagement (gamification, proposed)
+Thesis: turn cataloguing into a daily reading *habit* with light, sport-app-style
+mechanics + social accountability — building on what ships (`profiles.annual_goal`,
+`reading_sessions` page progress, circles, `friendships`, push foundation,
+`circle_book_comments`). Keep it opt-in & non-anxiety-inducing (the dossier's
+neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
+- **P0 — daily goal + streak.** A **daily pages target** (e.g. 20 p/j) on top of the
+  annual goal; a per-day reading log (derive from `reading_sessions` page deltas, or
+  a new `daily_reading(user_id, day, pages)` rollup). **Streak** = consecutive days
+  hitting the target, with a "freeze"/grace day so one miss doesn't wipe months.
+  Home + Profil show today's ring + current streak. Reuses the refonte KPITile/ring.
+- **P0 — reminders.** Opt-in daily push ("il te reste 12 pages pour ta série du
+  jour") via the existing push pipeline. **Needs FCM on Android** (see pending).
+  Quiet hours + a single, gentle reminder (no spam).
+- **P1 — bonuses, étoiles & badges.** Earn **stars/XP** for hitting daily goals,
+  finishing books/series, breadth (new genres). `achievements` + `user_achievements`
+  tables (service-role-seeded catalogue, owner-readable progress). In-app cosmetic
+  bonuses (cover frames, profile flair) — never pay-to-win.
+- **P1 — leaderboards vs friends & circles.** Weekly pages / streak ranking scoped
+  to a user's friends or a circle (a `SECURITY DEFINER` RPC like
+  `circle_leaderboard(circle_id)` / `friends_leaderboard()`, RLS-safe, no private
+  data). Friends can see each other's goals/streaks (privacy toggle, default
+  friends-only).
+- **P1 — challenges.** Time-boxed, sport-app-style ("500 pages cette semaine",
+  "finis un tome par jour"): `challenges` + `challenge_participants`; create within a
+  circle or among friends, live progress, a winner. Ties into badges.
+- **P2 — reading feed + follow.** A feed of book comments/mini-reviews anyone can
+  post; **follow** specific readers (one-way, lighter than `friendships`) to curate
+  your feed — `follows(follower_id, followee_id)` + a feed RPC merging followed users'
+  `circle_book_comments`/reviews. The discovery counterpart to the private library.
+
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
 - `book-search` (public) — fielded search, Open Library primary.

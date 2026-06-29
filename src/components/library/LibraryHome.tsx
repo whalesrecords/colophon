@@ -2,6 +2,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { KPIRow, KPITile } from '@/components/ui';
 import type { CurrentRead } from '@/features/reading/use-reading-sessions';
 import type { LibraryItem } from '@/features/library/use-library';
 import { palette } from '@/theme/tokens';
@@ -201,6 +202,7 @@ interface LibraryHomeProps {
   recent: LibraryItem[];
   reading: LibraryItem[];
   wishlist: LibraryItem[];
+  stats: { read: number; total: number };
   now: Date;
   onOpenBook: (id: string) => void;
   onSeeWishlist: () => void;
@@ -216,6 +218,7 @@ export function LibraryHome({
   recent,
   reading,
   wishlist,
+  stats,
   now,
   onOpenBook,
   onSeeWishlist,
@@ -252,6 +255,15 @@ export function LibraryHome({
       {currentRead ? (
         <Hero read={currentRead} onPress={() => onOpenBook(currentRead.itemId)} />
       ) : null}
+
+      <KPIRow>
+        <KPITile value={String(stats.read)} label="Livres lus" accent={palette.forest} />
+        <KPITile
+          value={String(stats.total)}
+          label="Dans ma bibliothèque"
+          accent={palette.prussian}
+        />
+      </KPIRow>
 
       <Shelf title="Derniers ajouts" items={recent} onOpen={onOpenBook} />
       <Shelf title="On continue" items={continueItems} onOpen={onOpenBook} />
