@@ -22,3 +22,19 @@ export function syncReadingWidget(data: { streak: number; today: number; goal: n
     // no-op — widget not available on this platform/build
   }
 }
+
+/** Push the year/collection snapshot to the "Mon année de lecture" widget. */
+export function syncStatsWidget(data: {
+  booksYear: number;
+  pagesYear: number;
+  total: number;
+}): void {
+  try {
+    storage.set('booksYear', Math.max(0, Math.round(data.booksYear)));
+    storage.set('pagesYear', Math.max(0, Math.round(data.pagesYear)));
+    storage.set('collTotal', Math.max(0, Math.round(data.total)));
+    ExtensionStorage.reloadWidget();
+  } catch {
+    // no-op — widget not available on this platform/build
+  }
+}

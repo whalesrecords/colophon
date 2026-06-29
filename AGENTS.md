@@ -235,8 +235,10 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   `ios.appleTeamId` is required, else prebuild won't generate the target. Build #36
   (1.0.0) shipped it to TestFlight. Android equivalent (`react-native-android-widget`)
   is still pending.
-- **Widget suite (vision).** Expand beyond the streak ring into a configurable set the
-  reader picks per slot: **stats** (year/pages/top genre), **challenge** progress,
+- **Widget suite (in progress).** A `WidgetBundle` (one App Group extension, multiple
+  widget kinds). **Shipped:** "Ma série de lecture" (streak ring) + "Mon année de lecture"
+  (`ColophonStatsWidget` — books/pages this year + collection size, fed by `syncStatsWidget`
+  from Profil). **Next kinds:** **challenge** progress, **rendez-vous** (circle agenda),
   next **rendez-vous** (circle agenda), a **circle** + its **unread discussions**, and
   a **map** mini (nearest book box / reading place). Each reads a snapshot pushed to
   the App Group via `widget-sync` (extend the payload). Could use WidgetKit

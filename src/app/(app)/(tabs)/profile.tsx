@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Platform,
@@ -25,6 +25,7 @@ import { type ShelfSuggestion, suggestShelves } from '@/features/library/suggest
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
+import { syncStatsWidget } from '@/features/reading/widget-sync';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { LOCALES, type TranslationKey, useT } from '@/i18n';
 import { THEME_OPTIONS, useThemePref } from '@/theme/theme-pref';
@@ -64,6 +65,17 @@ export default function ProfileScreen() {
   const { t } = useT();
   const { data: stats, isLoading } = useStats(session?.user.id);
   const { data: libraryItems } = useLibrary(session?.user.id);
+
+  // Keep the "Mon année de lecture" iOS widget fresh (no-op on web/Android).
+  useEffect(() => {
+    if (stats) {
+      syncStatsWidget({
+        booksYear: stats.readThisYear,
+        pagesYear: stats.pagesRead,
+        total: stats.total,
+      });
+    }
+  }, [stats]);
   const items = libraryItems ?? [];
   const [recapOpen, setRecapOpen] = useState(false);
   const { width } = useWindowDimensions();

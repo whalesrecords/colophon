@@ -95,7 +95,6 @@ struct ReadingWidgetView: View {
   }
 }
 
-@main
 struct ColophonReadingWidget: Widget {
   let kind = "ColophonReadingWidget"
   var body: some WidgetConfiguration {
@@ -105,5 +104,88 @@ struct ColophonReadingWidget: Widget {
     .configurationDisplayName("Ma série de lecture")
     .description("Ton objectif du jour et ta série.")
     .supportedFamilies([.systemSmall, .systemMedium])
+  }
+}
+
+// ===== Widget 2 : Mon année de lecture (stats) =====
+
+struct StatsEntry: TimelineEntry {
+  let date: Date
+  let booksYear: Int
+  let pagesYear: Int
+  let collTotal: Int
+}
+
+struct StatsProvider: TimelineProvider {
+  func read() -> StatsEntry {
+    let d = UserDefaults(suiteName: APP_GROUP)
+    return StatsEntry(
+      date: Date(),
+      booksYear: d?.integer(forKey: "booksYear") ?? 0,
+      pagesYear: d?.integer(forKey: "pagesYear") ?? 0,
+      collTotal: d?.integer(forKey: "collTotal") ?? 0
+    )
+  }
+  func placeholder(in context: Context) -> StatsEntry {
+    StatsEntry(date: Date(), booksYear: 42, pagesYear: 9120, collTotal: 192)
+  }
+  func getSnapshot(in context: Context, completion: @escaping (StatsEntry) -> Void) {
+    completion(read())
+  }
+  func getTimeline(in context: Context, completion: @escaping (Timeline<StatsEntry>) -> Void) {
+    let next = Calendar.current.date(byAdding: .hour, value: 6, to: Date()) ?? Date()
+    completion(Timeline(entries: [read()], policy: .after(next)))
+  }
+}
+
+struct StatMetric: View {
+  let value: String
+  let label: String
+  let color: Color
+  var body: some View {
+    VStack(alignment: .leading, spacing: 1) {
+      Text(value).font(.system(size: 22, weight: .semibold)).foregroundColor(color)
+      Text(label).font(.system(size: 10)).foregroundColor(.muted)
+    }
+  }
+}
+
+struct StatsWidgetView: View {
+  var entry: StatsEntry
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("MON ANNÉE DE LECTURE")
+        .font(.system(size: 9, weight: .bold)).tracking(1)
+        .foregroundColor(.muted)
+      Spacer(minLength: 2)
+      HStack(spacing: 18) {
+        StatMetric(value: "\(entry.booksYear)", label: "livres", color: .brick)
+        StatMetric(value: "\(entry.pagesYear)", label: "pages", color: .forest)
+      }
+      StatMetric(value: "\(entry.collTotal)", label: "dans la collection", color: .ink)
+    }
+    .padding(14)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .containerBackground(for: .widget) { Color.parchment }
+  }
+}
+
+struct ColophonStatsWidget: Widget {
+  let kind = "ColophonStatsWidget"
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: StatsProvider()) { entry in
+      StatsWidgetView(entry: entry)
+    }
+    .configurationDisplayName("Mon année de lecture")
+    .description("Tes livres et pages lus cette année.")
+    .supportedFamilies([.systemSmall, .systemMedium])
+  }
+}
+
+@main
+struct ColophonWidgets: WidgetBundle {
+  var body: some Widget {
+    ColophonReadingWidget()
+    ColophonStatsWidget()
   }
 }
