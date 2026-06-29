@@ -113,6 +113,10 @@ export default function LibraryScreen() {
     const owned = items.filter((i) => i.ownership !== 'wishlist');
     return { read: owned.filter((i) => i.status === 'read').length, total: owned.length };
   }, [items]);
+  const toReadItems = useMemo(
+    () => items.filter((i) => i.status === 'to_read' && i.ownership !== 'wishlist'),
+    [items],
+  );
   // Newest non-wishlist books first — so a just-scanned book is visible immediately.
   const recentItems = useMemo(
     () =>
@@ -169,11 +173,13 @@ export default function LibraryScreen() {
               currentRead={currentRead ?? null}
               recent={recentItems}
               reading={readingItems}
+              toRead={toReadItems}
               wishlist={wishlistItems}
               stats={homeStats}
               now={now}
               onOpenBook={(id) => router.push(`/book/${id}`)}
               onSeeWishlist={() => toggleFacet('ownership', 'wishlist')}
+              onSeeQueue={() => router.push('/queue')}
               onOpenProfile={() => router.push('/profile')}
             />
           </YStack>

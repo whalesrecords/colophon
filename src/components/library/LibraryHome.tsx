@@ -201,11 +201,13 @@ interface LibraryHomeProps {
   currentRead: CurrentRead | null;
   recent: LibraryItem[];
   reading: LibraryItem[];
+  toRead: LibraryItem[];
   wishlist: LibraryItem[];
   stats: { read: number; total: number };
   now: Date;
   onOpenBook: (id: string) => void;
   onSeeWishlist: () => void;
+  onSeeQueue: () => void;
   onOpenProfile: () => void;
 }
 
@@ -217,11 +219,13 @@ export function LibraryHome({
   currentRead,
   recent,
   reading,
+  toRead,
   wishlist,
   stats,
   now,
   onOpenBook,
   onSeeWishlist,
+  onSeeQueue,
   onOpenProfile,
 }: LibraryHomeProps) {
   const g = greeting(now.getHours());
@@ -267,6 +271,7 @@ export function LibraryHome({
 
       <Shelf title="Derniers ajouts" items={recent} onOpen={onOpenBook} />
       <Shelf title="On continue" items={continueItems} onOpen={onOpenBook} />
+      <Shelf title="Pile à lire" items={toRead} onOpen={onOpenBook} onSeeAll={onSeeQueue} />
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
     </YStack>
   );
