@@ -28,6 +28,7 @@ import { shareUrl, useCreateShare } from '@/features/sharing/use-share';
 import { type LibraryStats, useStats } from '@/features/stats/use-stats';
 import { LOCALES, type TranslationKey, useT } from '@/i18n';
 import { THEME_OPTIONS, useThemePref } from '@/theme/theme-pref';
+import { BarList, KPIRow, KPITile, StatusDot } from '@/components/ui';
 import { palette, type ReadingStatus, statusColors } from '@/theme/tokens';
 
 const STATUS_ORDER: ReadingStatus[] = ['reading', 'read', 'to_read', 'abandoned'];
@@ -40,31 +41,19 @@ function formatCount(n: number): string {
   return String(n);
 }
 
+// Eyebrow — now in INK (refonte): legible on parchment, unified across the app.
 function Label({ children }: { children: string }) {
   return (
     <Text
       fontFamily="$body"
       fontSize={11}
-      fontWeight="600"
-      letterSpacing={2.4}
+      fontWeight="700"
+      letterSpacing={1.8}
       textTransform="uppercase"
-      color="$colorMuted"
+      color="$color"
     >
       {children}
     </Text>
-  );
-}
-
-function StatBig({ value, label }: { value: string; label: string }) {
-  return (
-    <YStack flex={1} alignItems="center" gap="$1">
-      <Text fontFamily="$heading" fontSize={30} fontWeight="500" color="$color">
-        {value}
-      </Text>
-      <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-        {label}
-      </Text>
-    </YStack>
   );
 }
 
@@ -444,52 +433,38 @@ function Stats({ stats }: { stats: LibraryStats }) {
   const { t } = useT();
   return (
     <YStack gap="$5">
-      <XStack
-        backgroundColor="$backgroundStrong"
-        borderColor="$borderColor"
-        borderWidth={1}
-        borderRadius={12}
-        paddingVertical="$5"
-      >
-        <StatBig
+      <KPIRow>
+        <KPITile
           value={formatCount(stats.total)}
           label={stats.total > 1 ? t('profile.books') : t('profile.book')}
         />
-        <YStack width={1} backgroundColor="$borderColor" />
-        <StatBig
+        <KPITile
           value={formatCount(stats.readThisYear)}
           label={t('profile.readInYear', { year: stats.year })}
+          accent={palette.forest}
         />
-        <YStack width={1} backgroundColor="$borderColor" />
-        <StatBig value={formatCount(stats.pagesRead)} label={t('profile.pagesRead')} />
-      </XStack>
+        <KPITile value={formatCount(stats.pagesRead)} label={t('profile.pagesRead')} />
+      </KPIRow>
 
       {stats.pricedCount > 0 || stats.acquiredThisYear > 0 ? (
         <YStack gap="$3">
           <Label>Collection</Label>
-          <XStack
-            backgroundColor="$backgroundStrong"
-            borderColor="$borderColor"
-            borderWidth={1}
-            borderRadius={12}
-            paddingVertical="$5"
-          >
-            <StatBig
+          <KPIRow>
+            <KPITile
               value={euro(stats.collectionValue)}
               label={
                 stats.pricedCount < stats.total
                   ? `Valeur · ${stats.pricedCount} chiffrés`
                   : 'Valeur estimée'
               }
+              accent={palette.prussian}
             />
-            <YStack width={1} backgroundColor="$borderColor" />
-            <StatBig
+            <KPITile
               value={formatCount(stats.acquiredThisYear)}
               label={`Achetés en ${stats.year}`}
             />
-            <YStack width={1} backgroundColor="$borderColor" />
-            <StatBig value={euro(stats.spentThisYear)} label={`Dépensé en ${stats.year}`} />
-          </XStack>
+            <KPITile value={euro(stats.spentThisYear)} label={`Dépensé en ${stats.year}`} />
+          </KPIRow>
         </YStack>
       ) : null}
 
@@ -498,12 +473,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
         <YStack gap="$2">
           {STATUS_ORDER.map((status) => (
             <XStack key={status} alignItems="center" gap="$3">
-              <YStack
-                width={10}
-                height={10}
-                borderRadius={999}
-                backgroundColor={statusColors[status].dot}
-              />
+              <StatusDot color={statusColors[status].dot} />
               <Text fontFamily="$body" fontSize={15} color="$colorSoft" flex={1}>
                 {t(`status.${status}`)}
               </Text>
@@ -540,29 +510,6 @@ const CLASS_FACETS: { key: FacetKey; labelKey: TranslationKey }[] = [
   { key: 'decade', labelKey: 'facet.decade' },
   { key: 'language', labelKey: 'facet.language' },
 ];
-
-function BarList({ entries }: { entries: { label: string; count: number }[] }) {
-  const max = Math.max(1, ...entries.map((e) => e.count));
-  return (
-    <YStack gap="$2">
-      {entries.map((e) => (
-        <YStack key={e.label} gap={4}>
-          <XStack justifyContent="space-between" alignItems="baseline">
-            <Text fontFamily="$body" fontSize={13} color="$color" numberOfLines={1} flex={1}>
-              {e.label}
-            </Text>
-            <Text fontFamily="$body" fontSize={12} color="$colorMuted" marginLeft="$2">
-              {e.count}
-            </Text>
-          </XStack>
-          <YStack height={3} borderRadius={999} backgroundColor="$track" overflow="hidden">
-            <YStack height={3} width={`${(e.count / max) * 100}%`} backgroundColor="$accent" />
-          </YStack>
-        </YStack>
-      ))}
-    </YStack>
-  );
-}
 
 /** Classify the library by facet (genres, shelves, tags, decades…) on the dashboard. */
 function ClassificationSection({ items }: { items: LibraryItem[] }) {

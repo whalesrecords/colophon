@@ -1,63 +1,11 @@
-import { useState } from 'react';
 import { ScrollView, useWindowDimensions } from 'react-native';
-import { Spinner, Text, XStack, YStack } from 'tamagui';
+import { Spinner, Text, YStack } from 'tamagui';
 
 import { Screen } from '@/components/Screen';
-import { type TrendEntry, useTrends } from '@/features/trends/use-trends';
+import { BarList, KPIRow, KPITile, SectionLabel } from '@/components/ui';
+import { useTrends } from '@/features/trends/use-trends';
 
-function Label({ children }: { children: string }) {
-  return (
-    <Text
-      fontFamily="$body"
-      fontSize={11}
-      fontWeight="600"
-      letterSpacing={2.4}
-      textTransform="uppercase"
-      color="$colorMuted"
-    >
-      {children}
-    </Text>
-  );
-}
-
-function BarList({ entries, collapse = 3 }: { entries: TrendEntry[]; collapse?: number }) {
-  const [expanded, setExpanded] = useState(false);
-  const max = Math.max(1, ...entries.map((e) => e.count));
-  const shown = expanded ? entries : entries.slice(0, collapse);
-  const hidden = entries.length - collapse;
-  return (
-    <YStack gap="$3">
-      {shown.map((e) => (
-        <YStack key={e.label} gap="$1">
-          <XStack justifyContent="space-between" alignItems="baseline">
-            <Text fontFamily="$body" fontSize={14} color="$color" numberOfLines={1} flex={1}>
-              {e.label}
-            </Text>
-            <Text fontFamily="$body" fontSize={13} color="$colorMuted" marginLeft="$2">
-              {e.count}
-            </Text>
-          </XStack>
-          <YStack height={4} borderRadius={999} backgroundColor="$track" overflow="hidden">
-            <YStack height={4} width={`${(e.count / max) * 100}%`} backgroundColor="$accent" />
-          </YStack>
-        </YStack>
-      ))}
-      {hidden > 0 ? (
-        <Text
-          onPress={() => setExpanded((v) => !v)}
-          fontFamily="$body"
-          fontSize={13}
-          fontWeight="600"
-          color="$accent"
-          paddingVertical="$1"
-          pressStyle={{ opacity: 0.6 }}
-        >
-          {expanded ? 'Réduire' : `… voir ${hidden} de plus`}
-        </Text>
-      ) : null}
-    </YStack>
-  );
-}
+const fmt = (n: number) => n.toLocaleString('fr-FR');
 
 export default function TrendsScreen() {
   const { data, isLoading } = useTrends();
@@ -70,7 +18,7 @@ export default function TrendsScreen() {
         contentContainerStyle={{ paddingHorizontal: padH, paddingTop: 20, paddingBottom: 40 }}
       >
         <YStack gap="$1" marginBottom="$5">
-          <Label>Tendances</Label>
+          <SectionLabel>Tendances</SectionLabel>
           <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
             Ce que lit la communauté
           </Text>
@@ -82,51 +30,35 @@ export default function TrendsScreen() {
           </YStack>
         ) : (
           <YStack gap="$7">
-            <XStack
-              backgroundColor="$backgroundStrong"
-              borderColor="$borderColor"
-              borderWidth={1}
-              borderRadius={12}
-              paddingVertical="$4"
-            >
-              <YStack flex={1} alignItems="center" gap="$1">
-                <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
-                  {data.readers}
-                </Text>
-                <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-                  Lecteur{data.readers > 1 ? 's' : ''}
-                </Text>
-              </YStack>
-              <YStack width={1} backgroundColor="$borderColor" />
-              <YStack flex={1} alignItems="center" gap="$1">
-                <Text fontFamily="$heading" fontSize={26} fontWeight="500" color="$color">
-                  {data.books}
-                </Text>
-                <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-                  Livres référencés
-                </Text>
-              </YStack>
-            </XStack>
+            <KPIRow>
+              <KPITile
+                value={fmt(data.readers)}
+                label={data.readers > 1 ? 'Lecteurs' : 'Lecteur'}
+              />
+              <KPITile value={fmt(data.books)} label="Livres référencés" />
+              <KPITile value={fmt(data.genres.length)} label="Genres" />
+            </KPIRow>
 
             {data.genres.length > 0 ? (
               <YStack gap="$3">
-                <Label>Genres les plus lus</Label>
-                <BarList entries={data.genres} />
+                <SectionLabel>Genres les plus lus</SectionLabel>
+                <BarList entries={data.genres} collapse={3} />
               </YStack>
             ) : null}
 
             {data.authors.length > 0 ? (
               <YStack gap="$3">
-                <Label>Auteurs les plus présents</Label>
-                <BarList entries={data.authors} />
+                <SectionLabel>Auteurs les plus présents</SectionLabel>
+                <BarList entries={data.authors} collapse={3} />
               </YStack>
             ) : null}
 
             {data.tags.length > 0 ? (
               <YStack gap="$3">
-                <Label>Tags les plus utilisés</Label>
+                <SectionLabel>Tags les plus utilisés</SectionLabel>
                 <BarList
                   entries={data.tags.map((t) => ({ label: `#${t.label}`, count: t.count }))}
+                  collapse={3}
                 />
               </YStack>
             ) : null}
