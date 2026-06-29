@@ -17,6 +17,7 @@ import { useUpdateItem } from '@/features/library/use-update-item';
 import { useMarkRead } from '@/features/reading/use-reading-sessions';
 import { useShelfActions, useShelves } from '@/features/shelves/use-shelves';
 import { amazonUrl, bookshopUrl } from '@/lib/bookshop';
+import { leboncoinUrl, momoxSellUrl, vintedUrl } from '@/lib/marketplace';
 import { parseSeries } from '@/lib/series';
 import { useTagActions, useTags } from '@/features/tags/use-tags';
 import { composedPalette } from '@/theme/cover-palettes';
@@ -280,6 +281,53 @@ export default function BookDetailScreen() {
                 Amazon ↗
               </Text>
             </XStack>
+          </YStack>
+
+          {/* Revendre ou donner — resale / donation marketplaces */}
+          <YStack gap="$2">
+            <Label>Revendre ou donner</Label>
+            <XStack gap="$4" alignItems="center" flexWrap="wrap">
+              <Text
+                onPress={() => void Linking.openURL(momoxSellUrl())}
+                fontFamily="$body"
+                fontSize={14}
+                fontWeight="600"
+                color="$accent"
+                paddingVertical="$1"
+                pressStyle={{ opacity: 0.6 }}
+              >
+                momox · rachat ↗
+              </Text>
+              <Text
+                onPress={() =>
+                  void Linking.openURL(vintedUrl(book?.isbn13, book?.title, book?.authors?.[0]))
+                }
+                fontFamily="$body"
+                fontSize={14}
+                fontWeight="600"
+                color="$colorMuted"
+                paddingVertical="$1"
+                pressStyle={{ opacity: 0.6 }}
+              >
+                Vinted ↗
+              </Text>
+              <Text
+                onPress={() =>
+                  void Linking.openURL(leboncoinUrl(book?.isbn13, book?.title, book?.authors?.[0]))
+                }
+                fontFamily="$body"
+                fontSize={14}
+                fontWeight="600"
+                color="$colorMuted"
+                paddingVertical="$1"
+                pressStyle={{ opacity: 0.6 }}
+              >
+                Leboncoin ↗
+              </Text>
+            </XStack>
+            <Text fontFamily="$body" fontSize={12.5} color="$colorMuted" lineHeight={18}>
+              Prix de rachat momox selon l’état du livre · cote Vinted / Leboncoin.
+            </Text>
           </YStack>
 
           {/* format */}

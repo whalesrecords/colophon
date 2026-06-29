@@ -235,6 +235,26 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   your feed — `follows(follower_id, followee_id)` + a feed RPC merging followed users'
   `circle_book_comments`/reviews. The discovery counterpart to the private library.
 
+## Roadmap — revente, dons & valeur de revente
+Own the *exit* of possession too: help a reader resell, give, or buy second-hand —
+and surface what their collection is worth now (not just what it cost).
+- **v1 SHIPPED — per-book "Revendre ou donner".** Book detail links out to **momox**
+  (rachat instantané, price *by condition* once you enter the ISBN — the v1 answer to
+  "prix approximatif selon l'état"), **Vinted** & **Leboncoin** (title search → cote +
+  sell/give-away listing). `src/lib/marketplace.ts`, deep links (no public APIs).
+- **Marketplace space.** A dedicated section listing your *sellable/donnable* books
+  (duplicates, finished, low-rated, "ça traîne") with one-tap list-to-sell and a bulk
+  **momox lot** (rachat groupé). Reuses duplicate detection + ratings already shipped.
+- **Auto price-by-condition.** Add `items.condition` (neuf/très bon/bon/correct/abîmé)
+  + `estimated_value`; auto-fetch resale price by ISBN+condition. Needs a real pricing
+  source — **momox partner API** (gives price-by-condition), ISBNdb (paid, deferred),
+  or comps scraping (fragile/ToS). Until then, manual value entry feeds the same field.
+- **Resale value in the library.** Extend the Profil **Collection** card (today: sum of
+  `purchase_price` = what you paid) with an estimated **valeur de revente** (sum of
+  `estimated_value`) — "ce que ça vaut aujourd'hui" vs "ce que ça a coûté".
+- **Dons.** A clear "donner" path (Leboncoin *donnons* / Recyclivre / Emmaüs) for books
+  you won't resell — aligned with the indie/never-Amazon ethos.
+
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
 - `book-search` (public) — fielded search, Open Library primary.
