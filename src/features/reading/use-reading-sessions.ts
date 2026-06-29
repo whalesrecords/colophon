@@ -183,6 +183,53 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
 }
 
 /**
+ * Mark several books (e.g. a whole series, or its first N volumes) as read at
+ * once: items.status='read' + a finished session today for any that don't already
+ * have one this year, so they count in "Lus en {year}".
+ */
+export function useMarkSeriesRead(userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (itemIds: string[]): Promise<void> => {
+      if (itemIds.length === 0) return;
+      const { error: upd } = await supabase
+        .from('items')
+        .update({ status: 'read' })
+        .in('id', itemIds);
+      if (upd) throw new Error(upd.message);
+
+      const year = String(new Date().getFullYear());
+      const { data: existing } = await supabase
+        .from('reading_sessions')
+        .select('item_id, finished_on')
+        .in('item_id', itemIds)
+        .eq('status', 'finished');
+      const haveThisYear = new Set(
+        (existing ?? []).filter((s) => s.finished_on?.startsWith(year)).map((s) => s.item_id),
+      );
+      const rows = itemIds
+        .filter((id) => !haveThisYear.has(id))
+        .map((id) => ({
+          item_id: id,
+          status: 'finished' as const,
+          started_on: today(),
+          finished_on: today(),
+        }));
+      if (rows.length) {
+        const { error } = await supabase.from('reading_sessions').insert(rows);
+        if (error) throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['library'] });
+      queryClient.invalidateQueries({ queryKey: ['stats', userId] });
+      queryClient.invalidateQueries({ queryKey: ['currently-reading', userId] });
+      queryClient.invalidateQueries({ queryKey: ['year-recap'] });
+    },
+  });
+}
+
+/**
  * Mark a book read via the status pill: set items.status='read' AND record a
  * finished reading session dated today, so it counts in "Lus en {year}". A book
  * that already has a finished session this year is not double-counted.

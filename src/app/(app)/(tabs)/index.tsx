@@ -9,6 +9,7 @@ import { BulkCoverFill } from '@/components/library/BulkCoverFill';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
 import { LibraryHome } from '@/components/library/LibraryHome';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
+import { SeriesMarkRead } from '@/components/library/SeriesMarkRead';
 import { missingCover } from '@/features/library/use-bulk-cover-fill';
 import { useProfile } from '@/features/profile/use-profile';
 import { useCurrentlyReading } from '@/features/reading/use-reading-sessions';
@@ -532,6 +533,7 @@ export default function LibraryScreen() {
           </XStack>
           <ScrollView contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingVertical: 16 }}>
             <YStack gap="$6">
+              <SeriesMarkRead items={openSeries.items} userId={session?.user.id} />
               <XStack flexWrap="wrap" gap={GAP}>
                 {openSeries.items.map((item) => (
                   <LibraryCard
