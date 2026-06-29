@@ -226,11 +226,22 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   + target config), `widget-sync.ts` pushes the snapshot to the App Group
   `group.com.whalesrecords.colophon` and reloads the timeline (no-op on web/Android).
   **Activation needs an iOS build + the App Group capability — see `docs/widgets.md`.**
-  Android equivalent (App Widgets via `react-native-android-widget`) is the next step.
-- **P1 — bonuses, étoiles & badges.** Earn **stars/XP** for hitting daily goals,
-  finishing books/series, breadth (new genres). `achievements` + `user_achievements`
-  tables (service-role-seeded catalogue, owner-readable progress). In-app cosmetic
-  bonuses (cover frames, profile flair) — never pay-to-win.
+  Gotcha fixed: the target name must be sanitized (`ColophonLecture`, no spaces) +
+  `ios.appleTeamId` is required, else prebuild won't generate the target. Build #36
+  (1.0.0) shipped it to TestFlight. Android equivalent (`react-native-android-widget`)
+  is still pending.
+- **Widget suite (vision).** Expand beyond the streak ring into a configurable set the
+  reader picks per slot: **stats** (year/pages/top genre), **challenge** progress,
+  next **rendez-vous** (circle agenda), a **circle** + its **unread discussions**, and
+  a **map** mini (nearest book box / reading place). Each reads a snapshot pushed to
+  the App Group via `widget-sync` (extend the payload). Could use WidgetKit
+  configuration intents so one widget exposes several "kinds".
+- **P1 — bonuses, étoiles & badges. v1 SHIPPED (computed).** `features/profile/badges.ts`
+  defines a catalogue (collection size, books finished, pages, breadth, streak tiers)
+  evaluated on the fly from the stats we already have — `BadgesCard` on Profil shows
+  earned (gold ring) vs locked (dimmed + progress), "N/M". **Next:** persist + celebrate
+  the moment one is earned, surface on the widget / public profile, add stars/XP +
+  cosmetic flair (never pay-to-win) via `achievements` + `user_achievements` tables.
 - **P1 — leaderboards vs friends & circles.** Weekly pages / streak ranking scoped
   to a user's friends or a circle (a `SECURITY DEFINER` RPC like
   `circle_leaderboard(circle_id)` / `friends_leaderboard()`, RLS-safe, no private
