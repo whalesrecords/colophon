@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import Svg, { Circle } from 'react-native-svg';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { Card, SectionLabel } from '@/components/ui';
 import { useDailyGoal, useSetDailyGoal } from '@/features/reading/use-daily-goal';
+import { syncReadingWidget } from '@/features/reading/widget-sync';
 import { palette } from '@/theme/tokens';
 
 const PRESETS = [10, 20, 30, 50];
@@ -46,6 +48,12 @@ function Ring({ pct, color, size = 88 }: { pct: number; color: string; size?: nu
 export function DailyGoalCard({ userId }: { userId: string | undefined }) {
   const { data } = useDailyGoal(userId);
   const setGoal = useSetDailyGoal(userId);
+
+  // Keep the iOS home-screen widget in sync (no-op on web/Android).
+  useEffect(() => {
+    if (data) syncReadingWidget({ streak: data.streak, today: data.today, goal: data.goal });
+  }, [data]);
+
   if (!data) return null;
 
   const { goal, today, streak } = data;

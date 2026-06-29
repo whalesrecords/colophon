@@ -221,6 +221,12 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
 - **P0 — reminders.** Opt-in daily push ("il te reste 12 pages pour ta série du
   jour") via the existing push pipeline. **Needs FCM on Android** (see pending).
   Quiet hours + a single, gentle reminder (no spam).
+- **iOS home-screen widget — SCAFFOLDED.** A WidgetKit widget ("Ma série de lecture":
+  ring + 🔥 streak + today/goal) via `@bacons/apple-targets` — `targets/widget/` (Swift
+  + target config), `widget-sync.ts` pushes the snapshot to the App Group
+  `group.com.whalesrecords.colophon` and reloads the timeline (no-op on web/Android).
+  **Activation needs an iOS build + the App Group capability — see `docs/widgets.md`.**
+  Android equivalent (App Widgets via `react-native-android-widget`) is the next step.
 - **P1 — bonuses, étoiles & badges.** Earn **stars/XP** for hitting daily goals,
   finishing books/series, breadth (new genres). `achievements` + `user_achievements`
   tables (service-role-seeded catalogue, owner-readable progress). In-app cosmetic
