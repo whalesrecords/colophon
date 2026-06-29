@@ -35,9 +35,10 @@ function firstName(name: string | null | undefined, fallback: string | undefined
   return n ? n.split(/\s+/)[0] : 'lecteur·rice';
 }
 
-function Avatar({ initial }: { initial: string }) {
+function Avatar({ initial, onPress }: { initial: string; onPress?: () => void }) {
   return (
     <YStack
+      onPress={onPress}
       width={44}
       height={44}
       borderRadius={22}
@@ -46,6 +47,9 @@ function Avatar({ initial }: { initial: string }) {
       borderWidth={1}
       alignItems="center"
       justifyContent="center"
+      pressStyle={{ opacity: 0.6, borderColor: '$accent' }}
+      hoverStyle={{ borderColor: '$accent' }}
+      {...({ style: { cursor: 'pointer' } } as object)}
     >
       <Text fontFamily="$heading" fontSize={18} color="$colorSoft">
         {initial}
@@ -200,6 +204,7 @@ interface LibraryHomeProps {
   now: Date;
   onOpenBook: (id: string) => void;
   onSeeWishlist: () => void;
+  onOpenProfile: () => void;
 }
 
 /** The home header that sits above the library grid: greeting, the book you're
@@ -214,6 +219,7 @@ export function LibraryHome({
   now,
   onOpenBook,
   onSeeWishlist,
+  onOpenProfile,
 }: LibraryHomeProps) {
   const g = greeting(now.getHours());
   const dateLabel = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`;
@@ -240,7 +246,7 @@ export function LibraryHome({
             {g.hello}, {who}
           </Text>
         </YStack>
-        <Avatar initial={initial} />
+        <Avatar initial={initial} onPress={onOpenProfile} />
       </XStack>
 
       {currentRead ? (

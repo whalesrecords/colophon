@@ -168,6 +168,7 @@ export default function LibraryScreen() {
               now={now}
               onOpenBook={(id) => router.push(`/book/${id}`)}
               onSeeWishlist={() => toggleFacet('ownership', 'wishlist')}
+              onOpenProfile={() => router.push('/profile')}
             />
           </YStack>
         ) : null}

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Button, Text, XStack, YStack } from 'tamagui';
+import { Button, Input, Text, XStack, YStack } from 'tamagui';
 
 import type { LibraryItem } from '@/features/library/use-library';
 import { useMarkSeriesRead } from '@/features/reading/use-reading-sessions';
+import { parseFlexibleDate } from '@/lib/reading-date';
 import { palette } from '@/theme/tokens';
 
 /**
@@ -20,19 +21,29 @@ export function SeriesMarkRead({
   const total = items.length;
   const alreadyRead = items.filter((i) => i.status === 'read').length;
   const [count, setCount] = useState(total);
+  const [dateStr, setDateStr] = useState('');
   const [done, setDone] = useState(false);
 
   // Reset when the open series changes.
   useEffect(() => {
     setCount(total);
+    setDateStr('');
     setDone(false);
   }, [total, items]);
 
   if (total === 0) return null;
 
+  // Empty date = today; otherwise it must parse (JJ/MM/AAAA, or just the year…).
+  const parsedDate = dateStr.trim() ? parseFlexibleDate(dateStr) : '';
+  const dateInvalid = parsedDate === null;
+
   const onMark = () => {
+    if (dateInvalid) return;
     const ids = items.slice(0, count).map((i) => i.id);
-    mark.mutate(ids, { onSuccess: () => setDone(true) });
+    mark.mutate(
+      { itemIds: ids, finishedOn: parsedDate || undefined },
+      { onSuccess: () => setDone(true) },
+    );
   };
 
   const plural = count > 1 ? 's' : '';
@@ -128,9 +139,41 @@ export function SeriesMarkRead({
         </Button>
       </XStack>
 
+      <XStack alignItems="center" gap="$2">
+        <Text fontFamily="$body" fontSize={13} color="$colorMuted" flexShrink={0}>
+          Lu le
+        </Text>
+        <Input
+          value={dateStr}
+          onChangeText={(v) => {
+            setDateStr(v);
+            setDone(false);
+          }}
+          placeholder="aujourd’hui"
+          placeholderTextColor="$concreteLight"
+          keyboardType="numbers-and-punctuation"
+          autoCapitalize="none"
+          flex={1}
+          backgroundColor="$background"
+          borderColor={dateInvalid ? '$signal' : '$borderColor'}
+          borderWidth={1}
+          borderRadius={10}
+          height={40}
+          paddingHorizontal="$2"
+          fontFamily="$body"
+          fontSize={14}
+          color="$color"
+        />
+      </XStack>
+      {dateInvalid ? (
+        <Text fontFamily="$body" fontSize={12} color="$signal">
+          Date invalide — essaie JJ/MM/AAAA (ou laisse vide pour aujourd’hui).
+        </Text>
+      ) : null}
+
       <Button
         onPress={onMark}
-        disabled={mark.isPending || done}
+        disabled={mark.isPending || done || dateInvalid}
         backgroundColor={done ? palette.forest : '$accent'}
         color={palette.paper}
         borderRadius={12}

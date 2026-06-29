@@ -190,30 +190,34 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
 export function useMarkSeriesRead(userId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (itemIds: string[]): Promise<void> => {
+    mutationFn: async (input: { itemIds: string[]; finishedOn?: string }): Promise<void> => {
+      const { itemIds } = input;
       if (itemIds.length === 0) return;
+      const date = input.finishedOn?.trim() || today();
       const { error: upd } = await supabase
         .from('items')
         .update({ status: 'read' })
         .in('id', itemIds);
       if (upd) throw new Error(upd.message);
 
-      const year = String(new Date().getFullYear());
+      // Don't double-count: skip items that already have a finished session in the
+      // chosen date's year.
+      const year = date.slice(0, 4);
       const { data: existing } = await supabase
         .from('reading_sessions')
         .select('item_id, finished_on')
         .in('item_id', itemIds)
         .eq('status', 'finished');
-      const haveThisYear = new Set(
+      const haveThatYear = new Set(
         (existing ?? []).filter((s) => s.finished_on?.startsWith(year)).map((s) => s.item_id),
       );
       const rows = itemIds
-        .filter((id) => !haveThisYear.has(id))
+        .filter((id) => !haveThatYear.has(id))
         .map((id) => ({
           item_id: id,
           status: 'finished' as const,
-          started_on: today(),
-          finished_on: today(),
+          started_on: date,
+          finished_on: date,
         }));
       if (rows.length) {
         const { error } = await supabase.from('reading_sessions').insert(rows);
