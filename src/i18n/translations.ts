@@ -245,7 +245,7 @@ export const fr = {
   'scan.looking': 'Recherche… {ref}',
   'scan.lookingUpBook': 'Recherche du livre…',
   'scan.modeImport': 'Importer',
-  'scan.modeScan': 'Scanner / ISBN',
+  'scan.modeScan': 'Scanner',
   'scan.modeSearch': 'Rechercher',
   'scan.noCameraBody':
     "Saisissez l'ISBN ci-dessous (ou avec une douchette), ou utilisez « Rechercher ».",
@@ -534,7 +534,7 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'scan.looking': 'Looking up… {ref}',
   'scan.lookingUpBook': 'Looking up the book…',
   'scan.modeImport': 'Import',
-  'scan.modeScan': 'Scan / ISBN',
+  'scan.modeScan': 'Scan',
   'scan.modeSearch': 'Search',
   'scan.noCameraBody': 'Enter the ISBN below (or with a scanner gun), or use “Search”.',
   'scan.noCameraTitle': 'Camera unavailable on this device',

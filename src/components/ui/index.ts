@@ -3,4 +3,5 @@ export { BarList, BarRow, useTranches, type BarEntry } from './BarList';
 export { Card } from './Card';
 export { KPIRow, KPITile } from './KPITile';
 export { SectionLabel } from './SectionLabel';
+export { Segmented } from './Segmented';
 export { StatusDot } from './StatusDot';

@@ -9,6 +9,7 @@ import { AddSheet } from '@/components/scan/AddSheet';
 import { BarcodeScanner } from '@/components/scan/BarcodeScanner';
 import { SearchPanel } from '@/components/scan/SearchPanel';
 import { Screen } from '@/components/Screen';
+import { Segmented } from '@/components/ui';
 import { useAuth } from '@/features/auth/auth-context';
 import { type BookMetadata, useIsbnLookup } from '@/features/books/use-isbn-lookup';
 import { useCsvImport } from '@/features/library/use-csv-import';
@@ -23,46 +24,19 @@ import { palette } from '@/theme/tokens';
 
 type Mode = 'scan' | 'search' | 'import';
 
+// Eyebrow in INK (refonte) — legible on parchment, unified across the app.
 function Label({ children }: { children: string }) {
   return (
     <Text
       fontFamily="$body"
       fontSize={11}
-      fontWeight="600"
-      letterSpacing={2.2}
+      fontWeight="700"
+      letterSpacing={1.8}
       textTransform="uppercase"
-      color="$colorMuted"
+      color="$color"
     >
       {children}
     </Text>
-  );
-}
-
-function ModeTab({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Button
-      onPress={onPress}
-      flex={1}
-      height={40}
-      borderRadius={12}
-      borderWidth={1}
-      borderColor={active ? '$accent' : '$borderColor'}
-      backgroundColor={active ? '$accent' : 'transparent'}
-      color={active ? palette.paper : '$colorMuted'}
-      fontFamily="$body"
-      fontWeight="600"
-      fontSize={14}
-    >
-      {label}
-    </Button>
   );
 }
 
@@ -171,39 +145,27 @@ export default function ScanScreen() {
               {t('scan.add')}
             </Text>
           </YStack>
-          <XStack gap="$2" flexWrap="wrap">
-            <ModeTab
-              label={t('scan.modeScan')}
-              active={mode === 'scan'}
-              onPress={() => setMode('scan')}
-            />
-            <ModeTab
-              label={t('scan.modeSearch')}
-              active={mode === 'search'}
-              onPress={() => setMode('search')}
-            />
-            <ModeTab
-              label={t('scan.modeImport')}
-              active={mode === 'import'}
-              onPress={() => setMode('import')}
-            />
-          </XStack>
+          <Segmented
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: 'scan', label: t('scan.modeScan') },
+              { value: 'search', label: t('scan.modeSearch') },
+              { value: 'import', label: t('scan.modeImport') },
+            ]}
+          />
         </YStack>
 
         {mode === 'import' ? (
           <YStack gap="$3">
-            <XStack gap="$2">
-              <ModeTab
-                label={t('scan.importIsbnList')}
-                active={importKind === 'isbn'}
-                onPress={() => setImportKind('isbn')}
-              />
-              <ModeTab
-                label={t('scan.importCsvTab')}
-                active={importKind === 'csv'}
-                onPress={() => setImportKind('csv')}
-              />
-            </XStack>
+            <Segmented
+              value={importKind}
+              onChange={setImportKind}
+              options={[
+                { value: 'isbn', label: t('scan.importIsbnList') },
+                { value: 'csv', label: t('scan.importCsvTab') },
+              ]}
+            />
 
             {importKind === 'isbn' ? (
               <>
