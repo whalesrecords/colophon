@@ -47,8 +47,9 @@ function Pill({ label, active, onPress }: { label: string; active: boolean; onPr
   );
 }
 
-function unitLabel(t: GoalType): string {
-  return t === 'pages' ? 'pages' : 'livres';
+function unitLabel(t: GoalType, n: number): string {
+  if (t === 'pages') return n > 1 ? 'pages' : 'page';
+  return n > 1 ? 'livres' : 'livre';
 }
 
 function daysLeft(endsOn: string): number {
@@ -69,8 +70,16 @@ function ChallengeCard({
 }) {
   const { data: progress, isLoading } = useChallengeProgress(challenge.id);
   const left = daysLeft(challenge.ends_on);
-  const unit = unitLabel(challenge.goal_type);
+  const unit = unitLabel(challenge.goal_type, challenge.target);
   const isOwner = challenge.created_by === userId;
+  const rows = progress ?? [];
+  const winner = challenge.ended && rows[0] && rows[0].value > 0 ? rows[0] : null;
+  const winnerName = winner
+    ? winner.user_id === userId
+      ? 'Toi'
+      : winner.display_name || winner.pseudo || 'Lecteur'
+    : null;
+  const iWon = !!winner && winner.user_id === userId;
 
   return (
     <YStack
@@ -87,11 +96,12 @@ function ChallengeCard({
             {challenge.title}
           </Text>
           <Text fontFamily="$body" fontSize={12.5} color="$colorMuted">
-            {challenge.target} {unit} · {left === 0 ? 'dernier jour' : `${left} j restants`} ·{' '}
+            {challenge.target} {unit} ·{' '}
+            {challenge.ended ? 'Terminé' : left === 0 ? 'dernier jour' : `${left} j restants`} ·{' '}
             {challenge.participant_count} participant{challenge.participant_count > 1 ? 's' : ''}
           </Text>
         </YStack>
-        {challenge.joined ? (
+        {challenge.ended ? null : challenge.joined ? (
           !isOwner ? (
             <Button
               onPress={() => onLeave(challenge.id)}
@@ -126,6 +136,29 @@ function ChallengeCard({
         )}
       </XStack>
 
+      {winner ? (
+        <XStack
+          alignItems="center"
+          gap="$2"
+          backgroundColor={iWon ? palette.forest : '$background'}
+          borderColor={iWon ? palette.forest : '$borderColor'}
+          borderWidth={1}
+          borderRadius={10}
+          paddingHorizontal="$3"
+          paddingVertical="$2"
+        >
+          <Text fontSize={16}>🏆</Text>
+          <Text
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="700"
+            color={iWon ? palette.paper : '$color'}
+          >
+            {iWon ? 'Tu remportes ce défi !' : `${winnerName} remporte le défi`}
+          </Text>
+        </XStack>
+      ) : null}
+
       {isLoading ? (
         <Spinner color="$accent" />
       ) : (
@@ -144,7 +177,7 @@ function ChallengeCard({
                   color="$colorMuted"
                   width={16}
                 >
-                  {i + 1}
+                  {challenge.ended && i === 0 && row.value > 0 ? '🏆' : i + 1}
                 </Text>
                 <Avatar path={row.avatar_path} name={name} pseudo={row.pseudo} size={24} />
                 <YStack flex={1} gap="$1.5">
@@ -192,6 +225,8 @@ export function ChallengesSection({
 }) {
   const { data: challenges, isLoading } = useCircleChallenges(circleId, userId);
   const { create, join, leave } = useChallengeActions(circleId, userId);
+  const active = (challenges ?? []).filter((c) => !c.ended);
+  const ended = (challenges ?? []).filter((c) => c.ended);
 
   const [title, setTitle] = useState('');
   const [goalType, setGoalType] = useState<GoalType>('pages');
@@ -272,8 +307,8 @@ export function ChallengesSection({
         <Label>Défis en cours</Label>
         {isLoading ? (
           <Spinner color="$accent" />
-        ) : challenges && challenges.length > 0 ? (
-          challenges.map((c) => (
+        ) : active.length > 0 ? (
+          active.map((c) => (
             <ChallengeCard
               key={c.id}
               challenge={c}
@@ -289,6 +324,21 @@ export function ChallengesSection({
           </Text>
         )}
       </YStack>
+
+      {ended.length > 0 ? (
+        <YStack gap="$3">
+          <Label>Défis terminés</Label>
+          {ended.map((c) => (
+            <ChallengeCard
+              key={c.id}
+              challenge={c}
+              userId={userId}
+              onJoin={(id) => join.mutate(id)}
+              onLeave={(id) => leave.mutate(id)}
+            />
+          ))}
+        </YStack>
+      ) : null}
     </ScrollView>
   );
 }

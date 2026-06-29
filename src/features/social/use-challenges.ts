@@ -18,6 +18,7 @@ export interface Challenge {
 export interface ChallengeWithMe extends Challenge {
   participant_count: number;
   joined: boolean;
+  ended: boolean;
 }
 
 export interface ChallengeProgressRow {
@@ -34,11 +35,14 @@ export function useCircleChallenges(circleId: string | undefined, userId: string
     queryKey: ['challenges', circleId, userId],
     enabled: !!circleId,
     queryFn: async (): Promise<ChallengeWithMe[]> => {
+      const today = new Date().toISOString().slice(0, 10);
+      const since = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+      // Active + recently-ended (last 30 days, so winners stay visible a while).
       const { data: challenges, error } = await supabase
         .from('challenges')
         .select('id, circle_id, created_by, title, goal_type, target, starts_on, ends_on')
         .eq('circle_id', circleId as string)
-        .gte('ends_on', new Date().toISOString().slice(0, 10))
+        .gte('ends_on', since)
         .order('ends_on', { ascending: true });
       if (error) throw error;
       const list = (challenges ?? []) as Challenge[];
@@ -59,6 +63,7 @@ export function useCircleChallenges(circleId: string | undefined, userId: string
         ...c,
         participant_count: countById.get(c.id) ?? 0,
         joined: minePerChallenge.has(c.id),
+        ended: c.ends_on < today,
       }));
     },
   });
