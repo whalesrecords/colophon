@@ -1,10 +1,12 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
-import { useRef } from 'react';
-import { Alert, Linking, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Alert, Animated, Easing, Linking, StyleSheet, View } from 'react-native';
 import { Button, Text, YStack } from 'tamagui';
 
 import { palette } from '@/theme/tokens';
+
+const RETICLE_H = 150;
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;
@@ -15,6 +17,28 @@ interface BarcodeScannerProps {
 export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const last = useRef<{ value: string; at: number }>({ value: '', at: 0 });
+  const beam = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(beam, {
+          toValue: 1,
+          duration: 1600,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(beam, {
+          toValue: 0,
+          duration: 1600,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [beam]);
 
   const askPermission = async () => {
     const result = await requestPermission();
@@ -68,6 +92,8 @@ export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) 
     onScan(data);
   };
 
+  const translateY = beam.interpolate({ inputRange: [0, 1], outputRange: [0, RETICLE_H - 2] });
+
   return (
     <View style={styles.wrap}>
       <CameraView
@@ -76,26 +102,80 @@ export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) 
         barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a'] }}
         onBarcodeScanned={paused ? undefined : handle}
       />
-      <View style={styles.frame} pointerEvents="none" />
+      <View style={styles.overlay} pointerEvents="none">
+        <View style={styles.reticle}>
+          <View style={[styles.corner, styles.tl]} />
+          <View style={[styles.corner, styles.tr]} />
+          <View style={[styles.corner, styles.bl]} />
+          <View style={[styles.corner, styles.br]} />
+          <Animated.View style={[styles.beam, { transform: [{ translateY }] }]} />
+        </View>
+      </View>
+      <Text
+        position="absolute"
+        bottom={12}
+        left={0}
+        right={0}
+        textAlign="center"
+        fontFamily="$body"
+        fontSize={12}
+        fontWeight="600"
+        color={palette.paper}
+      >
+        Visez le code-barres
+      </Text>
     </View>
   );
 }
 
+const CORNER = 24;
+const BORDER = 3;
 const styles = StyleSheet.create({
   wrap: {
     height: 280,
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: palette.ink,
+    backgroundColor: palette.nuit,
   },
-  frame: {
+  overlay: {
     position: 'absolute',
-    left: '12%',
-    right: '12%',
-    top: '30%',
-    bottom: '30%',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.85)',
-    borderRadius: 6,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reticle: { width: '76%', height: RETICLE_H },
+  corner: { position: 'absolute', width: CORNER, height: CORNER, borderColor: palette.scanBeam },
+  tl: { top: 0, left: 0, borderTopWidth: BORDER, borderLeftWidth: BORDER, borderTopLeftRadius: 5 },
+  tr: {
+    top: 0,
+    right: 0,
+    borderTopWidth: BORDER,
+    borderRightWidth: BORDER,
+    borderTopRightRadius: 5,
+  },
+  bl: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: BORDER,
+    borderLeftWidth: BORDER,
+    borderBottomLeftRadius: 5,
+  },
+  br: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: BORDER,
+    borderRightWidth: BORDER,
+    borderBottomRightRadius: 5,
+  },
+  beam: {
+    position: 'absolute',
+    left: '5%',
+    right: '5%',
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: palette.scanBeam,
   },
 });

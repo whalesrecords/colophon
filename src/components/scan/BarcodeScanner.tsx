@@ -25,6 +25,15 @@ export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) 
     pausedRef.current = paused;
   }, [paused]);
 
+  // Inject the scan-beam keyframe once (the line sweeps the reticle).
+  useEffect(() => {
+    if (typeof document === 'undefined' || document.getElementById('cph-beam-kf')) return;
+    const s = document.createElement('style');
+    s.id = 'cph-beam-kf';
+    s.textContent = '@keyframes cphBeam{0%,100%{top:4%}50%{top:92%}}';
+    document.head.appendChild(s);
+  }, []);
+
   useEffect(() => {
     if (!active || !videoRef.current) return;
     let cancelled = false;
@@ -75,13 +84,80 @@ export function BarcodeScanner({ onScan, paused = false }: BarcodeScannerProps) 
           {error}
         </Text>
       ) : null}
-      {/* eslint-disable-next-line */}
-      <video
-        ref={videoRef}
-        muted
-        playsInline
-        style={{ width: '100%', maxHeight: 320, borderRadius: 8, background: palette.ink }}
-      />
+      <YStack
+        position="relative"
+        borderRadius={16}
+        overflow="hidden"
+        backgroundColor={palette.nuit}
+      >
+        {/* eslint-disable-next-line */}
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          style={{ width: '100%', maxHeight: 320, display: 'block' }}
+        />
+        {/* 4-corner reticle + sweeping scan beam (refonte) */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={{ position: 'relative', width: '76%', height: '54%' }}>
+            {(['tl', 'tr', 'bl', 'br'] as const).map((c) => {
+              const top = c[0] === 't';
+              const left = c[1] === 'l';
+              return (
+                <div
+                  key={c}
+                  style={{
+                    position: 'absolute',
+                    width: 24,
+                    height: 24,
+                    [top ? 'top' : 'bottom']: 0,
+                    [left ? 'left' : 'right']: 0,
+                    [`border${top ? 'Top' : 'Bottom'}`]: `3px solid ${palette.scanBeam}`,
+                    [`border${left ? 'Left' : 'Right'}`]: `3px solid ${palette.scanBeam}`,
+                    [`border${top ? 'Top' : 'Bottom'}${left ? 'Left' : 'Right'}Radius`]: 5,
+                  }}
+                />
+              );
+            })}
+            <div
+              style={{
+                position: 'absolute',
+                left: '5%',
+                right: '5%',
+                height: 2,
+                borderRadius: 2,
+                background: palette.scanBeam,
+                boxShadow: `0 0 8px 1px ${palette.scanBeam}`,
+                animation: 'cphBeam 2.4s ease-in-out infinite',
+              }}
+            />
+          </div>
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            color: 'rgba(244,238,226,0.85)',
+            font: '600 12px -apple-system, sans-serif',
+            letterSpacing: '0.04em',
+            pointerEvents: 'none',
+          }}
+        >
+          Visez le code-barres
+        </div>
+      </YStack>
       <Button
         onPress={() => setActive(false)}
         chromeless
