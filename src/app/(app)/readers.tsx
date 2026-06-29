@@ -59,15 +59,16 @@ function Avatar({
   );
 }
 
+// Eyebrow in INK (refonte) — unified, legible on parchment.
 function Section({ children }: { children: string }) {
   return (
     <Text
       fontFamily="$body"
       fontSize={11}
-      fontWeight="600"
-      letterSpacing={2.4}
+      fontWeight="700"
+      letterSpacing={1.8}
       textTransform="uppercase"
-      color="$colorMuted"
+      color="$color"
     >
       {children}
     </Text>
@@ -211,14 +212,19 @@ export default function ReadersScreen() {
                       >
                         + Ajouter
                       </Button>
-                      {r.sample_genres?.length ? (
+                      {r.shared > 0 || r.sample_genres?.length ? (
                         <Text
                           fontFamily="$body"
                           fontSize={11}
                           color="$colorMuted"
                           numberOfLines={1}
                         >
-                          {r.sample_genres.slice(0, 2).join(' · ')}
+                          {[
+                            r.shared > 0 ? `${r.shared} en commun` : null,
+                            r.sample_genres?.slice(0, 2).join(' · ') || null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
                         </Text>
                       ) : null}
                     </YStack>

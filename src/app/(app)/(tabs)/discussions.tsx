@@ -21,15 +21,16 @@ import { palette } from '@/theme/tokens';
 /** Each circle gets one of the four "tranches" as its accent, by position. */
 const TRANCHES = [palette.brick, palette.prussian, palette.forest, palette.gold];
 
+// Eyebrow in INK (refonte) — legible on parchment, unified across the app.
 function Label({ children }: { children: string }) {
   return (
     <Text
       fontFamily="$body"
       fontSize={11}
-      fontWeight="600"
-      letterSpacing={2.4}
+      fontWeight="700"
+      letterSpacing={1.8}
       textTransform="uppercase"
-      color="$colorMuted"
+      color="$color"
     >
       {children}
     </Text>
