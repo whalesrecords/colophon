@@ -91,11 +91,25 @@ export default function FeedScreen() {
   const { session } = useAuth();
   const { data: feed, isLoading } = useReadingFeed(session?.user.id);
 
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/discussions'));
+
   return (
     <Screen>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 40 }}
       >
+        <Text
+          onPress={goBack}
+          fontFamily="$body"
+          fontSize={15}
+          color="$accent"
+          fontWeight="600"
+          paddingVertical="$2"
+          marginBottom="$2"
+          pressStyle={{ opacity: 0.6 }}
+        >
+          ‹ Retour
+        </Text>
         <YStack gap="$1" marginBottom="$5">
           <Text
             fontFamily="$body"
