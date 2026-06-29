@@ -36,14 +36,20 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
   );
 
-  const [{ data: circle }, { data: members }] = await Promise.all([
+  const [{ data: circle }, { data: members }, { data: senderProfile }] = await Promise.all([
     supabase.from('circles').select('name').eq('id', circleId).maybeSingle(),
     supabase.from('circle_members').select('user_id, display_name').eq('circle_id', circleId),
+    // Resolve the sender's name from their profile (nom/prénom or pseudo) so the
+    // notification never shows an email — and stays current if they rename.
+    supabase.from('profiles').select('display_name, pseudo').eq('user_id', senderId).maybeSingle(),
   ]);
 
   const recipients = (members ?? []).filter((m) => m.user_id !== senderId).map((m) => m.user_id);
   const senderName =
-    (members ?? []).find((m) => m.user_id === senderId)?.display_name ?? 'Quelqu’un';
+    senderProfile?.display_name ||
+    senderProfile?.pseudo ||
+    (members ?? []).find((m) => m.user_id === senderId)?.display_name ||
+    'Quelqu’un';
   if (recipients.length === 0) {
     return new Response(JSON.stringify({ sent: 0 }), {
       headers: { 'Content-Type': 'application/json' },
