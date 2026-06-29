@@ -1,9 +1,17 @@
-import { Modal, Platform, ScrollView, Share as RNShare, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, ScrollView, View } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
 import { type RecapBook, useYearRecap } from '@/features/stats/use-year-recap';
+import {
+  shareWrappedImage,
+  shareWrappedText,
+  shareWrappedVideo,
+  wrappedCapabilities,
+  type WrappedShareData,
+} from '@/features/stats/wrapped-share';
 import { useT } from '@/i18n';
 import { palette } from '@/theme/tokens';
 
@@ -147,19 +155,43 @@ export function YearRecap({
     return s.charAt(0).toUpperCase() + s.slice(1);
   };
 
-  const onShare = () => {
-    const theme = data?.themes[0]?.value;
-    const msg =
-      `Mon année lecture ${year} sur Colophon : ${data?.booksRead ?? 0} livres, ` +
-      `${data?.pagesApproximate ? '~' : ''}${(data?.pages ?? 0).toLocaleString('fr-FR')} pages lues` +
-      (theme ? ` · thème phare : ${theme}` : '') +
-      '. 📚';
-    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(msg).catch(() => undefined);
-    } else {
-      RNShare.share({ message: msg }).catch(() => undefined);
+  const caps = wrappedCapabilities();
+  const [busy, setBusy] = useState<null | 'image' | 'video'>(null);
+  const [vidPct, setVidPct] = useState(0);
+
+  const shareData = (): WrappedShareData => ({
+    year,
+    booksRead: data?.booksRead ?? 0,
+    pages: data?.pages ?? 0,
+    pagesApproximate: data?.pagesApproximate ?? false,
+    topAuthor: data?.topAuthor ?? null,
+    topTheme: data?.themes?.[0]?.value ?? null,
+    busiestMonth:
+      data?.busiestMonth && data.busiestMonth.count > 1
+        ? { label: data.busiestMonth.label, count: data.busiestMonth.count }
+        : null,
+    byMonth: data?.byMonth?.map((m) => m.count) ?? [],
+    avgRating: data?.avgRating ?? null,
+  });
+
+  const onImage = async () => {
+    setBusy('image');
+    try {
+      await shareWrappedImage(shareData());
+    } finally {
+      setBusy(null);
     }
   };
+  const onVideo = async () => {
+    setBusy('video');
+    setVidPct(0);
+    try {
+      await shareWrappedVideo(shareData(), setVidPct);
+    } finally {
+      setBusy(null);
+    }
+  };
+  const onText = () => shareWrappedText(shareData());
 
   const empty = !isLoading && (!data || data.booksRead === 0);
 
@@ -460,42 +492,84 @@ export function YearRecap({
           )}
         </ScrollView>
 
-        <XStack
-          paddingHorizontal="$5"
-          paddingBottom="$7"
-          paddingTop="$3"
-          gap="$3"
-          alignItems="center"
-        >
-          <Button
-            onPress={onShare}
-            disabled={empty}
-            backgroundColor={palette.terracotta}
-            color={palette.paper}
-            borderRadius={999}
-            height={54}
-            flex={1}
-            fontFamily="$body"
-            fontWeight="600"
-            fontSize={16}
-            opacity={empty ? 0.5 : 1}
-            pressStyle={{ opacity: 0.9 }}
-          >
-            {`↗  ${t('recap.share')}`}
-          </Button>
-          <Button
-            onPress={onClose}
-            chromeless
-            height={54}
-            paddingHorizontal="$4"
-            color="$colorMuted"
-            fontFamily="$body"
-            fontWeight="600"
-            fontSize={16}
-          >
-            {t('recap.close')}
-          </Button>
-        </XStack>
+        <YStack paddingHorizontal="$5" paddingBottom="$7" paddingTop="$3" gap="$2">
+          <XStack gap="$2.5" alignItems="center">
+            {caps.image ? (
+              <>
+                <Button
+                  onPress={onImage}
+                  disabled={empty || !!busy}
+                  backgroundColor={palette.terracotta}
+                  color={palette.paper}
+                  borderRadius={999}
+                  height={54}
+                  flex={1}
+                  fontFamily="$body"
+                  fontWeight="600"
+                  fontSize={15}
+                  opacity={empty || busy === 'video' ? 0.5 : 1}
+                  pressStyle={{ opacity: 0.9 }}
+                >
+                  {busy === 'image' ? '…' : '↓  Image'}
+                </Button>
+                {caps.video ? (
+                  <Button
+                    onPress={onVideo}
+                    disabled={empty || !!busy}
+                    backgroundColor={palette.aizome}
+                    color={palette.paper}
+                    borderRadius={999}
+                    height={54}
+                    flex={1}
+                    fontFamily="$body"
+                    fontWeight="600"
+                    fontSize={15}
+                    opacity={empty || busy === 'image' ? 0.5 : 1}
+                    pressStyle={{ opacity: 0.9 }}
+                  >
+                    {busy === 'video' ? `Vidéo ${Math.round(vidPct * 100)}%` : '▶  Vidéo'}
+                  </Button>
+                ) : null}
+              </>
+            ) : (
+              <Button
+                onPress={onText}
+                disabled={empty}
+                backgroundColor={palette.terracotta}
+                color={palette.paper}
+                borderRadius={999}
+                height={54}
+                flex={1}
+                fontFamily="$body"
+                fontWeight="600"
+                fontSize={16}
+                opacity={empty ? 0.5 : 1}
+                pressStyle={{ opacity: 0.9 }}
+              >
+                {`↗  ${t('recap.share')}`}
+              </Button>
+            )}
+            <Button
+              onPress={onClose}
+              chromeless
+              height={54}
+              paddingHorizontal="$3"
+              color="$colorMuted"
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={15}
+            >
+              {t('recap.close')}
+            </Button>
+          </XStack>
+          {caps.video ? (
+            <Text fontFamily="$body" fontSize={12} color="$colorMuted" textAlign="center">
+              {busy === 'video'
+                ? 'Génération de la vidéo…'
+                : 'Image à poster · vidéo animée aux couleurs Colophon'}
+            </Text>
+          ) : null}
+        </YStack>
       </YStack>
     </Modal>
   );

@@ -6,6 +6,28 @@ import { Platform } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
 
+// Show notifications even when the app is foregrounded (otherwise an arriving
+// push is silently swallowed on the active screen). Module-level: set once.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+/** Android 8+ requires a channel — WITHOUT one, no notification is ever shown. */
+async function ensureAndroidChannel() {
+  if (Platform.OS !== 'android') return;
+  await Notifications.setNotificationChannelAsync('default', {
+    name: 'Notifications',
+    importance: Notifications.AndroidImportance.MAX,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#AE4133',
+  });
+}
+
 /**
  * Registers this device's Expo push token for the signed-in user (native only —
  * web keeps the in-app unread badges). Best-effort: silently no-ops if permission
@@ -15,11 +37,16 @@ import { supabase } from '@/lib/supabase';
  */
 export function usePushRegistration(userId: string | undefined) {
   useEffect(() => {
-    if (!userId || Platform.OS === 'web' || !Device.isDevice) return;
+    if (Platform.OS === 'web') return;
     let cancelled = false;
 
     void (async () => {
       try {
+        // Create the Android channel up front — it must exist before any
+        // notification can be displayed, independent of permission/token.
+        await ensureAndroidChannel();
+        if (!userId || !Device.isDevice) return;
+
         const existing = await Notifications.getPermissionsAsync();
         let granted = existing.granted;
         if (!granted && existing.canAskAgain) {

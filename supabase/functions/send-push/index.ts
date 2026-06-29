@@ -62,6 +62,10 @@ Deno.serve(async (req) => {
     title: circle?.name ?? 'Cercle de lecture',
     body: `${senderName} : ${body}`.trim(),
     data: { circleId },
+    // Android: route to the app's channel + deliver with high priority so the
+    // banner is shown promptly (matches the channel created on the device).
+    channelId: 'default',
+    priority: 'high',
   }));
 
   if (messages.length > 0) {

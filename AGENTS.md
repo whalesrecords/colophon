@@ -227,4 +227,14 @@ only fills for manga. Prioritized, grounded against what already ships:
   **add `https://colophon-three.vercel.app/reset-password` (or `…/**`) to Auth →
   URL Configuration → Redirect URLs** so the password-reset email link lands on the
   recovery page instead of falling back to the Site URL root.
+- **Android push needs FCM credentials.** The app now creates the `default`
+  notification channel + a foreground handler, and `send-push` sets
+  `channelId/priority`; but Expo push to Android still REQUIRES an FCM V1 service
+  account uploaded to EAS (`eas credentials` → Android → Push Notifications, from a
+  Firebase project). Without it, Android delivers nothing even when permission is
+  granted. iOS needs the APNs key (already set during a prior TestFlight build).
+- **Year-recap "Wrapped" share** (`features/stats/wrapped-share[.web].ts`): web
+  draws a vertical Colophon-coloured poster on a `<canvas>` → PNG image + animated
+  WebM video (MediaRecorder). Native falls back to a text share (a future native
+  build can add view-shot/Skia to render the same poster).
 - **Phase 6 (later)** offline-first via expo-sqlite + PowerSync.
