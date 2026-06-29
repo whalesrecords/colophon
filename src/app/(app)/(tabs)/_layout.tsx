@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { useEffect } from 'react';
 import { Platform, View, type ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -34,8 +35,25 @@ function ScanTabIcon() {
   );
 }
 
+// Web only: the browser draws a focus ring (an ochre box here) around the active
+// tab after a click. Strip it so the tab bar stays clean.
+function useStripTabFocusRing() {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const el = document.createElement('style');
+    el.textContent =
+      '[role="tablist"] [role="tab"]:focus,[role="tablist"] [role="tab"]:focus-visible,' +
+      '[role="tablist"] a:focus,[role="tablist"] a:focus-visible,' +
+      '[role="tablist"] button:focus,[role="tablist"] button:focus-visible' +
+      '{outline:none!important;box-shadow:none!important;}';
+    document.head.appendChild(el);
+    return () => el.remove();
+  }, []);
+}
+
 export default function AppTabsLayout() {
   const insets = useSafeAreaInsets();
+  useStripTabFocusRing();
   const { t } = useT();
   const { effective } = useThemePref();
   const { session } = useAuth();
@@ -52,10 +70,10 @@ export default function AppTabsLayout() {
           backgroundColor: dark ? 'rgba(21,19,14,0.96)' : 'rgba(244,241,234,0.96)',
           borderTopColor: dark ? '#332F26' : palette.hairline,
           // Android/web: add the gesture-nav / nav-bar inset so labels clear the
-          // system bar. Tall enough that the 11px label isn't vertically clipped.
-          height: Platform.select({ ios: 86, default: 68 + insets.bottom }),
+          // system bar. Tall enough that the 11px label (descenders incl.) isn't clipped.
+          height: Platform.select({ ios: 86, default: 76 + insets.bottom }),
           paddingTop: 8,
-          paddingBottom: Platform.select({ ios: 28, default: 12 + insets.bottom }),
+          paddingBottom: Platform.select({ ios: 28, default: 18 + insets.bottom }),
         },
         tabBarLabelStyle: {
           fontFamily: 'SchibstedGrotesk_500Medium',
