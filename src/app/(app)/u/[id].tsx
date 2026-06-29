@@ -7,6 +7,7 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
 import { useAuth } from '@/features/auth/auth-context';
+import { useFollowActions, useIsFollowing } from '@/features/social/use-follow';
 import { avatarUrl, useFriendActions, useReaderProfile } from '@/features/social/use-friends';
 import { palette } from '@/theme/tokens';
 
@@ -54,6 +55,8 @@ export default function ReaderProfileScreen() {
   const { session } = useAuth();
   const { data: profile, isLoading } = useReaderProfile(id);
   const { sendRequest, accept, remove } = useFriendActions(session?.user.id);
+  const { data: following } = useIsFollowing(id, session?.user.id);
+  const { follow, unfollow } = useFollowActions(session?.user.id);
 
   const url = profile ? avatarUrl(profile.avatar_path) : null;
   const name = profile?.display_name || profile?.pseudo || 'Lecteur';
@@ -131,12 +134,33 @@ export default function ReaderProfileScreen() {
                 </Text>
               ) : null}
 
-              <FriendButton
-                status={profile.friend_status}
-                onAdd={() => sendRequest.mutate(profile.user_id)}
-                onAccept={() => accept.mutate(profile.user_id)}
-                onRemove={() => remove.mutate(profile.user_id)}
-              />
+              <XStack gap="$2" alignItems="center">
+                <FriendButton
+                  status={profile.friend_status}
+                  onAdd={() => sendRequest.mutate(profile.user_id)}
+                  onAccept={() => accept.mutate(profile.user_id)}
+                  onRemove={() => remove.mutate(profile.user_id)}
+                />
+                {profile.friend_status !== 'self' ? (
+                  <Button
+                    onPress={() =>
+                      following ? unfollow.mutate(profile.user_id) : follow.mutate(profile.user_id)
+                    }
+                    height={40}
+                    paddingHorizontal="$4"
+                    borderRadius={999}
+                    borderWidth={1}
+                    borderColor={following ? '$borderColor' : '$accent'}
+                    backgroundColor="transparent"
+                    color={following ? '$colorSoft' : '$accent'}
+                    fontFamily="$body"
+                    fontSize={14}
+                    fontWeight="600"
+                  >
+                    {following ? 'Suivi ✓' : 'Suivre'}
+                  </Button>
+                ) : null}
+              </XStack>
             </YStack>
 
             <XStack alignItems="center" justifyContent="center" gap="$6">

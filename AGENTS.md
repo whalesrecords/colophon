@@ -270,10 +270,12 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   `challenge_progress(p_challenge)` (pages from `daily_reading` or books finished in the
   window, target bar + ✓ when reached). **Next:** friends-scoped challenges, a declared
   winner at the end, tie-in to badges/celebration.
-- **P2 — reading feed + follow.** A feed of book comments/mini-reviews anyone can
-  post; **follow** specific readers (one-way, lighter than `friendships`) to curate
-  your feed — `follows(follower_id, followee_id)` + a feed RPC merging followed users'
-  `circle_book_comments`/reviews. The discovery counterpart to the private library.
+- **P2 — reading feed + follow. v1 SHIPPED.** One-way **follow** (`follows(follower_id,
+  followee_id)`, RLS self-scoped) — a "Suivre/Suivi ✓" button on `/u/[id]`. A **`/feed`
+  screen** ("Ce que lit ton réseau", reached from the Échanges header "Fil" chip) lists
+  books recently **finished by people you follow** (cover, title, ★ rating, date) via the
+  `reading_feed()` SECURITY DEFINER RPC. **Next:** free-text mini-reviews/posts in the
+  feed; follower/following counts on profiles; merge in friends' activity.
 
 ## Roadmap — revente, dons & valeur de revente
 Own the *exit* of possession too: help a reader resell, give, or buy second-hand —

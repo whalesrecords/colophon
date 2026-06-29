@@ -771,6 +771,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      follows: {
+        Row: {
+          follower_id: string;
+          followee_id: string;
+          created_at: string;
+        };
+        Insert: {
+          follower_id?: string;
+          followee_id: string;
+          created_at?: string;
+        };
+        Update: {
+          follower_id?: string;
+          followee_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           annual_goal: number | null;
@@ -1008,6 +1026,20 @@ export type Database = {
           pseudo: string | null;
           avatar_path: string | null;
           value: number;
+        }[];
+      };
+      reading_feed: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          display_name: string | null;
+          pseudo: string | null;
+          avatar_path: string | null;
+          title: string | null;
+          cover_url: string | null;
+          isbn13: string | null;
+          rating: number | null;
+          finished_on: string;
         }[];
       };
       friends_current_reading: {
