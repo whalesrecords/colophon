@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Input, Text, XStack, YStack } from 'tamagui';
 
 import type { LibraryItem } from '@/features/library/use-library';
 import { useMarkSeriesRead } from '@/features/reading/use-reading-sessions';
 import { parseFlexibleDate } from '@/lib/reading-date';
+import { parseSeries } from '@/lib/series';
 import { palette } from '@/theme/tokens';
 
 /**
@@ -18,8 +19,24 @@ export function SeriesMarkRead({
   userId: string | undefined;
 }) {
   const mark = useMarkSeriesRead(userId);
-  const total = items.length;
-  const alreadyRead = items.filter((i) => i.status === 'read').length;
+  // Group physical copies into distinct tomes (by tome number, else ISBN) — the
+  // same dedup the series header uses, so "15 copies of 8 tomes" reads as 8, not 15.
+  const tomes = useMemo(() => {
+    const map = new Map<string, LibraryItem[]>();
+    const order: string[] = [];
+    for (const it of items) {
+      const ref = parseSeries(it.book?.title ?? '');
+      const key = ref?.volume != null ? `v${ref.volume}` : `i${it.book?.isbn13 ?? it.id}`;
+      if (!map.has(key)) {
+        map.set(key, []);
+        order.push(key);
+      }
+      map.get(key)!.push(it);
+    }
+    return order.map((k) => map.get(k)!);
+  }, [items]);
+  const total = tomes.length;
+  const alreadyRead = tomes.filter((g) => g.some((i) => i.status === 'read')).length;
   const [count, setCount] = useState(total);
   const [dateStr, setDateStr] = useState('');
   const [done, setDone] = useState(false);
@@ -39,7 +56,8 @@ export function SeriesMarkRead({
 
   const onMark = () => {
     if (dateInvalid) return;
-    const ids = items.slice(0, count).map((i) => i.id);
+    // Mark every physical copy of the first `count` distinct tomes.
+    const ids = tomes.slice(0, count).flatMap((g) => g.map((i) => i.id));
     mark.mutate(
       { itemIds: ids, finishedOn: parsedDate || undefined },
       { onSuccess: () => setDone(true) },
