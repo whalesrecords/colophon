@@ -316,6 +316,26 @@ and surface what their collection is worth now (not just what it cost).
   passed in) + "ajouter ici" by tapping a map point. Carte refonte also done: warm
   pastille clusters + tranche filter pills.
 
+## Roadmap — onboarding, découverte, confidentialité & sécurité (proposed)
+- **Chemin de lecteur à l'inscription (P1).** First-run persona pick — **Collectionneur**
+  (possession-first home), **Social** (sharing + discovery on), **Secret** (private by
+  default). Sets the privacy defaults below and tailors the first screen.
+- **Découverte façon Netflix (P1).** Horizontal rows by **genre / thème / type** across the
+  library + catalogue — the substrate for future recommendations.
+- **Recommandations par humeur (P2, façon StoryGraph).** mood/pace tags on books; "envie de
+  quoi ce soir ?" → suggestions filtered by mood.
+- **Modes de confidentialité (P0).** A master **Secret ⇄ Social** switch in Settings + per-
+  surface toggles (public profile, discovery/`suggested_readers`, current reading, feed
+  presence, leaderboards) — all reversible anytime. Secret = nothing leaves the account.
+  Reuses `share_current_reading` + a new `profiles.is_private` gating the authenticated
+  profile-SELECT policy and every social RPC.
+- **Récap hebdo par email (P1).** Opt-in weekly reading summary, emailed automatically — an
+  edge function on a `pg_cron` schedule + an email provider (Resend). Quiet, gentle, opt-out.
+- **Sécurité ULTRA (P0, transverse).** Full RLS audit + access tests; enable Auth leaked-
+  password protection (HaveIBeenPwned); run `/security-review` + harden; least-privilege on
+  every `SECURITY DEFINER` RPC (already EXECUTE-revoked from `anon`); no PII in logs; account
+  export + delete already shipped (App Store req.). The privacy modes above are part of this.
+
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
 - `book-search` (public) — fielded search, Open Library primary.
