@@ -334,10 +334,18 @@ and surface what their collection is worth now (not just what it cost).
   **Next:** per-surface granular toggles beyond the master switch; tie into the onboarding persona.
 - **Récap hebdo par email (P1).** Opt-in weekly reading summary, emailed automatically — an
   edge function on a `pg_cron` schedule + an email provider (Resend). Quiet, gentle, opt-out.
-- **Sécurité ULTRA (P0, transverse).** Full RLS audit + access tests; enable Auth leaked-
-  password protection (HaveIBeenPwned); run `/security-review` + harden; least-privilege on
-  every `SECURITY DEFINER` RPC (already EXECUTE-revoked from `anon`); no PII in logs; account
-  export + delete already shipped (App Store req.). The privacy modes above are part of this.
+- **Sécurité ULTRA (P0, transverse). Audit pass DONE.** Supabase security advisor run +
+  acted on: **all public tables have RLS** (no `rls_disabled` findings); the 3 trigger
+  functions (`handle_new_user`/`notify_new_message`/`enforce_comment_rate_limit`) were
+  inadvertently anon-callable via `/rest/v1/rpc/*` → **EXECUTE revoked**; secret scan clean
+  (`.env` gitignored, no service-role key committed, only the publishable anon key client-
+  side, service role only inside edge functions). Privacy modes (`is_private`) shipped.
+  **Accepted/low-risk:** public bucket listing on `avatars`/`book-boxes` (dropping the read
+  policy broke image display; kept) — only reveals which user-ids have an avatar. **Still
+  pending (YOUR dashboard action):** enable Auth **leaked-password protection**
+  (HaveIBeenPwned). **Follow-up:** add a shared-secret header to `send-push` (currently
+  `verify_jwt` off → theoretically spammable with a valid circle id); move `pg_net` out of
+  the `public` schema.
 
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
