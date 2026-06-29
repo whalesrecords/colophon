@@ -922,6 +922,7 @@ export type Database = {
       };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       log_daily_pages: { Args: { p_pages: number }; Returns: undefined };
+      record_reading_page: { Args: { p_session: string; p_page: number }; Returns: undefined };
       suggested_readers: {
         Args: { p_limit?: number };
         Returns: {

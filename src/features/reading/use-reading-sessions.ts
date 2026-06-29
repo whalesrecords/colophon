@@ -131,22 +131,14 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
 
   const setPage = useMutation({
     mutationFn: async ({ sessionId, page }: { sessionId: string; page: number }): Promise<void> => {
-      const newPage = Math.max(0, page);
-      // Read the previous page first so we can credit only the pages actually read
-      // today to the daily goal (a forward delta — going back doesn't subtract).
-      const { data: prev } = await supabase
-        .from('reading_sessions')
-        .select('current_page')
-        .eq('id', sessionId)
-        .maybeSingle();
-      const before = prev?.current_page ?? 0;
-      const { error } = await supabase
-        .from('reading_sessions')
-        .update({ current_page: newPage })
-        .eq('id', sessionId);
+      // One RPC updates the page AND recomputes today's daily goal as the NET advance
+      // for the day (current page minus the page at the start of today) — so going
+      // back and forth / correcting a typo can't inflate the count.
+      const { error } = await supabase.rpc('record_reading_page', {
+        p_session: sessionId,
+        p_page: Math.max(0, page),
+      });
       if (error) throw new Error(error.message);
-      const delta = newPage - before;
-      if (delta > 0) await supabase.rpc('log_daily_pages', { p_pages: delta });
     },
     onSuccess: invalidate,
   });
