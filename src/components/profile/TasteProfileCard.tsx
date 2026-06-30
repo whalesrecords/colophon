@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Text, XStack, YStack } from 'tamagui';
 
+import { ShareProfileSheet } from '@/components/profile/ShareProfileSheet';
 import { Card, SectionLabel } from '@/components/ui';
 import { useTranches } from '@/components/ui/BarList';
 import { useReaderTaste } from '@/features/library/use-reader-taste';
@@ -10,6 +12,7 @@ import { useReaderTaste } from '@/features/library/use-reader-taste';
 export function TasteProfileCard({ userId }: { userId: string | undefined }) {
   const tranches = useTranches();
   const { data } = useReaderTaste(userId);
+  const [shareOpen, setShareOpen] = useState(false);
   const clusters = (data?.clusters ?? [])
     .filter((c) => c && c.label && c.percent > 0)
     .sort((a, b) => b.percent - a.percent);
@@ -17,7 +20,26 @@ export function TasteProfileCard({ userId }: { userId: string | undefined }) {
 
   return (
     <Card gap="$3">
-      <SectionLabel>Profil de lecture</SectionLabel>
+      <XStack alignItems="center" justifyContent="space-between">
+        <SectionLabel>Profil de lecture</SectionLabel>
+        <Text
+          onPress={() => setShareOpen(true)}
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+          color="$accent"
+          pressStyle={{ opacity: 0.6 }}
+        >
+          Partager
+        </Text>
+      </XStack>
+      {shareOpen ? (
+        <ShareProfileSheet
+          userId={userId}
+          data={{ clusters }}
+          onClose={() => setShareOpen(false)}
+        />
+      ) : null}
       <YStack gap={14}>
         {clusters.map((c, i) => {
           const color = tranches[i % tranches.length];
