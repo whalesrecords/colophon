@@ -20,6 +20,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { useOnboarding } from '@/features/onboarding/OnboardingTour';
 import { MODULES, PRESETS, useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { useProfile, useUpdateProfile } from '@/features/profile/use-profile';
+import { Icon } from '@/components/icons';
 import { duplicateGroups } from '@/features/library/duplicates';
 import { useDeleteItem } from '@/features/library/use-delete-item';
 import { downloadCsv, toLibraryCsv } from '@/features/library/export-csv';
@@ -877,127 +878,184 @@ function DuplicatesSection({ items }: { items: LibraryItem[] }) {
     () => duplicateGroups(items.filter((i) => i.ownership === 'owned')),
     [items],
   );
-  // isbn13 of the group whose deletion is being confirmed inline.
-  const [confirming, setConfirming] = useState<string | null>(null);
+  // Which duplicate groups are ticked for removal (default: all), the bulk confirm bar.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [seeded, setSeeded] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!seeded && groups.length > 0) {
+      setSelected(new Set(groups.map((g) => g.isbn13)));
+      setSeeded(true);
+    }
+  }, [groups, seeded]);
 
   if (groups.length === 0) return null;
   const total = groups.reduce((n, g) => n + (g.count - 1), 0);
+  const selectedExtras = groups
+    .filter((g) => selected.has(g.isbn13))
+    .reduce((n, g) => n + (g.count - 1), 0);
+  const allOn = selected.size === groups.length;
 
-  // Keep the first copy, delete the extras (g.ids[1..]).
-  const dedupe = async (ids: string[]) => {
+  const toggle = (isbn: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(isbn)) n.delete(isbn);
+      else n.add(isbn);
+      return n;
+    });
+
+  // Keep the first copy of each selected title, delete its extras (ids[1..]).
+  const removeSelected = async () => {
     setBusy(true);
     try {
-      for (const id of ids.slice(1)) await del.mutateAsync(id);
+      for (const g of groups) {
+        if (!selected.has(g.isbn13)) continue;
+        for (const id of g.ids.slice(1)) await del.mutateAsync(id);
+      }
     } finally {
       setBusy(false);
-      setConfirming(null);
+      setConfirming(false);
     }
   };
 
   return (
     <YStack gap="$3" marginTop="$7">
-      <Label>{t('profile.duplicates')}</Label>
+      <XStack alignItems="center" justifyContent="space-between">
+        <Label>{t('profile.duplicates')}</Label>
+        <Text
+          onPress={() => setSelected(allOn ? new Set() : new Set(groups.map((g) => g.isbn13)))}
+          fontFamily="$body"
+          fontSize={13}
+          fontWeight="600"
+          color="$accent"
+          pressStyle={{ opacity: 0.6 }}
+        >
+          {allOn ? t('profile.deselectAll') : t('profile.selectAll')}
+        </Text>
+      </XStack>
       <Text fontFamily="$body" fontSize={13} color="$colorMuted">
         {t('profile.duplicatesSummary', { titles: groups.length, extra: total })}
       </Text>
+
       <YStack gap="$2">
         {groups.map((g) => {
-          const isConfirming = confirming === g.isbn13;
+          const on = selected.has(g.isbn13);
           return (
-            <YStack
+            <XStack
               key={g.isbn13}
-              padding="$3"
+              alignItems="center"
               gap="$2"
+              padding="$3"
               backgroundColor="$backgroundStrong"
-              borderColor={isConfirming ? palette.brick : '$borderColor'}
+              borderColor={on ? '$accent' : '$borderColor'}
               borderWidth={1}
               borderRadius={12}
             >
-              <XStack alignItems="center" gap="$2">
-                <Pressable style={{ flex: 1 }} onPress={() => router.push(`/book/${g.ids[0]}`)}>
-                  <YStack gap={2}>
-                    <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
-                      {g.title}
-                    </Text>
-                    {g.author ? (
-                      <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
-                        {g.author}
-                      </Text>
-                    ) : null}
-                  </YStack>
-                </Pressable>
-                <XStack
-                  backgroundColor={palette.terracotta}
-                  borderRadius={999}
-                  paddingHorizontal={8}
-                  height={20}
+              <Pressable onPress={() => toggle(g.isbn13)} hitSlop={8}>
+                <YStack
+                  width={22}
+                  height={22}
+                  borderRadius={6}
+                  borderWidth={2}
+                  borderColor={on ? '$accent' : '$borderColor'}
+                  backgroundColor={on ? '$accent' : 'transparent'}
                   alignItems="center"
+                  justifyContent="center"
                 >
-                  <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
-                    {`× ${g.count}`}
-                  </Text>
-                </XStack>
-                {!isConfirming ? (
-                  <Button
-                    onPress={() => setConfirming(g.isbn13)}
-                    disabled={busy}
-                    chromeless
-                    height={28}
-                    paddingHorizontal="$2"
-                    color="$accent"
-                    fontFamily="$body"
-                    fontSize={13}
-                    fontWeight="600"
-                  >
-                    {t('profile.dedupe')}
-                  </Button>
-                ) : null}
-              </XStack>
-
-              {isConfirming ? (
-                <YStack gap="$2">
-                  <Text fontFamily="$body" fontSize={12.5} color="$colorSoft" lineHeight={18}>
-                    {t('profile.dedupeConfirm', { count: g.count - 1 })}
-                  </Text>
-                  <XStack gap="$2">
-                    <Button
-                      onPress={() => void dedupe(g.ids)}
-                      disabled={busy}
-                      flex={1}
-                      height={38}
-                      borderRadius={10}
-                      backgroundColor={palette.brick}
-                      color={palette.paper}
-                      fontFamily="$body"
-                      fontWeight="700"
-                      fontSize={13.5}
-                    >
-                      {busy ? '…' : t('common.confirm')}
-                    </Button>
-                    <Button
-                      onPress={() => setConfirming(null)}
-                      disabled={busy}
-                      flex={1}
-                      height={38}
-                      borderRadius={10}
-                      backgroundColor="transparent"
-                      borderColor="$borderColor"
-                      borderWidth={1}
-                      color="$colorSoft"
-                      fontFamily="$body"
-                      fontWeight="600"
-                      fontSize={13.5}
-                    >
-                      {t('common.cancel')}
-                    </Button>
-                  </XStack>
+                  {on ? <Icon name="check" size={14} color={palette.paper} /> : null}
                 </YStack>
-              ) : null}
-            </YStack>
+              </Pressable>
+              <Pressable style={{ flex: 1 }} onPress={() => router.push(`/book/${g.ids[0]}`)}>
+                <YStack gap={2}>
+                  <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
+                    {g.title}
+                  </Text>
+                  {g.author ? (
+                    <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                      {g.author}
+                    </Text>
+                  ) : null}
+                </YStack>
+              </Pressable>
+              <XStack
+                backgroundColor={palette.terracotta}
+                borderRadius={999}
+                paddingHorizontal={8}
+                height={20}
+                alignItems="center"
+              >
+                <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                  {`× ${g.count}`}
+                </Text>
+              </XStack>
+            </XStack>
           );
         })}
       </YStack>
+
+      {confirming ? (
+        <YStack
+          gap="$2"
+          padding="$3"
+          backgroundColor="$backgroundStrong"
+          borderColor={palette.brick}
+          borderWidth={1}
+          borderRadius={12}
+        >
+          <Text fontFamily="$body" fontSize={12.5} color="$colorSoft" lineHeight={18}>
+            {t('profile.dedupeConfirmBulk', { count: selectedExtras })}
+          </Text>
+          <XStack gap="$2">
+            <Button
+              onPress={() => void removeSelected()}
+              disabled={busy}
+              flex={1}
+              height={40}
+              borderRadius={10}
+              backgroundColor={palette.brick}
+              color={palette.paper}
+              fontFamily="$body"
+              fontWeight="700"
+              fontSize={14}
+            >
+              {busy ? '…' : t('common.confirm')}
+            </Button>
+            <Button
+              onPress={() => setConfirming(false)}
+              disabled={busy}
+              flex={1}
+              height={40}
+              borderRadius={10}
+              backgroundColor="transparent"
+              borderColor="$borderColor"
+              borderWidth={1}
+              color="$colorSoft"
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={14}
+            >
+              {t('common.cancel')}
+            </Button>
+          </XStack>
+        </YStack>
+      ) : (
+        <Button
+          onPress={() => setConfirming(true)}
+          disabled={selectedExtras === 0 || busy}
+          backgroundColor={palette.brick}
+          color={palette.paper}
+          borderRadius={12}
+          height={46}
+          fontFamily="$body"
+          fontWeight="700"
+          fontSize={15}
+          opacity={selectedExtras === 0 ? 0.5 : 1}
+        >
+          {t('profile.dedupeRemoveN', { count: selectedExtras })}
+        </Button>
+      )}
     </YStack>
   );
 }

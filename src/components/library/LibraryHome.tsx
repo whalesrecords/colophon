@@ -5,6 +5,7 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { RecommendationsShelf } from '@/components/library/RecommendationsShelf';
 import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
+import { groupBySeries } from '@/features/library/group-series';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
 import { syncCurrentReadWidget } from '@/features/reading/widget-sync';
 import { useDisplayPrefs } from '@/features/settings/use-display-prefs';
@@ -201,6 +202,122 @@ function Shelf({
   );
 }
 
+/** Like Shelf, but series collapse into a single stacked cover with a "N tomes" badge —
+ *  so a 12-volume series in the to-read pile shows once, not twelve times. */
+function PileShelf({
+  title,
+  items,
+  onOpen,
+  onSeeAll,
+}: {
+  title: string;
+  items: LibraryItem[];
+  onOpen: (id: string) => void;
+  onSeeAll?: () => void;
+}) {
+  if (items.length === 0) return null;
+  const { groups, singles } = groupBySeries(items);
+  const entries = [
+    ...groups.map((g) => ({ kind: 'series' as const, g })),
+    ...singles.map((it) => ({ kind: 'single' as const, it })),
+  ];
+
+  return (
+    <YStack gap="$2">
+      <XStack alignItems="center" justifyContent="space-between">
+        <Text fontFamily="$heading" fontSize={20} fontWeight="500" color="$color">
+          {title}
+        </Text>
+        {onSeeAll ? (
+          <Text
+            onPress={onSeeAll}
+            fontFamily="$body"
+            fontSize={14}
+            fontWeight="600"
+            color={palette.brick}
+            pressStyle={{ opacity: 0.6 }}
+          >
+            Tout voir
+          </Text>
+        ) : null}
+      </XStack>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <XStack gap="$3" paddingRight="$4" paddingVertical="$1">
+          {entries.slice(0, 16).map((e) =>
+            e.kind === 'series' ? (
+              <Pressable key={e.g.key} onPress={() => onOpen(e.g.cover.id)}>
+                <YStack width={96} gap="$1">
+                  <YStack width={96} height={144}>
+                    {/* Stacked-pile effect: two offset cards peeking behind the cover. */}
+                    <YStack
+                      position="absolute"
+                      top={5}
+                      left={6}
+                      width={96}
+                      height={144}
+                      borderRadius={8}
+                      backgroundColor="$backgroundStrong"
+                      borderColor="$borderColor"
+                      borderWidth={1}
+                    />
+                    <YStack
+                      position="absolute"
+                      top={2.5}
+                      left={3}
+                      width={96}
+                      height={144}
+                      borderRadius={8}
+                      backgroundColor="$background"
+                      borderColor="$borderColor"
+                      borderWidth={1}
+                    />
+                    <BookCover
+                      title={e.g.cover.book?.title ?? ''}
+                      coverUrl={e.g.cover.coverOverride ?? e.g.cover.book?.cover_url}
+                      isbn={e.g.cover.book?.isbn13}
+                      width={96}
+                    />
+                    <YStack
+                      position="absolute"
+                      top={6}
+                      right={6}
+                      backgroundColor={palette.ink}
+                      borderRadius={999}
+                      paddingHorizontal={8}
+                      paddingVertical={3}
+                    >
+                      <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                        {e.g.distinctCount} tomes
+                      </Text>
+                    </YStack>
+                  </YStack>
+                  <Text fontFamily="$body" fontSize={12} color="$colorSoft" numberOfLines={1}>
+                    {e.g.name}
+                  </Text>
+                </YStack>
+              </Pressable>
+            ) : (
+              <Pressable key={e.it.id} onPress={() => onOpen(e.it.id)}>
+                <YStack width={96} gap="$1">
+                  <BookCover
+                    title={e.it.book?.title ?? ''}
+                    coverUrl={e.it.coverOverride ?? e.it.book?.cover_url}
+                    isbn={e.it.book?.isbn13}
+                    width={96}
+                  />
+                  <Text fontFamily="$body" fontSize={12} color="$colorSoft" numberOfLines={1}>
+                    {e.it.book?.title ?? 'Sans titre'}
+                  </Text>
+                </YStack>
+              </Pressable>
+            ),
+          )}
+        </XStack>
+      </ScrollView>
+    </YStack>
+  );
+}
+
 interface LibraryHomeProps {
   name: string | null | undefined;
   emailFallback: string | undefined;
@@ -302,7 +419,7 @@ export function LibraryHome({
 
       <Shelf title="Derniers ajouts" items={recent} onOpen={onOpenBook} />
       <Shelf title="On continue" items={continueItems} onOpen={onOpenBook} />
-      <Shelf title="Pile à lire" items={toRead} onOpen={onOpenBook} onSeeAll={onSeeQueue} />
+      <PileShelf title="Pile à lire" items={toRead} onOpen={onOpenBook} onSeeAll={onSeeQueue} />
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
 
       {prefs.discovery ? <RecommendationsShelf userId={userId} /> : null}

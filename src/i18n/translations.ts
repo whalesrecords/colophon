@@ -73,6 +73,11 @@ export const fr = {
   'profile.dedupeConfirm':
     'Garder 1 exemplaire et supprimer les {count} autres ? Vérifie d’abord — les couvertures ou éditions peuvent différer.',
   'profile.dedupeAll': 'Tout dédupliquer · {count} en trop',
+  'profile.selectAll': 'Tout',
+  'profile.deselectAll': 'Aucun',
+  'profile.dedupeRemoveN': 'Supprimer {count} exemplaire(s) en trop',
+  'profile.dedupeConfirmBulk':
+    'Supprimer {count} exemplaire(s) en trop ? On garde 1 exemplaire par titre — vérifie d’abord, les couvertures ou éditions peuvent différer.',
   'profile.share': 'Partage',
   'profile.shareCreate': 'Créer un lien public de ma bibliothèque',
   'profile.shareCopy': 'Copier le lien',
@@ -376,6 +381,11 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'profile.dedupeConfirm':
     'Keep 1 copy and delete the other {count}? Check first — covers or editions may differ.',
   'profile.dedupeAll': 'Remove all duplicates · {count} extra',
+  'profile.selectAll': 'All',
+  'profile.deselectAll': 'None',
+  'profile.dedupeRemoveN': 'Remove {count} extra copies',
+  'profile.dedupeConfirmBulk':
+    'Remove {count} extra copies? One copy per title is kept — check first, covers or editions may differ.',
   'profile.share': 'Share',
   'profile.shareCreate': 'Create a public link to my library',
   'profile.shareCopy': 'Copy link',
