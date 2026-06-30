@@ -276,6 +276,8 @@ struct CurrentReadView: View {
     .padding(14)
     .frame(maxWidth: .infinity, alignment: .leading)
     .containerBackground(for: .widget) { Color.parchment }
+    // Tap → open a calm reading session in the app.
+    .widgetURL(URL(string: "colophon://session"))
   }
 }
 

@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Button, Input, Text, XStack, YStack } from 'tamagui';
 
@@ -37,6 +38,7 @@ interface ReadingSectionProps {
 }
 
 export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionProps) {
+  const router = useRouter();
   const { data: sessions } = useReadingSessions(itemId);
   const { start, setPage, finish, remove, updateDates, logMinutes } = useSessionActions(
     itemId,
@@ -59,6 +61,20 @@ export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionPro
             minutesTotal={open.minutes ?? 0}
             onLog={(minutes) => logMinutes.mutate({ sessionId: open.id, minutes })}
           />
+          <Button
+            onPress={() => router.push(`/session?item=${itemId}`)}
+            backgroundColor="transparent"
+            borderColor="$borderColor"
+            borderWidth={1}
+            color="$accent"
+            borderRadius={12}
+            height={44}
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={14.5}
+          >
+            Lire au calme
+          </Button>
         </YStack>
       ) : (
         <Button
