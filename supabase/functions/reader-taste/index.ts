@@ -2,11 +2,11 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from '@supabase/supabase-js';
 
 // Semantic reader profile + "Dans ton style" recommendations.
-// Claude (Haiku) reads the user's library → taste clusters (for the camembert) +
-// recommended series in the same vein (NOT owned). Each recommendation is resolved
-// to a FRENCH edition (Google Books langRestrict=fr) so covers + résumés are French.
-// Result cached in reader_taste; recomputed only when the library changes (hash) or
-// after 14 days.
+// Claude (Haiku) reads the user's library → taste clusters (camembert/bars) +
+// recommended series in the same vein (NOT owned). Each recommendation carries an
+// affinity "match" %, the owned titles it's "related" to, and is resolved to a
+// FRENCH edition (Google langRestrict=fr) so covers + résumés are French. Cached in
+// reader_taste; recomputed only when the library changes (hash) or after 14 days.
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -41,6 +41,8 @@ interface Rec {
   cover_url: string;
   universe: string;
   why: string;
+  match: number;
+  related: string[];
 }
 
 async function resolveFrenchEdition(
@@ -57,16 +59,22 @@ async function resolveFrenchEdition(
     const res = await fetch(url, { headers: { Accept: 'application/json' } });
     if (!res.ok) return null;
     const data = await res.json();
-    for (const item of data.items ?? []) {
-      const info = item.volumeInfo ?? {};
-      const ids: { type: string; identifier: string }[] = info.industryIdentifiers ?? [];
-      const isbn13 = ids.find((i) => i.type === 'ISBN_13')?.identifier;
-      const cover = info.imageLinks?.thumbnail ?? info.imageLinks?.smallThumbnail;
-      if (isbn13 && cover) {
-        return {
-          isbn13,
-          cover_url: cover.replace('http://', 'https://').replace('&edge=curl', ''),
-        };
+    const items = data.items ?? [];
+    // 1st pass: a genuinely French edition (FR résumé). 2nd pass: any edition with
+    // an ISBN+cover (langRestrict already biased FR) — so we never drop a rec.
+    for (const requireFr of [true, false]) {
+      for (const item of items) {
+        const info = item.volumeInfo ?? {};
+        if (requireFr && info.language !== 'fr') continue;
+        const ids: { type: string; identifier: string }[] = info.industryIdentifiers ?? [];
+        const isbn13 = ids.find((i) => i.type === 'ISBN_13')?.identifier;
+        const cover = info.imageLinks?.thumbnail ?? info.imageLinks?.smallThumbnail;
+        if (isbn13 && cover) {
+          return {
+            isbn13,
+            cover_url: cover.replace('http://', 'https://').replace('&edge=curl', ''),
+          };
+        }
       }
     }
   } catch {
@@ -89,7 +97,6 @@ Deno.serve(async (req: Request) => {
     Deno.env.get('ANTHROPIC_KEY');
   const GOOGLE_KEY = Deno.env.get('GOOGLE_BOOKS_KEY');
 
-  // Identify the caller from their JWT.
   const authHeader = req.headers.get('Authorization') ?? '';
   const userClient = createClient(SUPABASE_URL, ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
@@ -100,7 +107,6 @@ Deno.serve(async (req: Request) => {
 
   const db = createClient(SUPABASE_URL, SERVICE_KEY);
 
-  // The reader's library (favour rated / recently-added, exclude wishlist).
   const { data: rows } = await db
     .from('items')
     .select('isbn13, rating, book:book_metadata(title, authors)')
@@ -115,7 +121,6 @@ Deno.serve(async (req: Request) => {
     rating: number | null;
     book: { title: string | null; authors: string[] | null } | null;
   }[];
-
   if (library.length === 0) return json({ clusters: [], recommendations: [] });
 
   const ownedSeries = new Set<string>();
@@ -128,9 +133,8 @@ Deno.serve(async (req: Request) => {
     lines.push(`- ${t}${a ? ` — ${a}` : ''}`);
   }
   const libraryHash =
-    norm([...ownedSeries].sort().join('|')).slice(0, 200) + `#${ownedSeries.size}`;
+    norm([...ownedSeries].sort().join('|')).slice(0, 200) + `#${ownedSeries.size}#v5`;
 
-  // Serve from cache when the library hasn't changed and the row is fresh.
   const { data: cached } = await db
     .from('reader_taste')
     .select('clusters, recommendations, library_hash, computed_at')
@@ -141,7 +145,8 @@ Deno.serve(async (req: Request) => {
     cached.library_hash === libraryHash &&
     Date.now() - new Date(cached.computed_at).getTime() < STALE_DAYS * 86_400_000 &&
     Array.isArray(cached.recommendations) &&
-    cached.recommendations.length > 0
+    cached.recommendations.length > 0 &&
+    typeof cached.recommendations[0]?.match === 'number' // ensure cached has the new fields
   ) {
     return json({ clusters: cached.clusters, recommendations: cached.recommendations });
   }
@@ -154,17 +159,23 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // Ask Claude for clusters + new-series recommendations (strict JSON, in French).
   const prompt =
     `Bibliothèque d'un lecteur (titre — auteur) :\n${lines.slice(0, 50).join('\n')}\n\n` +
     `Réponds UNIQUEMENT en JSON valide, en français, avec exactement cette forme :\n` +
-    `{"clusters":[{"label":"...","percent":0}],"recommendations":[{"title":"...","author":"...","universe":"...","why":"..."}]}\n\n` +
-    `1. "clusters" : 5 à 7 univers de lecture sémantiques décrivant ses goûts (ex. "Seinen sombre", "Imaginaire épique", "Polar/thriller", "BD franco-belge", "Littérature contemplative", "Essais & idées"), chacun avec un "percent" entier ; le total fait 100.\n` +
-    `2. "recommendations" : 8 livres ou séries qu'il ne possède PAS, dans la même veine, en VARIANT les univers, UNE SEULE entrée par série. "why" = une phrase courte en français. Évite les séries déjà possédées.`;
+    `{"clusters":[{"label":"...","percent":0}],"recommendations":[{"title":"...","author":"...","universe":"...","why":"...","match":0,"related":["..."]}]}\n\n` +
+    `1. "clusters" : 5 à 7 univers de lecture sémantiques décrivant ses goûts, chacun avec un "percent" entier ; le total fait 100.\n` +
+    `2. "recommendations" : 8 livres ou séries qu'il ne possède PAS (même à une autre édition), dans la même veine, en VARIANT les univers, UNE SEULE entrée par série. Pour chacun : "why" (phrase courte FR), "match" (entier 0-100 = affinité estimée avec CE lecteur), "related" (1 à 3 titres de SA bibliothèque ci-dessus dont ce livre se rapproche le plus).`;
 
   let parsed: {
     clusters?: unknown;
-    recommendations?: { title: string; author: string; universe?: string; why?: string }[];
+    recommendations?: {
+      title: string;
+      author: string;
+      universe?: string;
+      why?: string;
+      match?: number;
+      related?: string[];
+    }[];
   } = {};
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -176,13 +187,14 @@ Deno.serve(async (req: Request) => {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 1600,
+        max_tokens: 2000,
         system:
           'Tu es un libraire expert en mangas, BD et littérature. Tu réponds uniquement en JSON valide, en français.',
         messages: [{ role: 'user', content: prompt }],
       }),
     });
-    if (!resp.ok) return json({ error: 'llm_error', status: resp.status }, 502);
+    if (!resp.ok)
+      return json({ error: 'llm_error', status: resp.status, detail: await resp.text() }, 502);
     const j = await resp.json();
     const text: string = j.content?.[0]?.text ?? '';
     const start = text.indexOf('{');
@@ -192,7 +204,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: 'llm_parse', detail: String(e) }, 502);
   }
 
-  // Resolve each recommendation to a French edition (cover + ISBN), drop owned series.
   const recs: Rec[] = [];
   const seen = new Set<string>();
   for (const r of parsed.recommendations ?? []) {
@@ -210,11 +221,14 @@ Deno.serve(async (req: Request) => {
       cover_url: ed.cover_url,
       universe: r.universe ?? '',
       why: r.why ?? '',
+      match: typeof r.match === 'number' ? Math.max(0, Math.min(100, Math.round(r.match))) : 0,
+      related: Array.isArray(r.related)
+        ? r.related.filter((x) => typeof x === 'string').slice(0, 3)
+        : [],
     });
   }
 
   const clusters = Array.isArray(parsed.clusters) ? parsed.clusters : [];
-
   await db.from('reader_taste').upsert({
     user_id: uid,
     clusters,
@@ -222,6 +236,5 @@ Deno.serve(async (req: Request) => {
     library_hash: libraryHash,
     computed_at: new Date().toISOString(),
   });
-
   return json({ clusters, recommendations: recs });
 });

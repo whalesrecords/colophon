@@ -8,6 +8,7 @@ import { BookCover } from '@/components/BookCover';
 import { type BookMetadata, useIsbnLookup } from '@/features/books/use-isbn-lookup';
 import { useAuth } from '@/features/auth/auth-context';
 import { useAddItem } from '@/features/library/use-add-item';
+import { useCommunityRating, useReaderTaste } from '@/features/library/use-reader-taste';
 import { composedPalette } from '@/theme/cover-palettes';
 import {
   OWNERSHIP_LABELS,
@@ -44,6 +45,9 @@ export default function DiscoverScreen() {
   const { session } = useAuth();
   const lookup = useIsbnLookup();
   const add = useAddItem(session?.user.id);
+  const { data: taste } = useReaderTaste(session?.user.id);
+  const rec = taste?.recommendations.find((r) => r.isbn13 === isbn);
+  const { data: community } = useCommunityRating(isbn);
   const [book, setBook] = useState<BookMetadata | null>(null);
   const [failed, setFailed] = useState(false);
   const [status, setStatus] = useState<ReadingStatus>('to_read');
@@ -135,6 +139,78 @@ export default function DiscoverScreen() {
                 ) : null}
               </YStack>
             </YStack>
+
+            {rec?.match || (community && community.count > 0) ? (
+              <XStack gap="$2" justifyContent="center" flexWrap="wrap">
+                {rec?.match ? (
+                  <XStack
+                    backgroundColor={palette.ink}
+                    borderRadius={999}
+                    paddingHorizontal="$3"
+                    paddingVertical="$2"
+                  >
+                    <Text fontFamily="$body" fontSize={13} fontWeight="700" color={palette.paper}>
+                      {rec.match}% pour toi
+                    </Text>
+                  </XStack>
+                ) : null}
+                {community && community.count > 0 ? (
+                  <XStack
+                    alignItems="center"
+                    gap="$1.5"
+                    backgroundColor="$backgroundStrong"
+                    borderColor="$borderColor"
+                    borderWidth={1}
+                    borderRadius={999}
+                    paddingHorizontal="$3"
+                    paddingVertical="$2"
+                  >
+                    <Text fontFamily="$body" fontSize={13} fontWeight="700" color={palette.gold}>
+                      ★ {community.avg}
+                    </Text>
+                    <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+                      · {community.count} lecteur{community.count > 1 ? 's' : ''}
+                    </Text>
+                  </XStack>
+                ) : null}
+              </XStack>
+            ) : null}
+
+            {rec?.why ? (
+              <Text
+                fontFamily="$body"
+                fontSize={13.5}
+                fontStyle="italic"
+                color="$colorSoft"
+                textAlign="center"
+                lineHeight={20}
+              >
+                « {rec.why} »
+              </Text>
+            ) : null}
+
+            {rec?.related?.length ? (
+              <YStack gap="$2">
+                <Label>En lien avec tes lectures</Label>
+                <XStack flexWrap="wrap" gap="$2">
+                  {rec.related.map((t) => (
+                    <XStack
+                      key={t}
+                      paddingHorizontal="$3"
+                      paddingVertical="$2"
+                      borderRadius={999}
+                      backgroundColor="$backgroundStrong"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                    >
+                      <Text fontFamily="$body" fontSize={13} color="$color">
+                        {t}
+                      </Text>
+                    </XStack>
+                  ))}
+                </XStack>
+              </YStack>
+            ) : null}
 
             {book.description ? (
               <YStack gap="$2">

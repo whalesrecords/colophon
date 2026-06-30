@@ -4,6 +4,7 @@ import { Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { useReaderTaste } from '@/features/library/use-reader-taste';
+import { palette } from '@/theme/tokens';
 
 /**
  * "Dans ton style" row at the bottom of the home: books to discover (not owned), in
@@ -46,13 +47,30 @@ export function RecommendationsShelf({ userId }: { userId: string | undefined })
           {recs.map((b) => (
             <Pressable key={b.isbn13} onPress={() => router.push(`/discover/${b.isbn13}`)}>
               <YStack width={112} gap="$1">
-                <BookCover
-                  title={b.title}
-                  author={b.author}
-                  coverUrl={b.cover_url}
-                  isbn={b.isbn13}
-                  width={112}
-                />
+                <YStack>
+                  <BookCover
+                    title={b.title}
+                    author={b.author}
+                    coverUrl={b.cover_url}
+                    isbn={b.isbn13}
+                    width={112}
+                  />
+                  {b.match > 0 ? (
+                    <YStack
+                      position="absolute"
+                      top={6}
+                      right={6}
+                      backgroundColor={palette.ink}
+                      borderRadius={999}
+                      paddingHorizontal={7}
+                      paddingVertical={3}
+                    >
+                      <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                        {b.match}%
+                      </Text>
+                    </YStack>
+                  ) : null}
+                </YStack>
                 <Text fontFamily="$body" fontSize={12} color="$colorSoft" numberOfLines={1}>
                   {b.title}
                 </Text>

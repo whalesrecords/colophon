@@ -1041,6 +1041,10 @@ export type Database = {
         Args: { p_user: string };
         Returns: { followers: number; following: number }[];
       };
+      book_community_rating: {
+        Args: { p_isbn13: string };
+        Returns: { avg: number | null; count: number }[];
+      };
       reading_feed: {
         Args: Record<string, never>;
         Returns: {

@@ -14,6 +14,30 @@ export interface TasteRec {
   cover_url: string;
   universe: string;
   why: string;
+  match: number;
+  related: string[];
+}
+
+export interface CommunityRating {
+  avg: number | null;
+  count: number;
+}
+
+/** Average rating + count across all Colophon readers for a book (by ISBN). */
+export function useCommunityRating(isbn13: string | undefined) {
+  return useQuery({
+    queryKey: ['community-rating', isbn13],
+    enabled: !!isbn13,
+    staleTime: 10 * 60_000,
+    queryFn: async (): Promise<CommunityRating> => {
+      const { data, error } = await supabase.rpc('book_community_rating', {
+        p_isbn13: isbn13 as string,
+      });
+      if (error) throw error;
+      const row = (data ?? [])[0];
+      return { avg: row?.avg ?? null, count: row?.count ?? 0 };
+    },
+  });
 }
 
 export interface ReaderTaste {
