@@ -10,6 +10,7 @@ function item(id: string, title: string): LibraryItem {
     borrowedFrom: null,
     rating: null,
     added_at: '2026-01-01',
+    queuePosition: null,
     coverOverride: null,
     shelfNames: [],
     tagNames: [],

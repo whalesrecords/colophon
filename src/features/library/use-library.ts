@@ -22,6 +22,8 @@ export interface LibraryItem {
   borrowedFrom: string | null;
   rating: number | null;
   added_at: string;
+  /** Manual reading-queue order (set on the /queue screen); null = not prioritised. */
+  queuePosition: number | null;
   coverOverride: string | null;
   book: LibraryBook | null;
   shelfNames: string[];
@@ -30,7 +32,7 @@ export interface LibraryItem {
 }
 
 const SELECT =
-  'id, status, ownership, format, borrowed_from, rating, added_at, cover_override, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
+  'id, status, ownership, format, borrowed_from, rating, added_at, queue_position, cover_override, book:book_metadata(isbn13, title, authors, publisher, language, published_date, cover_url, genres), item_shelves(shelves(name)), item_tags(tags(name)), loans(borrower, returned_on)';
 
 interface RawRow {
   id: string;
@@ -40,6 +42,7 @@ interface RawRow {
   borrowed_from: string | null;
   rating: number | null;
   added_at: string;
+  queue_position: number | null;
   cover_override: string | null;
   book: LibraryBook | null;
   item_shelves: { shelves: { name: string | null } | null }[] | null;
@@ -76,6 +79,7 @@ export function useLibrary(userId: string | undefined) {
         borrowedFrom: row.borrowed_from,
         rating: row.rating,
         added_at: row.added_at,
+        queuePosition: row.queue_position,
         coverOverride: row.cover_override,
         book: row.book,
         shelfNames: (row.item_shelves ?? [])

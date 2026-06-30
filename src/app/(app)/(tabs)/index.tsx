@@ -111,8 +111,20 @@ export default function LibraryScreen() {
     const owned = items.filter((i) => i.ownership !== 'wishlist');
     return { read: owned.filter((i) => i.status === 'read').length, total: owned.length };
   }, [items]);
+  // Pile à lire in the order you set on /queue: prioritised items first (by queue
+  // position), then the rest newest-first.
   const toReadItems = useMemo(
-    () => items.filter((i) => i.status === 'to_read' && i.ownership !== 'wishlist'),
+    () =>
+      items
+        .filter((i) => i.status === 'to_read' && i.ownership !== 'wishlist')
+        .sort((a, b) => {
+          const ap = a.queuePosition;
+          const bp = b.queuePosition;
+          if (ap != null && bp != null) return ap - bp;
+          if (ap != null) return -1;
+          if (bp != null) return 1;
+          return b.added_at.localeCompare(a.added_at);
+        }),
     [items],
   );
   // Newest non-wishlist books first — so a just-scanned book is visible immediately.
