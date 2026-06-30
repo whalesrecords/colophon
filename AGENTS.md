@@ -320,14 +320,23 @@ and surface what their collection is worth now (not just what it cost).
 - **Chemin de lecteur à l'inscription (P1).** First-run persona pick — **Collectionneur**
   (possession-first home), **Social** (sharing + discovery on), **Secret** (private by
   default). Sets the privacy defaults below and tailors the first screen.
-- **Découverte façon Netflix (P1). First row SHIPPED.** A **"Dans ton style"** shelf at the
-  bottom of the home (`RecommendationsShelf` + `useRecommendations`): up to 5 books to
-  **discover (not owned)** in the reader's vein — searches `book-search` by their top
-  **genres + authors**, then **excludes series they already collect** (via `seriesKey`/
-  `parseSeries`) and keeps one book per series, so you get new series (Blue Lock, Tintin…)
-  not "5 more Berserk". Tap → a **`/discover/[isbn]` preview** (cover + **résumé up top** +
-  genres + one-tap add Possédé/Envie/Emprunté + status), via `useIsbnLookup` + `useAddItem`.
-  **Next:** prefer volume 1 of a suggested series; more rows by genre/thème/type; mood search.
+- **Découverte sémantique (P1). SHIPPED — LLM engine.** The `reader-taste` edge function
+  (Claude Haiku, needs the `ANTHROPIC_API_KEY` secret — read with a hyphen-tolerant fallback)
+  reads the user's library → **taste clusters** (semantic universes) + **"Dans ton style"
+  recommendations**: new series in the same vein (NOT owned, 1 per series, varied universes),
+  each with an affinity **`match` %** + the owned titles it's **`related`** to, resolved to a
+  **FRENCH edition** (Google `langRestrict=fr`, two-pass: prefer `language==='fr'` for a FR
+  résumé, fall back to any). Cached in `reader_taste` (recompute on library change / >14d;
+  `#vN` hash suffix busts the cache on schema bumps). Client: `useReaderTaste` →
+  `RecommendationsShelf` (home, match % badge) + `TasteProfileCard` (Profil — **stacked
+  tranche bars**, book-spine/logo style) + `/discover/[isbn]` (résumé up top, **% pour toi**,
+  **community rating** via `book_community_rating(isbn)`, **En lien avec tes lectures** chips,
+  the LLM's `why`). Share: `taste-share` (canvas poster / native text) + `ShareProfileSheet`
+  ("Partager l'image" + "Poster dans un cercle"). **Next:** ask the LLM for more candidates
+  (rec count varies 3–6 as Google lacks a FR edition+cover for some); prefer volume 1; embeddings
+  + pgvector when the catalog is large enough (cheaper at scale than per-user LLM calls).
+- **Library prefs persisted (SHIPPED).** `useLibraryPrefs` (AsyncStorage) keeps view/size/
+  series-grouping/sort/filters across navigation + restarts.
 - **Recommandations par humeur (P2, façon StoryGraph).** mood/pace tags on books; "envie de
   quoi ce soir ?" → suggestions filtered by mood.
 - **Modes de confidentialité (P0). v1 SHIPPED.** `profiles.is_private` + a master **Secret ⇄
