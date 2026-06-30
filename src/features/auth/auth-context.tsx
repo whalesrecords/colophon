@@ -17,18 +17,28 @@ interface AuthState {
   updatePassword: (password: string) => ReturnType<typeof supabase.auth.updateUser>;
 }
 
-function resetRedirectTo(): string {
-  // Always the stable web domain so there is a single URL to allow-list in
-  // Supabase Auth (preview deploys rotate their origin). On localhost dev, prefer
-  // the current origin so the link comes back to the running dev server.
+function authRedirectBase(): string {
+  // Stable web domain so there is a single URL to allow-list in Supabase Auth
+  // (preview deploys rotate their origin). On localhost dev, prefer the running
+  // dev server's origin so links come back to it.
   if (
     Platform.OS === 'web' &&
     typeof window !== 'undefined' &&
     /localhost|127\.0\.0\.1/.test(window.location.origin)
   ) {
-    return `${window.location.origin}/reset-password`;
+    return window.location.origin;
   }
-  return `${env.webUrl}/reset-password`;
+  return env.webUrl;
+}
+
+function resetRedirectTo(): string {
+  return `${authRedirectBase()}/reset-password`;
+}
+
+// Where the email-confirmation link lands. Without this, Supabase falls back to the
+// project's Site URL (which defaults to http://localhost:3000) — dead on a phone.
+function signUpRedirectTo(): string {
+  return authRedirectBase();
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -59,7 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       initializing,
       signIn: (email, password) =>
         supabase.auth.signInWithPassword({ email: email.trim(), password }),
-      signUp: (email, password) => supabase.auth.signUp({ email: email.trim(), password }),
+      signUp: (email, password) =>
+        supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: { emailRedirectTo: signUpRedirectTo() },
+        }),
       signOut: async () => {
         await supabase.auth.signOut();
       },
