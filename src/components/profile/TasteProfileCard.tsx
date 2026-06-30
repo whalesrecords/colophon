@@ -5,6 +5,8 @@ import { ShareProfileSheet } from '@/components/profile/ShareProfileSheet';
 import { Card, SectionLabel } from '@/components/ui';
 import { useTranches } from '@/components/ui/BarList';
 import { useReaderTaste } from '@/features/library/use-reader-taste';
+import { useProfile } from '@/features/profile/use-profile';
+import { env } from '@/lib/env';
 
 /** "Profil de lecture" — the reader's semantic universes (from reader-taste) as
  *  stacked tranche-coloured bars (book-spine style, like the logo), each = a %.
@@ -12,11 +14,15 @@ import { useReaderTaste } from '@/features/library/use-reader-taste';
 export function TasteProfileCard({ userId }: { userId: string | undefined }) {
   const tranches = useTranches();
   const { data } = useReaderTaste(userId);
+  const { data: profile } = useProfile(userId);
   const [shareOpen, setShareOpen] = useState(false);
   const clusters = (data?.clusters ?? [])
     .filter((c) => c && c.label && c.percent > 0)
     .sort((a, b) => b.percent - a.percent);
   if (clusters.length === 0) return null;
+
+  const name = profile?.display_name || profile?.pseudo || 'Lecteur';
+  const followUrl = `${env.webUrl}/u/${userId ?? ''}`;
 
   return (
     <Card gap="$3" marginTop="$6">
@@ -36,7 +42,7 @@ export function TasteProfileCard({ userId }: { userId: string | undefined }) {
       {shareOpen ? (
         <ShareProfileSheet
           userId={userId}
-          data={{ clusters }}
+          data={{ clusters, name, followUrl }}
           onClose={() => setShareOpen(false)}
         />
       ) : null}
