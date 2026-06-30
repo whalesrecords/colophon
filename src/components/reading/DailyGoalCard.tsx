@@ -63,7 +63,7 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
   const color = met ? palette.forest : palette.brick;
 
   return (
-    <Card gap="$3">
+    <Card gap="$3" marginTop="$6">
       <XStack alignItems="center" justifyContent="space-between">
         <SectionLabel>Objectif du jour</SectionLabel>
         {streak > 0 ? (

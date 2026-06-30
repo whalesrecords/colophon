@@ -82,7 +82,7 @@ export function BadgesCard({
   const earned = badges.filter((b) => b.earned).length;
 
   return (
-    <Card gap="$3">
+    <Card gap="$3" marginTop="$6">
       <XStack alignItems="center" justifyContent="space-between">
         <SectionLabel>Badges</SectionLabel>
         <Text fontFamily="$body" fontSize={13} fontWeight="700" color={palette.gold}>

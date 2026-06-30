@@ -19,7 +19,7 @@ export function TasteProfileCard({ userId }: { userId: string | undefined }) {
   if (clusters.length === 0) return null;
 
   return (
-    <Card gap="$3">
+    <Card gap="$3" marginTop="$6">
       <XStack alignItems="center" justifyContent="space-between">
         <SectionLabel>Profil de lecture</SectionLabel>
         <Text
