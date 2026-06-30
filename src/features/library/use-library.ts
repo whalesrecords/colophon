@@ -53,12 +53,22 @@ export function useLibrary(userId: string | undefined) {
     queryKey: ['library', userId],
     enabled: !!userId,
     queryFn: async (): Promise<LibraryItem[]> => {
-      const { data, error } = await supabase
-        .from('items')
-        .select(SELECT)
-        .order('added_at', { ascending: false });
-      if (error) throw error;
-      return ((data ?? []) as unknown as RawRow[]).map((row) => ({
+      // PostgREST caps each response at 1000 rows — page through so big collections
+      // (a serious manga library runs to many thousands) load in full.
+      const PAGE = 1000;
+      const raw: RawRow[] = [];
+      for (let from = 0; from < 60000; from += PAGE) {
+        const { data, error } = await supabase
+          .from('items')
+          .select(SELECT)
+          .order('added_at', { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        const page = (data ?? []) as unknown as RawRow[];
+        raw.push(...page);
+        if (page.length < PAGE) break;
+      }
+      return raw.map((row) => ({
         id: row.id,
         status: row.status,
         ownership: row.ownership ?? 'owned',

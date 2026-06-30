@@ -40,23 +40,39 @@ export function useStats(userId: string | undefined) {
     queryKey: ['stats', userId],
     enabled: !!userId,
     queryFn: async (): Promise<LibraryStats> => {
-      const [itemsRes, sessionsRes] = await Promise.all([
-        supabase
-          .from('items')
-          .select(
-            'id, status, ownership, purchase_price, purchase_date, estimated_value, book:book_metadata(page_count, authors)',
-          ),
-        supabase.from('reading_sessions').select('item_id, status, finished_on'),
+      // Page past PostgREST's 1000-row cap so stats are exact for big collections.
+      const fetchAll = async <R>(
+        build: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>,
+      ): Promise<R[]> => {
+        const PAGE = 1000;
+        const out: R[] = [];
+        for (let from = 0; from < 100000; from += PAGE) {
+          const { data, error } = await build(from, from + PAGE - 1);
+          if (error) throw error;
+          const page = (data ?? []) as R[];
+          out.push(...page);
+          if (page.length < PAGE) break;
+        }
+        return out;
+      };
+
+      const [itemsData, sessions] = await Promise.all([
+        fetchAll<ItemRow>((from, to) =>
+          supabase
+            .from('items')
+            .select(
+              'id, status, ownership, purchase_price, purchase_date, estimated_value, book:book_metadata(page_count, authors)',
+            )
+            .range(from, to),
+        ),
+        fetchAll<SessionRow>((from, to) =>
+          supabase.from('reading_sessions').select('item_id, status, finished_on').range(from, to),
+        ),
       ]);
-      if (itemsRes.error) throw itemsRes.error;
-      if (sessionsRes.error) throw sessionsRes.error;
 
       // Wishlist (envies) are not owned — exclude them from every count. Borrowed counts.
-      const rows = ((itemsRes.data ?? []) as unknown as ItemRow[]).filter(
-        (r) => r.ownership !== 'wishlist',
-      );
+      const rows = itemsData.filter((r) => r.ownership !== 'wishlist');
       const presentIds = new Set(rows.map((r) => r.id));
-      const sessions = (sessionsRes.data ?? []) as unknown as SessionRow[];
 
       const stats: LibraryStats = {
         total: rows.length,
