@@ -75,7 +75,10 @@ struct ReadingWidgetView: View {
           .foregroundColor(.muted)
         Spacer()
         if entry.streak > 0 {
-          Text("🔥 \(entry.streak)").font(.system(size: 12, weight: .bold)).foregroundColor(.ink)
+          HStack(spacing: 3) {
+            Image(systemName: "flame.fill").font(.system(size: 11)).foregroundColor(.brick)
+            Text("\(entry.streak)").font(.system(size: 12, weight: .bold)).foregroundColor(.ink)
+          }
         }
       }
       Spacer(minLength: 4)
@@ -84,8 +87,8 @@ struct ReadingWidgetView: View {
         VStack(alignment: .leading, spacing: 2) {
           Text("\(entry.today) / \(entry.goal)")
             .font(.system(size: 20, weight: .semibold)).foregroundColor(.ink)
-          Text(met ? "Atteint 🎉" : "Encore \(max(0, entry.goal - entry.today)) p.")
-            .font(.system(size: 11)).foregroundColor(.muted)
+          Text(met ? "Objectif atteint" : "Encore \(max(0, entry.goal - entry.today)) p.")
+            .font(.system(size: 11)).foregroundColor(met ? .forest : .muted)
         }
         Spacer()
       }
@@ -182,10 +185,116 @@ struct ColophonStatsWidget: Widget {
   }
 }
 
+// ===== Widget 3 : Où en es-tu ? (current read + progress) =====
+
+struct CurrentReadEntry: TimelineEntry {
+  let date: Date
+  let active: Bool
+  let title: String
+  let author: String
+  let page: Int
+  let total: Int
+  let pct: Int
+  let minutesToday: Int
+}
+
+struct CurrentReadProvider: TimelineProvider {
+  func read() -> CurrentReadEntry {
+    let d = UserDefaults(suiteName: APP_GROUP)
+    return CurrentReadEntry(
+      date: Date(),
+      active: (d?.integer(forKey: "cr_active") ?? 0) == 1,
+      title: d?.string(forKey: "cr_title") ?? "",
+      author: d?.string(forKey: "cr_author") ?? "",
+      page: d?.integer(forKey: "cr_page") ?? 0,
+      total: d?.integer(forKey: "cr_total") ?? 0,
+      pct: d?.integer(forKey: "cr_pct") ?? 0,
+      minutesToday: d?.integer(forKey: "cr_minutesToday") ?? 0
+    )
+  }
+  func placeholder(in context: Context) -> CurrentReadEntry {
+    CurrentReadEntry(
+      date: Date(), active: true, title: "L'Établi", author: "Robert Linhart",
+      page: 84, total: 180, pct: 47, minutesToday: 25)
+  }
+  func getSnapshot(in context: Context, completion: @escaping (CurrentReadEntry) -> Void) {
+    completion(read())
+  }
+  func getTimeline(in context: Context, completion: @escaping (Timeline<CurrentReadEntry>) -> Void) {
+    let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
+    completion(Timeline(entries: [read()], policy: .after(next)))
+  }
+}
+
+struct CurrentReadView: View {
+  var entry: CurrentReadEntry
+  var body: some View {
+    VStack(alignment: .leading, spacing: 5) {
+      Text("OÙ EN ES-TU ?")
+        .font(.system(size: 9, weight: .bold)).tracking(1)
+        .foregroundColor(.muted)
+
+      if entry.active {
+        Spacer(minLength: 2)
+        Text(entry.title)
+          .font(.system(size: 16, weight: .semibold)).foregroundColor(.ink)
+          .lineLimit(2)
+        if !entry.author.isEmpty {
+          Text(entry.author)
+            .font(.system(size: 11)).italic().foregroundColor(.muted).lineLimit(1)
+        }
+        Spacer(minLength: 4)
+        GeometryReader { geo in
+          ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 3).fill(Color.track).frame(height: 6)
+            RoundedRectangle(cornerRadius: 3).fill(Color.brick)
+              .frame(width: geo.size.width * CGFloat(min(100, max(0, entry.pct))) / 100, height: 6)
+          }
+        }.frame(height: 6)
+        HStack {
+          Text(entry.total > 0 ? "p. \(entry.page) / \(entry.total)" : "p. \(entry.page)")
+            .font(.system(size: 11)).foregroundColor(.muted)
+          Spacer()
+          if entry.total > 0 {
+            Text("\(entry.pct)%").font(.system(size: 12, weight: .bold)).foregroundColor(.brick)
+          }
+        }
+        if entry.minutesToday > 0 {
+          Text("\(entry.minutesToday) min aujourd'hui")
+            .font(.system(size: 10)).foregroundColor(.muted)
+        }
+      } else {
+        Spacer()
+        Text("Aucune lecture en cours")
+          .font(.system(size: 14, weight: .medium)).foregroundColor(.ink)
+        Text("Ouvre un livre pour commencer")
+          .font(.system(size: 11)).foregroundColor(.muted)
+        Spacer()
+      }
+    }
+    .padding(14)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .containerBackground(for: .widget) { Color.parchment }
+  }
+}
+
+struct ColophonCurrentReadWidget: Widget {
+  let kind = "ColophonCurrentReadWidget"
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: CurrentReadProvider()) { entry in
+      CurrentReadView(entry: entry)
+    }
+    .configurationDisplayName("Où en es-tu ?")
+    .description("Le livre que tu lis et ta progression.")
+    .supportedFamilies([.systemSmall, .systemMedium])
+  }
+}
+
 @main
 struct ColophonWidgets: WidgetBundle {
   var body: some Widget {
     ColophonReadingWidget()
     ColophonStatsWidget()
+    ColophonCurrentReadWidget()
   }
 }

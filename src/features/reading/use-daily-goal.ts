@@ -15,6 +15,8 @@ export interface DailyGoal {
   goalSet: boolean;
   /** Pages read per day, keyed by ISO date (yyyy-mm-dd) — for the month view. */
   byDay: Record<string, number>;
+  /** Minutes read today (the chronometer rollup). */
+  minutesToday: number;
 }
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -58,20 +60,26 @@ export function useDailyGoal(userId: string | undefined) {
           .maybeSingle(),
         supabase
           .from('daily_reading')
-          .select('day, pages')
+          .select('day, pages, minutes')
           .order('day', { ascending: false })
           .limit(120),
       ]);
       const goalSet = profile?.daily_goal != null;
       const goal = profile?.daily_goal ?? DEFAULT_DAILY_GOAL;
       const byDay = new Map<string, number>();
-      for (const r of rows ?? []) byDay.set(r.day, r.pages);
+      const minutesByDay = new Map<string, number>();
+      for (const r of rows ?? []) {
+        byDay.set(r.day, r.pages);
+        minutesByDay.set(r.day, r.minutes ?? 0);
+      }
+      const todayIso = iso(new Date());
       return {
         goal,
-        today: byDay.get(iso(new Date())) ?? 0,
+        today: byDay.get(todayIso) ?? 0,
         streak: computeStreak(byDay, goal),
         goalSet,
         byDay: Object.fromEntries(byDay),
+        minutesToday: minutesByDay.get(todayIso) ?? 0,
       };
     },
   });

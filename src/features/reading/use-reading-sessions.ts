@@ -155,6 +155,26 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
     onSuccess: invalidate,
   });
 
+  // Credit chronometer minutes to the session AND to today's daily rollup (one RPC).
+  const logMinutes = useMutation({
+    mutationFn: async ({
+      sessionId,
+      minutes,
+    }: {
+      sessionId: string;
+      minutes: number;
+    }): Promise<void> => {
+      const m = Math.max(0, Math.round(minutes));
+      if (m <= 0) return;
+      const { error } = await supabase.rpc('log_reading_minutes', {
+        p_session: sessionId,
+        p_minutes: m,
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
   const remove = useMutation({
     mutationFn: async (sessionId: string): Promise<void> => {
       const { error } = await supabase.from('reading_sessions').delete().eq('id', sessionId);
@@ -183,7 +203,7 @@ export function useSessionActions(itemId: string, userId: string | undefined) {
     onSuccess: invalidate,
   });
 
-  return { start, setPage, finish, remove, updateDates };
+  return { start, setPage, finish, remove, updateDates, logMinutes };
 }
 
 /**

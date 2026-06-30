@@ -38,7 +38,10 @@ interface ReadingSectionProps {
 
 export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionProps) {
   const { data: sessions } = useReadingSessions(itemId);
-  const { start, setPage, finish, remove, updateDates } = useSessionActions(itemId, userId);
+  const { start, setPage, finish, remove, updateDates, logMinutes } = useSessionActions(
+    itemId,
+    userId,
+  );
   const open = sessions?.find((s) => s.status === 'reading');
 
   return (
@@ -46,11 +49,17 @@ export function ReadingSection({ itemId, userId, totalPages }: ReadingSectionPro
       <Label>Suivi de lecture</Label>
 
       {open ? (
-        <Progress
-          session={open}
-          onSetPage={(page) => setPage.mutate({ sessionId: open.id, page })}
-          onFinish={() => finish.mutate(open.id)}
-        />
+        <YStack gap="$4">
+          <Progress
+            session={open}
+            onSetPage={(page) => setPage.mutate({ sessionId: open.id, page })}
+            onFinish={() => finish.mutate(open.id)}
+          />
+          <ReadingTimer
+            minutesTotal={open.minutes ?? 0}
+            onLog={(minutes) => logMinutes.mutate({ sessionId: open.id, minutes })}
+          />
+        </YStack>
       ) : (
         <Button
           onPress={() => start.mutate(totalPages)}
@@ -247,6 +256,149 @@ function SessionRow({
         ✕
       </Button>
     </XStack>
+  );
+}
+
+/** "MM:SS" (or "H:MM:SS" past an hour), monospaced so the clock doesn't jiggle. */
+function fmtClock(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const mm = String(m).padStart(2, '0');
+  const ss = String(sec).padStart(2, '0');
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+/** "45 min" / "2 h" / "2 h 15 min". */
+function fmtDuration(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes));
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem === 0 ? `${h} h` : `${h} h ${rem} min`;
+}
+
+/**
+ * Reading chronometer for an open session. Times a reading sitting and, on "Terminer
+ * la séance", credits the rounded minutes to the session + today's daily goal (via
+ * log_reading_minutes). Timestamp-based so it stays accurate if the screen sleeps.
+ */
+function ReadingTimer({
+  minutesTotal,
+  onLog,
+}: {
+  minutesTotal: number;
+  onLog: (minutes: number) => void;
+}) {
+  const [running, setRunning] = useState(false);
+  const [baseSeconds, setBaseSeconds] = useState(0); // accumulated across pauses
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => tick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  const elapsed =
+    running && startedAt != null
+      ? baseSeconds + Math.floor((Date.now() - startedAt) / 1000)
+      : baseSeconds;
+  const credit = Math.round(elapsed / 60);
+  const idle = !running && elapsed === 0;
+
+  const startOrResume = () => {
+    setStartedAt(Date.now());
+    setRunning(true);
+  };
+  const pause = () => {
+    setBaseSeconds(elapsed);
+    setStartedAt(null);
+    setRunning(false);
+  };
+  const stop = () => {
+    if (credit >= 1) onLog(credit);
+    setRunning(false);
+    setStartedAt(null);
+    setBaseSeconds(0);
+  };
+
+  return (
+    <YStack
+      gap="$3"
+      backgroundColor="$backgroundStrong"
+      borderColor="$borderColor"
+      borderWidth={1}
+      borderRadius={16}
+      padding="$3"
+    >
+      <XStack alignItems="center" justifyContent="space-between">
+        <Label>Chrono de lecture</Label>
+        {minutesTotal > 0 ? (
+          <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+            {fmtDuration(minutesTotal)} au total
+          </Text>
+        ) : null}
+      </XStack>
+
+      <Text
+        fontFamily="$heading"
+        fontSize={46}
+        fontWeight="500"
+        color={running ? palette.brick : '$color'}
+        textAlign="center"
+        fontVariant={['tabular-nums']}
+      >
+        {fmtClock(elapsed)}
+      </Text>
+
+      {idle ? (
+        <Button
+          onPress={startOrResume}
+          backgroundColor={palette.brick}
+          color={palette.paper}
+          borderRadius={12}
+          height={46}
+          fontFamily="$body"
+          fontWeight="700"
+          pressStyle={{ opacity: 0.9 }}
+        >
+          Démarrer la séance
+        </Button>
+      ) : (
+        <XStack gap="$2">
+          <Button
+            flex={1}
+            onPress={running ? pause : startOrResume}
+            backgroundColor="$background"
+            borderColor="$borderColor"
+            borderWidth={1}
+            color="$color"
+            borderRadius={12}
+            height={46}
+            fontFamily="$body"
+            fontWeight="600"
+          >
+            {running ? 'Pause' : 'Reprendre'}
+          </Button>
+          <Button
+            flex={1.4}
+            onPress={stop}
+            backgroundColor={palette.brick}
+            color={palette.paper}
+            borderRadius={12}
+            height={46}
+            fontFamily="$body"
+            fontWeight="700"
+            pressStyle={{ opacity: 0.9 }}
+          >
+            {credit >= 1 ? `Terminer · +${credit} min` : 'Terminer'}
+          </Button>
+        </XStack>
+      )}
+    </YStack>
   );
 }
 

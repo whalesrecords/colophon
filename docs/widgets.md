@@ -1,29 +1,35 @@
-# iOS home-screen widget — "Ma série de lecture"
+# iOS home-screen widgets
 
-A WidgetKit widget showing the daily reading goal + streak (and later, challenge
-progress), via [`@bacons/apple-targets`](https://github.com/EvanBacon/expo-apple-targets).
+A WidgetKit bundle via [`@bacons/apple-targets`](https://github.com/EvanBacon/expo-apple-targets),
+three widgets sharing one App Group extension:
+
+- **Ma série de lecture** — daily goal ring + streak (`ColophonReadingWidget`).
+- **Mon année de lecture** — books/pages this year + collection size (`ColophonStatsWidget`).
+- **Où en es-tu ?** — the book you're reading, progress bar, `p. X/Y · Z%`, minutes today
+  (`ColophonCurrentReadWidget`).
 
 ## How it works
 
-- **`targets/widget/index.swift`** — the SwiftUI widget. Reads the shared App Group
-  `UserDefaults(suiteName: "group.com.whalesrecords.colophon")` for `streak`, `today`,
-  `goal` and draws the Colophon ring + 🔥 streak.
+- **`targets/widget/index.swift`** — the SwiftUI widgets. Each reads the shared App Group
+  `UserDefaults(suiteName: "group.com.whalesrecords.colophon")`: `streak`/`today`/`goal`
+  for the ring, `booksYear`/`pagesYear`/`collTotal` for stats, `cr_*` for the current read.
 - **`targets/widget/expo-target.config.js`** — declares the widget extension target +
   its App Group entitlement.
-- **`src/features/reading/widget-sync.ts`** — `syncReadingWidget()` writes those keys
-  to the App Group and calls `ExtensionStorage.reloadWidget()`. Called from
-  `DailyGoalCard` whenever the streak/goal changes. **No-ops on web + Android** (the
-  native module is absent there), so it's safe in every build.
+- **`src/features/reading/widget-sync.ts`** — `syncReadingWidget()` / `syncStatsWidget()`
+  / `syncCurrentReadWidget()` write those keys to the App Group and call
+  `ExtensionStorage.reloadWidget()`. Called from `DailyGoalCard`, Profil, and `LibraryHome`
+  respectively. **No-ops on web + Android** (the native module is absent there).
 - **`app.json`** — the `@bacons/apple-targets` plugin + the app's App Group entitlement.
 
-## ⚠️ Status: code ready, currently DISABLED in app.json
+## Status: ACTIVE
 
-The `@bacons/apple-targets` plugin + the app's App Group entitlement were removed
-from `app.json` so headless EAS builds keep working. Reason: a brand-new app
-extension (the widget) needs its **own provisioning profile**, and EAS can only
-create that in **interactive** mode the first time ("Distribution Certificate is not
-validated for non-interactive builds"). The App Group capability + the widget bundle
-id `com.whalesrecords.colophon.widget` were already registered by the first attempt.
+The `@bacons/apple-targets` plugin + the App Group entitlement are wired in `app.json`,
+and the widget bundle id `com.whalesrecords.colophon.widget` has a valid provisioning
+profile (shipped in TestFlight build #40+). Headless `--non-interactive` builds work.
+
+The original one-time hurdle (kept for history): a brand-new app extension needs its
+**own provisioning profile**, which EAS can only create in **interactive** mode the
+first time. That's done; the App Group + the widget bundle id are registered.
 
 ## Activating it (one interactive build, then headless works)
 

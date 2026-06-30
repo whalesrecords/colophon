@@ -274,16 +274,19 @@ export type Database = {
       daily_reading: {
         Row: {
           day: string;
+          minutes: number;
           pages: number;
           user_id: string;
         };
         Insert: {
           day?: string;
+          minutes?: number;
           pages?: number;
           user_id?: string;
         };
         Update: {
           day?: string;
+          minutes?: number;
           pages?: number;
           user_id?: string;
         };
@@ -844,6 +847,7 @@ export type Database = {
           finished_on: string | null;
           id: string;
           item_id: string;
+          minutes: number;
           reader: string | null;
           started_on: string | null;
           status: string | null;
@@ -855,6 +859,7 @@ export type Database = {
           finished_on?: string | null;
           id?: string;
           item_id: string;
+          minutes?: number;
           reader?: string | null;
           started_on?: string | null;
           status?: string | null;
@@ -866,6 +871,7 @@ export type Database = {
           finished_on?: string | null;
           id?: string;
           item_id?: string;
+          minutes?: number;
           reader?: string | null;
           started_on?: string | null;
           status?: string | null;
@@ -1006,6 +1012,10 @@ export type Database = {
       };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       log_daily_pages: { Args: { p_pages: number }; Returns: undefined };
+      log_reading_minutes: {
+        Args: { p_minutes: number; p_session: string };
+        Returns: undefined;
+      };
       record_reading_page: { Args: { p_session: string; p_page: number }; Returns: undefined };
       friends_leaderboard: {
         Args: Record<string, never>;

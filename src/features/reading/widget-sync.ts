@@ -38,3 +38,32 @@ export function syncStatsWidget(data: {
     // no-op — widget not available on this platform/build
   }
 }
+
+/**
+ * Push the "où en es-tu ?" snapshot to the current-read widget + the watchOS app:
+ * the book in progress, its page/total + percent, and minutes read today. `cr_active`
+ * is 0 when nothing is being read (the widget then shows an empty state).
+ */
+export function syncCurrentReadWidget(data: {
+  title: string | null;
+  author: string | null;
+  page: number;
+  totalPages: number | null;
+  minutesToday: number;
+}): void {
+  try {
+    const total = Math.max(0, Math.round(data.totalPages ?? 0));
+    const page = Math.max(0, Math.round(data.page));
+    const pct = total > 0 ? Math.max(0, Math.min(100, Math.round((page / total) * 100))) : 0;
+    storage.set('cr_active', data.title ? 1 : 0);
+    storage.set('cr_title', data.title ?? '');
+    storage.set('cr_author', data.author ?? '');
+    storage.set('cr_page', page);
+    storage.set('cr_total', total);
+    storage.set('cr_pct', pct);
+    storage.set('cr_minutesToday', Math.max(0, Math.round(data.minutesToday)));
+    ExtensionStorage.reloadWidget();
+  } catch {
+    // no-op — widget not available on this platform/build
+  }
+}

@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { RecommendationsShelf } from '@/components/library/RecommendationsShelf';
 import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
+import { useDailyGoal } from '@/features/reading/use-daily-goal';
+import { syncCurrentReadWidget } from '@/features/reading/widget-sync';
 import { useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { KPIRow, KPITile } from '@/components/ui';
 import type { CurrentRead } from '@/features/reading/use-reading-sessions';
@@ -234,12 +237,32 @@ export function LibraryHome({
   onOpenProfile,
 }: LibraryHomeProps) {
   const { prefs } = useDisplayPrefs();
+  const { data: daily } = useDailyGoal(userId);
   const g = greeting(now.getHours());
   const dateLabel = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`;
   const who = firstName(name, emailFallback);
   const initial = who.slice(0, 1).toUpperCase();
   // "On continue" excludes the hero book to avoid showing it twice.
   const continueItems = reading.filter((it) => it.id !== currentRead?.itemId);
+
+  // Keep the iOS "où en es-tu ?" widget + watchOS app in sync with the current read.
+  const minutesToday = daily?.minutesToday ?? 0;
+  useEffect(() => {
+    syncCurrentReadWidget({
+      title: currentRead && !currentRead.justFinished ? currentRead.title : null,
+      author: currentRead?.author ?? null,
+      page: currentRead?.currentPage ?? 0,
+      totalPages: currentRead?.totalPages ?? null,
+      minutesToday,
+    });
+  }, [
+    currentRead?.title,
+    currentRead?.author,
+    currentRead?.currentPage,
+    currentRead?.totalPages,
+    currentRead?.justFinished,
+    minutesToday,
+  ]);
 
   return (
     <YStack gap="$5">

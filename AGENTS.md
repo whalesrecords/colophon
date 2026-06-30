@@ -238,11 +238,31 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
 - **Widget suite (in progress).** A `WidgetBundle` (one App Group extension, multiple
   widget kinds). **Shipped:** "Ma série de lecture" (streak ring) + "Mon année de lecture"
   (`ColophonStatsWidget` — books/pages this year + collection size, fed by `syncStatsWidget`
-  from Profil). **Next kinds:** **challenge** progress, **rendez-vous** (circle agenda),
-  next **rendez-vous** (circle agenda), a **circle** + its **unread discussions**, and
+  from Profil) + **"Où en es-tu ?"** (`ColophonCurrentReadWidget` — current book + progress
+  bar + `p. X/Y · Z%` + minutes today, fed by `syncCurrentReadWidget` from `LibraryHome`).
+  Widget emoji swapped for SF Symbols (`flame.fill`). **Next kinds:** **challenge** progress,
+  **rendez-vous** (circle agenda), a **circle** + its **unread discussions**, and
   a **map** mini (nearest book box / reading place). Each reads a snapshot pushed to
   the App Group via `widget-sync` (extend the payload). Could use WidgetKit
   configuration intents so one widget exposes several "kinds".
+- **Reading chronometer + reading-TIME tracking. SHIPPED (phone/web).** `reading_sessions.minutes`
+  + `daily_reading.minutes` + a `log_reading_minutes(p_session, p_minutes)` SECURITY DEFINER
+  RPC (mirrors `record_reading_page`: ownership via the parent item, credits the session +
+  today's rollup). `ReadingTimer` card in book detail (`ReadingSection`) — a timestamp-based
+  stopwatch (Démarrer/Pause/Reprendre/Terminer), on "Terminer · +N min" it logs the rounded
+  minutes. `useDailyGoal` now also returns `minutesToday`. Verified end-to-end on web (RPC
+  syncs session + daily minutes). **Next:** surface minutes in the bilan / daily goal card;
+  a reading-pace (pages-per-hour) stat.
+- **watchOS companion app. SCAFFOLDED (disabled).** `targets/watch/` (`@bacons/apple-targets`
+  type `watch`): a SwiftUI watch app — two paged screens, "Où en es-tu ?" (current read +
+  progress + −/+ page bump) and "Chrono" (reading stopwatch). A `WatchData` `WCSessionDelegate`
+  receives the current-read snapshot from the phone and relays logs (minutes/page) back.
+  **Config kept inert** (`expo-target.config.js.disabled`) so the `targets/*` glob doesn't
+  break non-interactive builds (a new app target needs one interactive provisioning build,
+  like the widget did). **Remaining to wire data:** a phone-side `WCSession` bridge (native
+  module) — RN has no WCSession; the JS half already writes the `cr_*` snapshot to the App
+  Group. Full activation + message protocol in `docs/watch.md`. Until then the watch runs as
+  a standalone chronometer.
 - **Mascottes (design).** `design/` references (`MASCOTTES-CHALLENGE.svg` = le marque-page
   + la tour de tomes, 3 états chacun) drive the widget/challenge art. Proposed extras:
   la pousse (série, anti-pression), le médaillon § (badges), l'escargot (lecture lente).
