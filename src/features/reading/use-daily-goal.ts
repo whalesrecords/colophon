@@ -13,6 +13,8 @@ export interface DailyGoal {
   streak: number;
   /** Whether the user has explicitly set a goal. */
   goalSet: boolean;
+  /** Pages read per day, keyed by ISO date (yyyy-mm-dd) — for the month view. */
+  byDay: Record<string, number>;
 }
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -69,6 +71,7 @@ export function useDailyGoal(userId: string | undefined) {
         today: byDay.get(iso(new Date())) ?? 0,
         streak: computeStreak(byDay, goal),
         goalSet,
+        byDay: Object.fromEntries(byDay),
       };
     },
   });

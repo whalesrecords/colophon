@@ -41,6 +41,58 @@ function Ring({ pct, color, size = 88 }: { pct: number; color: string; size?: nu
   );
 }
 
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * The current month as a row of dots — one per day. Same colour code as the ring:
+ * forest when the goal was met, brick when there was progress but the goal wasn't
+ * reached, an empty circle at 0%. Today is ringed in the accent; future days fade.
+ */
+function MonthDots({ byDay, goal }: { byDay: Record<string, number>; goal: number }) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthLabel = now.toLocaleDateString('fr-FR', { month: 'long' });
+
+  return (
+    <YStack gap="$2">
+      <Text
+        fontFamily="$body"
+        fontSize={11}
+        fontWeight="700"
+        letterSpacing={1.4}
+        textTransform="uppercase"
+        color="$colorMuted"
+      >
+        Ce mois-ci · {monthLabel}
+      </Text>
+      <XStack flexWrap="wrap" gap={6}>
+        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
+          const pages = byDay[`${year}-${pad2(month + 1)}-${pad2(d)}`] ?? 0;
+          const future = d > today;
+          const met = goal > 0 && pages >= goal;
+          const partial = pages > 0 && !met;
+          const isToday = d === today;
+          return (
+            <YStack
+              key={d}
+              width={13}
+              height={13}
+              borderRadius={999}
+              opacity={future ? 0.4 : 1}
+              backgroundColor={met ? palette.forest : partial ? palette.brick : 'transparent'}
+              borderWidth={met || partial ? (isToday ? 2 : 0) : isToday ? 2 : 1}
+              borderColor={isToday ? palette.espresso : future ? '$borderColor' : palette.concrete}
+            />
+          );
+        })}
+      </XStack>
+    </YStack>
+  );
+}
+
 /**
  * Daily reading goal + streak — the P0 of the engagement roadmap. Shows today's
  * pages vs. the daily target as a ring, the current streak (🔥), and quick presets
@@ -98,6 +150,8 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
           </Text>
         </YStack>
       </XStack>
+
+      <MonthDots byDay={data.byDay} goal={goal} />
 
       <XStack gap="$2" alignItems="center" flexWrap="wrap">
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">
