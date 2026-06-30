@@ -40,6 +40,28 @@ export function syncStatsWidget(data: {
 }
 
 /**
+ * Push the badges snapshot to the badges widget: earned/total + the earned badges'
+ * labels + icon keys (pipe-joined, catalogue order — the widget shows the latest, i.e.
+ * the highest-tier, ones). À la "Santé" — your trophies on the home screen.
+ */
+export function syncBadgesWidget(data: {
+  earned: number;
+  total: number;
+  labels: string[];
+  icons: string[];
+}): void {
+  try {
+    storage.set('badgesEarned', Math.max(0, Math.round(data.earned)));
+    storage.set('badgesTotal', Math.max(0, Math.round(data.total)));
+    storage.set('badgeNames', data.labels.join('|'));
+    storage.set('badgeIcons', data.icons.join('|'));
+    ExtensionStorage.reloadWidget();
+  } catch {
+    // no-op — widget not available on this platform/build
+  }
+}
+
+/**
  * Push the "où en es-tu ?" snapshot to the current-read widget + the watchOS app:
  * the book in progress, its page/total + percent, and minutes read today. `cr_active`
  * is 0 when nothing is being read (the widget then shows an empty state).

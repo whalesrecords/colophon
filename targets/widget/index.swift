@@ -13,6 +13,7 @@ extension Color {
   static let forest = Color(red: 0.176, green: 0.420, blue: 0.306)    // #2D6B4E
   static let track = Color(red: 0.894, green: 0.855, blue: 0.780)     // #E4DAC7
   static let muted = Color(red: 0.549, green: 0.518, blue: 0.475)     // #8C8479
+  static let gold = Color(red: 0.710, green: 0.514, blue: 0.180)      // #B5832E
 }
 
 struct ReadingEntry: TimelineEntry {
@@ -290,11 +291,119 @@ struct ColophonCurrentReadWidget: Widget {
   }
 }
 
+// ===== Widget 4 : Mes badges (à la Santé) =====
+
+/// Maps a PackGlyph icon key (from features/profile/badges.ts) to an SF Symbol.
+func sfSymbol(forBadge key: String) -> String {
+  switch key {
+  case "book", "openBook": return "book.fill"
+  case "books": return "books.vertical.fill"
+  case "box": return "archivebox.fill"
+  case "medal": return "medal.fill"
+  case "star": return "star.fill"
+  case "award": return "rosette"
+  case "map": return "map.fill"
+  case "flame": return "flame.fill"
+  case "calendar": return "calendar"
+  case "trophy": return "trophy.fill"
+  default: return "rosette"
+  }
+}
+
+struct BadgesEntry: TimelineEntry {
+  let date: Date
+  let earned: Int
+  let total: Int
+  let names: [String]
+  let icons: [String]
+}
+
+struct BadgesProvider: TimelineProvider {
+  func read() -> BadgesEntry {
+    let d = UserDefaults(suiteName: APP_GROUP)
+    let names = (d?.string(forKey: "badgeNames") ?? "").split(separator: "|").map(String.init)
+    let icons = (d?.string(forKey: "badgeIcons") ?? "").split(separator: "|").map(String.init)
+    return BadgesEntry(
+      date: Date(),
+      earned: d?.integer(forKey: "badgesEarned") ?? 0,
+      total: max(1, d?.integer(forKey: "badgesTotal") ?? 11),
+      names: names, icons: icons
+    )
+  }
+  func placeholder(in context: Context) -> BadgesEntry {
+    BadgesEntry(
+      date: Date(), earned: 5, total: 11,
+      names: ["Marathon", "Éclectique", "Dévoreur"],
+      icons: ["award", "map", "star"])
+  }
+  func getSnapshot(in context: Context, completion: @escaping (BadgesEntry) -> Void) {
+    completion(read())
+  }
+  func getTimeline(in context: Context, completion: @escaping (Timeline<BadgesEntry>) -> Void) {
+    let next = Calendar.current.date(byAdding: .hour, value: 3, to: Date()) ?? Date()
+    completion(Timeline(entries: [read()], policy: .after(next)))
+  }
+}
+
+struct BadgesWidgetView: View {
+  var entry: BadgesEntry
+  // The latest (highest-tier) earned badges sit at the end of the catalogue order.
+  var latest: [(name: String, icon: String)] {
+    let pairs = zip(entry.names, entry.icons).map { (name: $0, icon: $1) }
+    return Array(pairs.suffix(3).reversed())
+  }
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      HStack {
+        Text("MES BADGES")
+          .font(.system(size: 9, weight: .bold)).tracking(1).foregroundColor(.muted)
+        Spacer()
+        Text("\(entry.earned)/\(entry.total)")
+          .font(.system(size: 12, weight: .bold)).foregroundColor(.gold)
+      }
+      Spacer(minLength: 2)
+      if latest.isEmpty {
+        Text("Lis pour débloquer\ntes premiers badges")
+          .font(.system(size: 12)).foregroundColor(.muted)
+      } else {
+        ForEach(Array(latest.enumerated()), id: \.offset) { _, b in
+          HStack(spacing: 8) {
+            ZStack {
+              Circle().fill(Color.card).overlay(Circle().stroke(Color.gold, lineWidth: 1.5))
+              Image(systemName: sfSymbol(forBadge: b.icon))
+                .font(.system(size: 12)).foregroundColor(.ink)
+            }.frame(width: 26, height: 26)
+            Text(b.name).font(.system(size: 12, weight: .medium)).foregroundColor(.ink)
+              .lineLimit(1)
+            Spacer()
+          }
+        }
+      }
+    }
+    .padding(14)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .containerBackground(for: .widget) { Color.parchment }
+  }
+}
+
+struct ColophonBadgesWidget: Widget {
+  let kind = "ColophonBadgesWidget"
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: BadgesProvider()) { entry in
+      BadgesWidgetView(entry: entry)
+    }
+    .configurationDisplayName("Mes badges")
+    .description("Tes trophées de lecture débloqués.")
+    .supportedFamilies([.systemSmall, .systemMedium])
+  }
+}
+
 @main
 struct ColophonWidgets: WidgetBundle {
   var body: some Widget {
     ColophonReadingWidget()
     ColophonStatsWidget()
     ColophonCurrentReadWidget()
+    ColophonBadgesWidget()
   }
 }

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Text, XStack, YStack } from 'tamagui';
 
 import { PackIcon } from '@/components/icons';
@@ -5,6 +6,7 @@ import { Card, SectionLabel } from '@/components/ui';
 import { BadgeCelebration, useBadgeCelebration } from '@/features/profile/BadgeCelebration';
 import { type Badge, computeBadges } from '@/features/profile/badges';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
+import { syncBadgesWidget } from '@/features/reading/widget-sync';
 import { palette } from '@/theme/tokens';
 
 interface StatsForBadges {
@@ -80,8 +82,20 @@ export function BadgesCard({
 }) {
   const { data: goal } = useDailyGoal(userId);
   const badges = computeBadges({ ...stats, streak: goal?.streak ?? 0 });
-  const earned = badges.filter((b) => b.earned).length;
+  const earnedBadges = badges.filter((b) => b.earned);
+  const earned = earnedBadges.length;
   const { current, dismiss } = useBadgeCelebration(badges);
+
+  // Keep the iOS badges widget in sync (no-op on web/Android).
+  useEffect(() => {
+    syncBadgesWidget({
+      earned,
+      total: badges.length,
+      labels: earnedBadges.map((b) => b.label),
+      icons: earnedBadges.map((b) => b.icon),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [earned, badges.length]);
 
   return (
     <Card gap="$3" marginTop="$6">
