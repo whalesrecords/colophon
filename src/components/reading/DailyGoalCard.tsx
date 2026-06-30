@@ -34,7 +34,7 @@ function Ring({ pct, color, size = 88 }: { pct: number; color: string; size?: nu
           transform={`rotate(-90 ${mid} ${mid})`}
         />
       </Svg>
-      <Text fontFamily="$heading" fontSize={20} fontWeight="600" color="$color">
+      <Text fontFamily="$body" fontSize={19} fontWeight="700" color="$color">
         {Math.round(Math.min(1, pct) * 100)}%
       </Text>
     </YStack>
@@ -42,53 +42,110 @@ function Ring({ pct, color, size = 88 }: { pct: number; color: string; size?: nu
 }
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
+const isoKey = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+/** Monday-first weekday index: Mon=0 … Sun=6 (JS getDay() is Sun=0). */
+const mondayIdx = (d: Date) => (d.getDay() + 6) % 7;
+const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
+/** Shared day-dot style — forest = goal met, brick = partial, empty = 0%, today ringed. */
+function dotStyle(pages: number, goal: number, future: boolean, isToday: boolean) {
+  const met = goal > 0 && pages >= goal;
+  const partial = pages > 0 && !met;
+  const filled = met || partial;
+  return {
+    opacity: future ? 0.35 : 1,
+    backgroundColor: met ? palette.forest : partial ? palette.brick : 'transparent',
+    borderWidth: isToday ? 2 : filled ? 0 : 1,
+    borderColor: isToday ? palette.espresso : future ? '$borderColor' : palette.concrete,
+  } as const;
+}
+
+function MiniLabel({ children }: { children: string }) {
+  return (
+    <Text
+      fontFamily="$body"
+      fontSize={10.5}
+      fontWeight="700"
+      letterSpacing={1.4}
+      textTransform="uppercase"
+      color="$colorMuted"
+    >
+      {children}
+    </Text>
+  );
+}
+
+/** This week as a horizontal strip — weekday initials over a coloured dot per day. */
+function WeekStrip({ byDay, goal }: { byDay: Record<string, number>; goal: number }) {
+  const now = new Date();
+  const todayKey = isoKey(now);
+  const monday = new Date(now);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(now.getDate() - mondayIdx(now));
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+
+  return (
+    <YStack flex={1} gap="$2">
+      <MiniLabel>Cette semaine</MiniLabel>
+      <XStack justifyContent="space-between">
+        {days.map((d, i) => {
+          const key = isoKey(d);
+          const future = key > todayKey;
+          const s = dotStyle(byDay[key] ?? 0, goal, future, key === todayKey);
+          return (
+            <YStack key={i} alignItems="center" gap={5}>
+              <Text fontFamily="$body" fontSize={10} fontWeight="600" color="$colorMuted">
+                {WEEKDAYS[i]}
+              </Text>
+              <YStack width={16} height={16} borderRadius={999} {...s} />
+            </YStack>
+          );
+        })}
+      </XStack>
+    </YStack>
+  );
+}
 
 /**
- * The current month as a row of dots — one per day. Same colour code as the ring:
- * forest when the goal was met, brick when there was progress but the goal wasn't
- * reached, an empty circle at 0%. Today is ringed in the accent; future days fade.
+ * The current month as a calendar grid (7 columns, Monday-first). Day 1 is offset to
+ * its weekday — a month starting on a Thursday begins at column 4. Same colour code as
+ * the week strip: forest = met, brick = partial, empty = 0%, today ringed, future faded.
  */
-function MonthDots({ byDay, goal }: { byDay: Record<string, number>; goal: number }) {
+function MonthGrid({ byDay, goal }: { byDay: Record<string, number>; goal: number }) {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
-  const today = now.getDate();
+  const todayKey = isoKey(now);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const lead = mondayIdx(new Date(year, month, 1)); // blank cells before day 1
+  const cells: (number | null)[] = [
+    ...Array(lead).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+  const weeks = Array.from({ length: cells.length / 7 }, (_, r) => cells.slice(r * 7, r * 7 + 7));
   const monthLabel = now.toLocaleDateString('fr-FR', { month: 'long' });
 
   return (
     <YStack gap="$2">
-      <Text
-        fontFamily="$body"
-        fontSize={11}
-        fontWeight="700"
-        letterSpacing={1.4}
-        textTransform="uppercase"
-        color="$colorMuted"
-      >
-        Ce mois-ci · {monthLabel}
-      </Text>
-      <XStack flexWrap="wrap" gap={6}>
-        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
-          const pages = byDay[`${year}-${pad2(month + 1)}-${pad2(d)}`] ?? 0;
-          const future = d > today;
-          const met = goal > 0 && pages >= goal;
-          const partial = pages > 0 && !met;
-          const isToday = d === today;
-          return (
-            <YStack
-              key={d}
-              width={13}
-              height={13}
-              borderRadius={999}
-              opacity={future ? 0.4 : 1}
-              backgroundColor={met ? palette.forest : partial ? palette.brick : 'transparent'}
-              borderWidth={met || partial ? (isToday ? 2 : 0) : isToday ? 2 : 1}
-              borderColor={isToday ? palette.espresso : future ? '$borderColor' : palette.concrete}
-            />
-          );
-        })}
-      </XStack>
+      <MiniLabel>{monthLabel}</MiniLabel>
+      <YStack gap={4}>
+        {weeks.map((week, ri) => (
+          <XStack key={ri} gap={4}>
+            {week.map((d, ci) => {
+              if (d === null) return <YStack key={ci} width={12} height={12} />;
+              const key = `${year}-${pad2(month + 1)}-${pad2(d)}`;
+              const future = key > todayKey;
+              const s = dotStyle(byDay[key] ?? 0, goal, future, key === todayKey);
+              return <YStack key={ci} width={12} height={12} borderRadius={999} {...s} />;
+            })}
+          </XStack>
+        ))}
+      </YStack>
     </YStack>
   );
 }
@@ -140,9 +197,14 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
       <XStack alignItems="center" gap="$4">
         <Ring pct={pct} color={color} />
         <YStack flex={1} gap="$1">
-          <Text fontFamily="$heading" fontSize={22} fontWeight="600" color="$color">
-            {today} / {goal} pages
-          </Text>
+          <XStack alignItems="baseline" gap="$1">
+            <Text fontFamily="$body" fontSize={26} fontWeight="800" color="$color">
+              {today}
+            </Text>
+            <Text fontFamily="$body" fontSize={16} fontWeight="600" color="$colorMuted">
+              / {goal} pages
+            </Text>
+          </XStack>
           <Text fontFamily="$body" fontSize={13.5} color="$colorSoft">
             {met
               ? 'Objectif atteint, bravo'
@@ -151,7 +213,10 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
         </YStack>
       </XStack>
 
-      <MonthDots byDay={data.byDay} goal={goal} />
+      <XStack gap="$4" alignItems="flex-start">
+        <WeekStrip byDay={data.byDay} goal={goal} />
+        <MonthGrid byDay={data.byDay} goal={goal} />
+      </XStack>
 
       <XStack gap="$2" alignItems="center" flexWrap="wrap">
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">
