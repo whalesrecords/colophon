@@ -239,12 +239,23 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   widget kinds). **Shipped:** "Ma série de lecture" (streak ring) + "Mon année de lecture"
   (`ColophonStatsWidget` — books/pages this year + collection size, fed by `syncStatsWidget`
   from Profil) + **"Où en es-tu ?"** (`ColophonCurrentReadWidget` — current book + progress
-  bar + `p. X/Y · Z%` + minutes today, fed by `syncCurrentReadWidget` from `LibraryHome`).
-  Widget emoji swapped for SF Symbols (`flame.fill`). **Next kinds:** **challenge** progress,
+  bar + `p. X/Y · Z%` + minutes today, fed by `syncCurrentReadWidget` from `LibraryHome`)
+  + **"Mes badges"** (`ColophonBadgesWidget` — N/M + the 3 highest-tier earned badges with
+  SF Symbols, fed by `syncBadgesWidget` from `BadgesCard`; à la Santé). Widget emoji
+  swapped for SF Symbols (`flame.fill`). **Next kinds:** **challenge** progress,
   **rendez-vous** (circle agenda), a **circle** + its **unread discussions**, and
   a **map** mini (nearest book box / reading place). Each reads a snapshot pushed to
   the App Group via `widget-sync` (extend the payload). Could use WidgetKit
   configuration intents so one widget exposes several "kinds".
+- **Interactive reading chrono à la Santé (proposed, native).** Tap a widget → start a
+  reading session that runs as a **Live Activity** (ActivityKit: Lock Screen + Dynamic
+  Island elapsed timer + book), "Terminer" (an **App Intent**) ends it and prompts for
+  pages. Needs: a Live Activity widget in the bundle, `NSSupportsLiveActivities`, App
+  Intents, and a phone-side bridge to `Activity.request/update/end` (RN has none —
+  `expo-live-activity` or a custom module). Big native effort, needs a device to validate.
+- **DailyGoalCard redesign (SHIPPED).** Month as a real calendar grid (7 cols, Monday-first,
+  day 1 offset to its weekday) + a horizontal "cette semaine" strip; numbers unified to the
+  sans UI font (no more serif/sans clash in the goal figure).
 - **Reading chronometer + reading-TIME tracking. SHIPPED (phone/web).** `reading_sessions.minutes`
   + `daily_reading.minutes` + a `log_reading_minutes(p_session, p_minutes)` SECURITY DEFINER
   RPC (mirrors `record_reading_page`: ownership via the parent item, credits the session +
