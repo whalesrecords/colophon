@@ -218,15 +218,17 @@ function PileShelf({
   if (items.length === 0) return null;
   const { groups, singles } = groupBySeries(items);
   // Keep the caller's order (the reading-queue order) instead of grouping alphabetically:
-  // each entry sorts by the earliest position of its item(s) in the input list.
+  // each entry sorts by the earliest position of its item(s) in the input list. Anything
+  // not in the map falls to the end (large finite sentinel — keeps the subtraction valid).
+  const END = Number.MAX_SAFE_INTEGER;
   const pos = new Map(items.map((it, i) => [it.id, i]));
   const entries = [
     ...groups.map((g) => ({
       kind: 'series' as const,
       g,
-      order: Math.min(...g.items.map((it) => pos.get(it.id) ?? 0)),
+      order: Math.min(...g.items.map((it) => pos.get(it.id) ?? END)),
     })),
-    ...singles.map((it) => ({ kind: 'single' as const, it, order: pos.get(it.id) ?? 0 })),
+    ...singles.map((it) => ({ kind: 'single' as const, it, order: pos.get(it.id) ?? END })),
   ].sort((a, b) => a.order - b.order);
 
   return (

@@ -3,7 +3,7 @@
 ## Overview
 Deux livrables liés autour de l'engagement / lecture régulière de **Colophon** :
 
-- **A · Objectif du jour (refonte)** — refonte de la carte d'objectif quotidien : un héro de progression clair, puis trois rythmes (semaine · mois · année), puis le réglage de la cible. **Ça redessine un composant qui existe déjà** dans le code (`DailyGoalCard.tsx`).
+- **A · Objectif du jour (refonte)** — refonte de la carte d'objectif quotidien : un héros de progression clair, puis trois rythmes (semaine · mois · année), puis le réglage de la cible. **Ça redessine un composant qui existe déjà** dans le code (`DailyGoalCard.tsx`).
 - **B · Mon coin lecture (nouveau jeu)** — une couche ludique façon *Foodvisor de la lecture* : lire **nourrit** une étagère (les livres s'ajoutent), **rapporte des lumens** (monnaie), qu'on **mise** sur des défis ou **dépense** en boutique (lampes, plantes, coussins, nouvelles étagères) pour rendre le coin lecture douillet. La mascotte **Colette** (illustration au trait déjà présente dans le projet) y vit. **C'est une fonctionnalité neuve** — rien d'équivalent dans le code aujourd'hui.
 
 L'app est **Expo / React Native + Tamagui**, FR par défaut, Supabase en back, TanStack Query côté données. Polices **Spectral** (serif éditorial) + **Schibsted Grotesk** (UI). Palette « Les tranches » (brique / prussien / forêt / ocre) sur fond parchemin, esprit wabi-sabi.
@@ -106,7 +106,7 @@ Illustration au trait **déjà dans le projet** (`mascotte/colette.png`, + versi
 | Forêt (objectif atteint) | `#2D6B4E` | `palette.forest` |
 | Ocre (récompenses) | `#B5832E` | `palette.gold` |
 
-**Tokens neufs pour le jeu** (à ajouter) : lumen/or `#D8A23E` (et clair `#E0B262`), lampe `#C98F3A`→`#9A6A22`, fond coin `#F3EAD6`→`#E4D2B4`, bois étagère `#E7D7B9`, pastille série `#F1E7D3`/`#E6D7B8`, nuit `#221B14`/`#15110C`. Rappels : radius carte 18–28, pastille 999, anneau trait 11 (héro) / 3.4 (mini).
+**Tokens neufs pour le jeu** (à ajouter) : lumen/or `#D8A23E` (et clair `#E0B262`), lampe `#C98F3A`→`#9A6A22`, fond coin `#F3EAD6`→`#E4D2B4`, bois étagère `#E7D7B9`, pastille série `#F1E7D3`/`#E6D7B8`, nuit `#221B14`/`#15110C`. Rappels : radius carte 18–28, pastille 999, anneau trait 11 (héros) / 3.4 (mini).
 
 ## Assets
 - **Colette** : `mascotte/colette.png` (+ `mascotte/colette-anim.gif`, 60 images) — déjà dans le projet, à réutiliser tel quel.
