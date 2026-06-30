@@ -467,7 +467,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
   const { t } = useT();
   return (
     <YStack gap="$5">
-      <KPIRow>
+      <KPIRow gap={18}>
         <KPITile
           value={formatCount(stats.total)}
           label={stats.total > 1 ? t('profile.books') : t('profile.book')}
@@ -483,7 +483,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
       {stats.pricedCount > 0 || stats.acquiredThisYear > 0 || stats.resaleCount > 0 ? (
         <YStack gap="$3">
           <Label>Collection</Label>
-          <KPIRow>
+          <KPIRow gap={18}>
             <KPITile
               value={euro(stats.collectionValue)}
               label={
@@ -500,7 +500,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
             <KPITile value={euro(stats.spentThisYear)} label={`Dépensé en ${stats.year}`} />
           </KPIRow>
           {stats.resaleCount > 0 ? (
-            <KPIRow>
+            <KPIRow gap={18}>
               <KPITile
                 value={euro(stats.resaleValue)}
                 label={

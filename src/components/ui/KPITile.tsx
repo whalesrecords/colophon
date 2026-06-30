@@ -46,7 +46,7 @@ export function KPITile({
   );
 }
 
-/** A row of KPITiles with the canonical 12px gap. */
-export function KPIRow({ children }: { children: React.ReactNode }) {
-  return <XStack gap={12}>{children}</XStack>;
+/** A row of KPITiles. Canonical 12px gap; pass `gap` for more breathing room. */
+export function KPIRow({ children, gap = 12 }: { children: React.ReactNode; gap?: number }) {
+  return <XStack gap={gap}>{children}</XStack>;
 }
