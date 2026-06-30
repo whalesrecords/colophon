@@ -150,6 +150,94 @@ function MonthGrid({ byDay, goal }: { byDay: Record<string, number>; goal: numbe
   );
 }
 
+const MONTH_INITIALS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+
+/** A small month ring whose fill = share of the month's days that met the goal. */
+function MonthRing({
+  ratio,
+  current,
+  future,
+}: {
+  ratio: number;
+  current: boolean;
+  future: boolean;
+}) {
+  const size = 22;
+  const stroke = 3;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c * (1 - Math.min(1, Math.max(0, ratio)));
+  const mid = size / 2;
+  return (
+    <YStack opacity={future ? 0.35 : 1}>
+      <Svg width={size} height={size}>
+        <Circle cx={mid} cy={mid} r={r} stroke={palette.track} strokeWidth={stroke} fill="none" />
+        {ratio > 0 ? (
+          <Circle
+            cx={mid}
+            cy={mid}
+            r={r}
+            stroke={palette.forest}
+            strokeWidth={stroke}
+            fill="none"
+            strokeDasharray={c}
+            strokeDashoffset={off}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${mid} ${mid})`}
+          />
+        ) : null}
+        {current ? (
+          <Circle
+            cx={mid}
+            cy={mid}
+            r={r + stroke - 0.5}
+            stroke={palette.espresso}
+            strokeWidth={1}
+            fill="none"
+          />
+        ) : null}
+      </Svg>
+    </YStack>
+  );
+}
+
+/** The year as 12 rings — one per month, filled by how many days met the goal. */
+function YearRings({ byDay, goal }: { byDay: Record<string, number>; goal: number }) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const curMonth = now.getMonth();
+  const months = Array.from({ length: 12 }, (_, m) => {
+    const daysInMonth = new Date(year, m + 1, 0).getDate();
+    let met = 0;
+    if (goal > 0) {
+      for (let d = 1; d <= daysInMonth; d++) {
+        if ((byDay[`${year}-${pad2(m + 1)}-${pad2(d)}`] ?? 0) >= goal) met += 1;
+      }
+    }
+    return { m, ratio: daysInMonth > 0 ? met / daysInMonth : 0 };
+  });
+  return (
+    <YStack gap="$2">
+      <MiniLabel>{`Cette année · ${year}`}</MiniLabel>
+      <XStack justifyContent="space-between">
+        {months.map((mo) => (
+          <YStack key={mo.m} alignItems="center" gap={3}>
+            <MonthRing ratio={mo.ratio} current={mo.m === curMonth} future={mo.m > curMonth} />
+            <Text
+              fontFamily="$body"
+              fontSize={9}
+              fontWeight="600"
+              color={mo.m === curMonth ? '$accent' : '$colorMuted'}
+            >
+              {MONTH_INITIALS[mo.m]}
+            </Text>
+          </YStack>
+        ))}
+      </XStack>
+    </YStack>
+  );
+}
+
 /**
  * Daily reading goal + streak — the P0 of the engagement roadmap. Shows today's
  * pages vs. the daily target as a ring, the current streak (🔥), and quick presets
@@ -217,6 +305,8 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
         <WeekStrip byDay={data.byDay} goal={goal} />
         <MonthGrid byDay={data.byDay} goal={goal} />
       </XStack>
+
+      <YearRings byDay={data.byDay} goal={goal} />
 
       <XStack gap="$2" alignItems="center" flexWrap="wrap">
         <Text fontFamily="$body" fontSize={12} color="$colorMuted">

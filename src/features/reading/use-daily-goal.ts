@@ -62,7 +62,7 @@ export function useDailyGoal(userId: string | undefined) {
           .from('daily_reading')
           .select('day, pages, minutes')
           .order('day', { ascending: false })
-          .limit(120),
+          .limit(400), // a full year of days for the "12 cercles" view
       ]);
       const goalSet = profile?.daily_goal != null;
       const goal = profile?.daily_goal ?? DEFAULT_DAILY_GOAL;
