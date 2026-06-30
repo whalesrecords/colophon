@@ -116,13 +116,20 @@ export default function ScanScreen() {
     }
   };
 
-  const commitAdd = async (opts: { ownership: Ownership; status: ReadingStatus }) => {
+  const commitAdd = async (opts: {
+    ownership: Ownership;
+    status: ReadingStatus;
+    readYear?: number | null;
+    pageCount?: number | null;
+  }) => {
     if (!pendingBook) return;
     setCommitting(true);
     await submitResolved(pendingBook, opts);
     setCommitting(false);
     setPendingBook(null);
-    (inputRef.current as { focus?: () => void } | null)?.focus?.();
+    // Re-focus the ISBN field only on web (keyboard-driven entry). On a phone this
+    // popped the on-screen keyboard after every scan, covering the next AddSheet.
+    if (Platform.OS === 'web') (inputRef.current as { focus?: () => void } | null)?.focus?.();
   };
 
   const onSubmit = () => {

@@ -272,21 +272,38 @@ export function useMarkRead(itemId: string, userId: string | undefined) {
         .eq('id', itemId);
       if (upd) throw new Error(upd.message);
 
+      // A finished book counts as fully read: record its full page count so the
+      // session reads "N/N pages", not "0 pages".
+      const { data: item } = await supabase
+        .from('items')
+        .select('book:book_metadata(page_count)')
+        .eq('id', itemId)
+        .maybeSingle();
+      const pages = (item?.book as { page_count: number | null } | null)?.page_count ?? null;
+
       const year = String(new Date().getFullYear());
       const { data: sessions } = await supabase
         .from('reading_sessions')
-        .select('finished_on, status')
+        .select('id, finished_on, status, current_page, total_pages')
         .eq('item_id', itemId)
         .eq('status', 'finished');
-      const alreadyThisYear = (sessions ?? []).some((s) => s.finished_on?.startsWith(year));
-      if (!alreadyThisYear) {
+      const thisYear = (sessions ?? []).find((s) => s.finished_on?.startsWith(year));
+      if (!thisYear) {
         const { error } = await supabase.from('reading_sessions').insert({
           item_id: itemId,
           status: 'finished',
           started_on: today(),
           finished_on: today(),
+          total_pages: pages,
+          current_page: pages,
         });
         if (error) throw new Error(error.message);
+      } else if (pages != null && (thisYear.current_page ?? 0) < pages) {
+        // Backfill pages on an existing finished session that has none.
+        await supabase
+          .from('reading_sessions')
+          .update({ total_pages: pages, current_page: pages })
+          .eq('id', thisYear.id);
       }
     },
     onSuccess: () => {

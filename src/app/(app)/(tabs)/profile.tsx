@@ -21,6 +21,7 @@ import { useOnboarding } from '@/features/onboarding/OnboardingTour';
 import { MODULES, PRESETS, useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { useProfile, useUpdateProfile } from '@/features/profile/use-profile';
 import { duplicateGroups } from '@/features/library/duplicates';
+import { useDeleteItem } from '@/features/library/use-delete-item';
 import { downloadCsv, toLibraryCsv } from '@/features/library/export-csv';
 import { computeFacets, EMPTY_FILTERS, type FacetKey } from '@/features/library/faceting';
 import { type ShelfSuggestion, suggestShelves } from '@/features/library/suggest-shelves';
@@ -669,24 +670,34 @@ const CLASS_FACETS: { key: FacetKey; labelKey: TranslationKey }[] = [
 /** Classify the library by facet (genres, shelves, tags, decades…) on the dashboard. */
 function ClassificationSection({ items }: { items: LibraryItem[] }) {
   const { t } = useT();
+  const [open, setOpen] = useState(false);
   const facets = useMemo(() => computeFacets(items, EMPTY_FILTERS), [items]);
   const shown = CLASS_FACETS.filter((f) => facets[f.key].length > 0);
   if (shown.length === 0) return null;
   return (
-    <YStack gap="$5" marginTop="$7">
-      <Label>{t('profile.classification')}</Label>
-      {shown.map((f) => (
-        <YStack key={f.key} gap="$2">
-          <Text fontFamily="$heading" fontSize={16} fontStyle="italic" color="$colorSoft">
-            {t(f.labelKey)}
+    <YStack gap="$4" marginTop="$7">
+      <Pressable onPress={() => setOpen((v) => !v)}>
+        <XStack alignItems="center" justifyContent="space-between">
+          <Label>{t('profile.classification')}</Label>
+          <Text fontFamily="$body" fontSize={13} fontWeight="600" color="$accent">
+            {open ? t('common.hide') : t('common.see')}
           </Text>
-          <BarList
-            entries={facets[f.key]
-              .slice(0, 6)
-              .map((v) => ({ label: displayValue(f.key, v.value), count: v.count }))}
-          />
-        </YStack>
-      ))}
+        </XStack>
+      </Pressable>
+      {open
+        ? shown.map((f) => (
+            <YStack key={f.key} gap="$2">
+              <Text fontFamily="$heading" fontSize={16} fontStyle="italic" color="$colorSoft">
+                {t(f.labelKey)}
+              </Text>
+              <BarList
+                entries={facets[f.key]
+                  .slice(0, 6)
+                  .map((v) => ({ label: displayValue(f.key, v.value), count: v.count }))}
+              />
+            </YStack>
+          ))
+        : null}
     </YStack>
   );
 }
@@ -860,12 +871,30 @@ function LanguishingSection({ userId }: { userId: string | undefined }) {
 function DuplicatesSection({ items }: { items: LibraryItem[] }) {
   const router = useRouter();
   const { t } = useT();
+  const { session } = useAuth();
+  const del = useDeleteItem(session?.user.id);
   const groups = useMemo(
     () => duplicateGroups(items.filter((i) => i.ownership === 'owned')),
     [items],
   );
+  // isbn13 of the group whose deletion is being confirmed inline.
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
   if (groups.length === 0) return null;
   const total = groups.reduce((n, g) => n + (g.count - 1), 0);
+
+  // Keep the first copy, delete the extras (g.ids[1..]).
+  const dedupe = async (ids: string[]) => {
+    setBusy(true);
+    try {
+      for (const id of ids.slice(1)) await del.mutateAsync(id);
+    } finally {
+      setBusy(false);
+      setConfirming(null);
+    }
+  };
+
   return (
     <YStack gap="$3" marginTop="$7">
       <Label>{t('profile.duplicates')}</Label>
@@ -873,41 +902,101 @@ function DuplicatesSection({ items }: { items: LibraryItem[] }) {
         {t('profile.duplicatesSummary', { titles: groups.length, extra: total })}
       </Text>
       <YStack gap="$2">
-        {groups.map((g) => (
-          <Pressable key={g.isbn13} onPress={() => router.push(`/book/${g.ids[0]}`)}>
-            <XStack
-              alignItems="center"
-              gap="$2"
+        {groups.map((g) => {
+          const isConfirming = confirming === g.isbn13;
+          return (
+            <YStack
+              key={g.isbn13}
               padding="$3"
+              gap="$2"
               backgroundColor="$backgroundStrong"
-              borderColor="$borderColor"
+              borderColor={isConfirming ? palette.brick : '$borderColor'}
               borderWidth={1}
               borderRadius={12}
             >
-              <YStack flex={1} gap={2}>
-                <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
-                  {g.title}
-                </Text>
-                {g.author ? (
-                  <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
-                    {g.author}
+              <XStack alignItems="center" gap="$2">
+                <Pressable style={{ flex: 1 }} onPress={() => router.push(`/book/${g.ids[0]}`)}>
+                  <YStack gap={2}>
+                    <Text fontFamily="$heading" fontSize={15} color="$color" numberOfLines={1}>
+                      {g.title}
+                    </Text>
+                    {g.author ? (
+                      <Text fontFamily="$body" fontSize={12} color="$colorMuted" numberOfLines={1}>
+                        {g.author}
+                      </Text>
+                    ) : null}
+                  </YStack>
+                </Pressable>
+                <XStack
+                  backgroundColor={palette.terracotta}
+                  borderRadius={999}
+                  paddingHorizontal={8}
+                  height={20}
+                  alignItems="center"
+                >
+                  <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
+                    {`× ${g.count}`}
                   </Text>
+                </XStack>
+                {!isConfirming ? (
+                  <Button
+                    onPress={() => setConfirming(g.isbn13)}
+                    disabled={busy}
+                    chromeless
+                    height={28}
+                    paddingHorizontal="$2"
+                    color="$accent"
+                    fontFamily="$body"
+                    fontSize={13}
+                    fontWeight="600"
+                  >
+                    {t('profile.dedupe')}
+                  </Button>
                 ) : null}
-              </YStack>
-              <XStack
-                backgroundColor={palette.terracotta}
-                borderRadius={999}
-                paddingHorizontal={8}
-                height={20}
-                alignItems="center"
-              >
-                <Text fontFamily="$body" fontSize={11} fontWeight="700" color={palette.paper}>
-                  {`× ${g.count}`}
-                </Text>
               </XStack>
-            </XStack>
-          </Pressable>
-        ))}
+
+              {isConfirming ? (
+                <YStack gap="$2">
+                  <Text fontFamily="$body" fontSize={12.5} color="$colorSoft" lineHeight={18}>
+                    {t('profile.dedupeConfirm', { count: g.count - 1 })}
+                  </Text>
+                  <XStack gap="$2">
+                    <Button
+                      onPress={() => void dedupe(g.ids)}
+                      disabled={busy}
+                      flex={1}
+                      height={38}
+                      borderRadius={10}
+                      backgroundColor={palette.brick}
+                      color={palette.paper}
+                      fontFamily="$body"
+                      fontWeight="700"
+                      fontSize={13.5}
+                    >
+                      {busy ? '…' : t('common.confirm')}
+                    </Button>
+                    <Button
+                      onPress={() => setConfirming(null)}
+                      disabled={busy}
+                      flex={1}
+                      height={38}
+                      borderRadius={10}
+                      backgroundColor="transparent"
+                      borderColor="$borderColor"
+                      borderWidth={1}
+                      color="$colorSoft"
+                      fontFamily="$body"
+                      fontWeight="600"
+                      fontSize={13.5}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                  </XStack>
+                </YStack>
+              ) : null}
+            </YStack>
+          );
+        })}
       </YStack>
     </YStack>
   );

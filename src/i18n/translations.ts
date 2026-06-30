@@ -69,6 +69,10 @@ export const fr = {
   'profile.badgeLent': 'Prêté',
   'profile.duplicates': 'Doublons',
   'profile.duplicatesSummary': '{titles} titre(s) en plusieurs exemplaires · {extra} de trop',
+  'profile.dedupe': 'Dédupliquer',
+  'profile.dedupeConfirm':
+    'Garder 1 exemplaire et supprimer les {count} autres ? Vérifie d’abord — les couvertures ou éditions peuvent différer.',
+  'profile.dedupeAll': 'Tout dédupliquer · {count} en trop',
   'profile.share': 'Partage',
   'profile.shareCreate': 'Créer un lien public de ma bibliothèque',
   'profile.shareCopy': 'Copier le lien',
@@ -131,10 +135,14 @@ export const fr = {
   // Common
   'common.cancel': 'Annuler',
   'common.delete': 'Supprimer',
+  'common.confirm': 'Confirmer',
+  'common.see': 'Voir',
+  'common.hide': 'Masquer',
 
   // add
   'add.addAs': "Je l'ajoute comme…",
   'add.readingStatus': 'Statut de lecture :',
+  'add.readInYear': 'Lu en',
   'add.untitled': 'Sans titre',
 
   // book
@@ -364,6 +372,10 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'profile.badgeLent': 'On loan',
   'profile.duplicates': 'Duplicates',
   'profile.duplicatesSummary': '{titles} title(s) with several copies · {extra} extra',
+  'profile.dedupe': 'Remove duplicates',
+  'profile.dedupeConfirm':
+    'Keep 1 copy and delete the other {count}? Check first — covers or editions may differ.',
+  'profile.dedupeAll': 'Remove all duplicates · {count} extra',
   'profile.share': 'Share',
   'profile.shareCreate': 'Create a public link to my library',
   'profile.shareCopy': 'Copy link',
@@ -420,10 +432,14 @@ export const en: Partial<Record<TranslationKey, string>> = {
 
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',
+  'common.confirm': 'Confirm',
+  'common.see': 'See',
+  'common.hide': 'Hide',
 
   // add
   'add.addAs': "I'm adding it as…",
   'add.readingStatus': 'Reading status:',
+  'add.readInYear': 'Read in',
   'add.untitled': 'Untitled',
 
   // book

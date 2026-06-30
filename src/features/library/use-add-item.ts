@@ -8,6 +8,10 @@ export interface AddItemInput {
   ownership?: Ownership;
   status?: ReadingStatus;
   borrowedFrom?: string | null;
+  /** When adding as "Lu" from the AddSheet: the year it was read (defaults handled by caller). */
+  readYear?: number | null;
+  /** Total pages — recorded on the finished session so "Lu" counts the whole book. */
+  pageCount?: number | null;
 }
 
 /**
@@ -19,7 +23,7 @@ export function useAddItem(userId: string | undefined) {
   return useMutation({
     mutationFn: async (input: AddItemInput): Promise<{ id: string }> => {
       if (!userId) throw new Error('Vous devez être connecté.');
-      const { isbn13, ownership, status, borrowedFrom } = input;
+      const { isbn13, ownership, status, borrowedFrom, readYear, pageCount } = input;
       const { data, error } = await supabase
         .from('items')
         .insert({
@@ -32,9 +36,21 @@ export function useAddItem(userId: string | undefined) {
         .select('id')
         .single();
       if (error) throw new Error(error.message);
-      // Note: adding a book as "Lu" sets the status only — it does NOT fabricate a
-      // dated finish (the book may have been read years ago). The "Lu" pill on the
-      // book detail (useMarkRead) is the explicit "I finished it now" gesture.
+      // Adding as "Lu" with a year (from the AddSheet) records a finished session dated
+      // to that year, with the FULL page count — so a read book counts its whole pages
+      // and shows up in "Lus en {year}". Bulk paths pass no readYear → status-only (no
+      // fabricated date), preserving the "read years ago" safety.
+      if (status === 'read' && readYear != null) {
+        const date = `${readYear}-01-01`;
+        await supabase.from('reading_sessions').insert({
+          item_id: data.id,
+          status: 'finished',
+          started_on: date,
+          finished_on: date,
+          total_pages: pageCount ?? null,
+          current_page: pageCount ?? null,
+        });
+      }
       return data;
     },
     onSuccess: () => {

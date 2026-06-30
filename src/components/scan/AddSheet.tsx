@@ -30,14 +30,28 @@ export function AddSheet({
 }: {
   book: BookMetadata;
   busy: boolean;
-  onConfirm: (opts: { ownership: Ownership; status: ReadingStatus }) => void;
+  onConfirm: (opts: {
+    ownership: Ownership;
+    status: ReadingStatus;
+    readYear?: number | null;
+    pageCount?: number | null;
+  }) => void;
   onCancel: () => void;
 }) {
   const { t } = useT();
   const [status, setStatus] = useState<ReadingStatus>('to_read');
+  const thisYear = new Date().getFullYear();
+  const [readYear, setReadYear] = useState(thisYear);
   const meta = [book.authors?.[0], book.publisher, book.published_date?.slice(0, 4)]
     .filter(Boolean)
     .join(' · ');
+  const confirm = (ownership: Ownership) =>
+    onConfirm({
+      ownership,
+      status,
+      readYear: status === 'read' ? readYear : null,
+      pageCount: book.page_count,
+    });
 
   return (
     <YStack position="absolute" top={0} left={0} right={0} bottom={0}>
@@ -92,7 +106,7 @@ export function AddSheet({
               return (
                 <Button
                   key={o}
-                  onPress={() => onConfirm({ ownership: o, status })}
+                  onPress={() => confirm(o)}
                   disabled={busy}
                   flex={1}
                   height={56}
@@ -139,6 +153,53 @@ export function AddSheet({
             );
           })}
         </XStack>
+
+        {status === 'read' ? (
+          <XStack alignItems="center" gap="$2">
+            <Text fontFamily="$body" fontSize={13} color="$colorMuted">
+              {t('add.readInYear')}
+            </Text>
+            <Button
+              onPress={() => setReadYear((y) => y - 1)}
+              disabled={busy}
+              circular
+              size={32}
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              color="$color"
+              fontFamily="$body"
+              fontSize={18}
+            >
+              −
+            </Button>
+            <Text
+              fontFamily="$heading"
+              fontSize={18}
+              fontWeight="600"
+              color="$color"
+              minWidth={48}
+              textAlign="center"
+            >
+              {readYear}
+            </Text>
+            <Button
+              onPress={() => setReadYear((y) => Math.min(thisYear, y + 1))}
+              disabled={busy || readYear >= thisYear}
+              circular
+              size={32}
+              backgroundColor="$backgroundStrong"
+              borderColor="$borderColor"
+              borderWidth={1}
+              color="$color"
+              fontFamily="$body"
+              fontSize={18}
+              opacity={readYear >= thisYear ? 0.4 : 1}
+            >
+              +
+            </Button>
+          </XStack>
+        ) : null}
 
         {busy ? (
           <XStack justifyContent="center">
