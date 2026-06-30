@@ -382,9 +382,15 @@ and surface what their collection is worth now (not just what it cost).
   `window.location.origin` on web. Set it to the Vercel domain for native shares.
 - **Pending (dashboard toggles, not code):** enable Auth "leaked password
   protection" (HaveIBeenPwned); set `GOOGLE_BOOKS_KEY` to raise lookup quota;
-  **add `https://colophon-three.vercel.app/reset-password` (or `…/**`) to Auth →
-  URL Configuration → Redirect URLs** so the password-reset email link lands on the
-  recovery page instead of falling back to the Site URL root.
+  **Auth → URL Configuration**: (a) set **Site URL** to
+  `https://colophon-three.vercel.app` (it still defaults to `http://localhost:3000`,
+  so email-confirmation + reset links die on a phone), and (b) add
+  `https://colophon-three.vercel.app/**` to **Redirect URLs**. Sign-up now passes
+  `emailRedirectTo` (and reset passes `redirectTo`) via `authRedirectBase()` in
+  `auth-context.tsx`, but Supabase only honours those if the URL is allow-listed —
+  otherwise it falls back to the Site URL. Not done yet ⇒ confirmation links 404 on
+  `localhost:3000`. (A future native build can deep-link `colophon://` for in-app
+  confirmation; would also need `colophon://**` allow-listed.)
 - **Android push needs FCM credentials.** The app now creates the `default`
   notification channel + a foreground handler, and `send-push` sets
   `channelId/priority`; but Expo push to Android still REQUIRES an FCM V1 service
