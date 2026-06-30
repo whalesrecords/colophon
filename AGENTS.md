@@ -247,12 +247,15 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   a **map** mini (nearest book box / reading place). Each reads a snapshot pushed to
   the App Group via `widget-sync` (extend the payload). Could use WidgetKit
   configuration intents so one widget exposes several "kinds".
-- **Interactive reading chrono à la Santé (proposed, native).** Tap a widget → start a
-  reading session that runs as a **Live Activity** (ActivityKit: Lock Screen + Dynamic
-  Island elapsed timer + book), "Terminer" (an **App Intent**) ends it and prompts for
-  pages. Needs: a Live Activity widget in the bundle, `NSSupportsLiveActivities`, App
-  Intents, and a phone-side bridge to `Activity.request/update/end` (RN has none —
-  `expo-live-activity` or a custom module). Big native effort, needs a device to validate.
+- **Séance de lecture « au calme ». SHIPPED (in-app).** A distraction-free dark
+  full-screen reading session (`/session`, `colophon://session`): pick a book → big
+  timestamp chrono (Démarrer/Pause/Reprendre) → "Terminer · +N min" logs minutes → an
+  "Où en es-tu ?" page-marking step. Entry: "Lire au calme" in book detail + the
+  "Où en es-tu ?" widget's `widgetURL`. Verified end-to-end on web.
+- **Interactive reading chrono à la Santé — Live Activity (planned, native).** The Lock
+  Screen + Dynamic Island running-timer layer on top of the calm session: ActivityKit +
+  App Intents + a phone-side bridge (`expo-live-activity` or a custom module). Full plan
+  + scaffold code in `docs/live-activity.md`. Big native effort, needs a device to validate.
 - **DailyGoalCard redesign (SHIPPED).** Month as a real calendar grid (7 cols, Monday-first,
   day 1 offset to its weekday) + a horizontal "cette semaine" strip; numbers unified to the
   sans UI font (no more serif/sans clash in the goal figure).
