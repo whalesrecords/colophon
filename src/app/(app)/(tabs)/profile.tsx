@@ -17,6 +17,7 @@ import { useLanguishing } from '@/features/reading/use-languishing';
 import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
+import { useOnboarding } from '@/features/onboarding/OnboardingTour';
 import { useProfile, useUpdateProfile } from '@/features/profile/use-profile';
 import { duplicateGroups } from '@/features/library/duplicates';
 import { downloadCsv, toLibraryCsv } from '@/features/library/export-csv';
@@ -63,6 +64,7 @@ function Label({ children }: { children: string }) {
 
 export default function ProfileScreen() {
   const { session, signOut } = useAuth();
+  const { replay: replayTour } = useOnboarding();
   const { t } = useT();
   const { data: stats, isLoading } = useStats(session?.user.id);
   const { data: libraryItems } = useLibrary(session?.user.id);
@@ -160,6 +162,22 @@ export default function ProfileScreen() {
 
         <Button
           marginTop="$6"
+          onPress={replayTour}
+          backgroundColor="$backgroundStrong"
+          borderColor="$borderColor"
+          borderWidth={1}
+          color="$color"
+          borderRadius={12}
+          height={48}
+          fontFamily="$body"
+          fontWeight="600"
+          pressStyle={{ opacity: 0.85 }}
+        >
+          Revoir le tutoriel
+        </Button>
+
+        <Button
+          marginTop="$3"
           onPress={signOut}
           backgroundColor="$backgroundStrong"
           borderColor="$borderColor"
