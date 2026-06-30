@@ -30,6 +30,7 @@ import {
 import { copiesByIsbn } from '@/features/library/duplicates';
 import { groupBySeries, type SeriesGroup } from '@/features/library/group-series';
 import { type LibraryItem, useLibrary } from '@/features/library/use-library';
+import { type GridSize, useLibraryPrefs } from '@/features/library/use-library-prefs';
 import { useShelves } from '@/features/shelves/use-shelves';
 import { parseSeries } from '@/lib/series';
 import { composedPalette } from '@/theme/cover-palettes';
@@ -56,7 +57,6 @@ const SORTS: {
 /** How much text to show under a cover — covers shrink, labels drop. */
 type LabelMode = 'full' | 'title' | 'none';
 
-type GridSize = 'XXS' | 'XS' | 'S' | 'M' | 'L';
 const GRID_SIZES: GridSize[] = ['XXS', 'XS', 'S', 'M', 'L'];
 const GRID_BASE: Record<GridSize, number> = { XXS: 50, XS: 66, S: 84, M: 112, L: 150 };
 const ROW_COVER: Record<GridSize, number> = { XXS: 20, XS: 26, S: 30, M: 40, L: 56 };
@@ -91,11 +91,9 @@ export default function LibraryScreen() {
   const { width } = useWindowDimensions();
   const { data, isLoading, error } = useLibrary(session?.user.id);
 
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [sort, setSort] = useState<SortKey>('added');
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [size, setSize] = useState<GridSize>('M');
-  const [group, setGroup] = useState(true); // relier les séries automatiquement par défaut
+  // Persisted across navigation + app restarts (AsyncStorage).
+  const { view, setView, size, setSize, group, setGroup, sort, setSort, filters, setFilters } =
+    useLibraryPrefs();
   const [openSeries, setOpenSeries] = useState<SeriesGroup | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showView, setShowView] = useState(false);
