@@ -188,12 +188,48 @@ function SessionRow({
     }
   };
 
+  // One-tap shortcuts for the "lu le" date — most people just want a year.
+  const thisYear = new Date().getFullYear();
+  const today = new Date();
+  const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(
+    today.getMonth() + 1,
+  ).padStart(2, '0')}/${thisYear}`;
+
   if (editing) {
     return (
       <YStack gap="$2" paddingVertical="$2" borderBottomColor="$borderColor" borderBottomWidth={1}>
         <XStack gap="$2">
           <DateField label="Début" value={startedOn} onChange={setStartedOn} />
           <DateField label="Fin (lu le)" value={finishedOn} onChange={setFinishedOn} />
+        </XStack>
+        <XStack gap="$2" flexWrap="wrap" alignItems="center">
+          <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+            Lu :
+          </Text>
+          {[
+            { label: "Aujourd'hui", value: todayStr },
+            ...[0, 1, 2, 3, 4].map((i) => ({
+              label: String(thisYear - i),
+              value: String(thisYear - i),
+            })),
+          ].map((opt) => (
+            <Button
+              key={opt.label}
+              onPress={() => setFinishedOn(opt.value)}
+              height={28}
+              paddingHorizontal="$2"
+              borderRadius={999}
+              borderWidth={1}
+              borderColor={finishedOn === opt.value ? '$accent' : '$borderColor'}
+              backgroundColor={finishedOn === opt.value ? '$accent' : 'transparent'}
+              color={finishedOn === opt.value ? palette.paper : '$colorSoft'}
+              fontFamily="$body"
+              fontSize={12.5}
+              fontWeight="600"
+            >
+              {opt.label}
+            </Button>
+          ))}
         </XStack>
         {error ? (
           <Text fontFamily="$body" fontSize={12} color="$signal">
