@@ -2,6 +2,7 @@ import { Text, XStack, YStack } from 'tamagui';
 
 import { PackIcon } from '@/components/icons';
 import { Card, SectionLabel } from '@/components/ui';
+import { BadgeCelebration, useBadgeCelebration } from '@/features/profile/BadgeCelebration';
 import { type Badge, computeBadges } from '@/features/profile/badges';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
 import { palette } from '@/theme/tokens';
@@ -80,6 +81,7 @@ export function BadgesCard({
   const { data: goal } = useDailyGoal(userId);
   const badges = computeBadges({ ...stats, streak: goal?.streak ?? 0 });
   const earned = badges.filter((b) => b.earned).length;
+  const { current, dismiss } = useBadgeCelebration(badges);
 
   return (
     <Card gap="$3" marginTop="$6">
@@ -94,6 +96,7 @@ export function BadgesCard({
           <BadgeTile key={b.id} badge={b} />
         ))}
       </XStack>
+      {current ? <BadgeCelebration badge={current} onClose={dismiss} /> : null}
     </Card>
   );
 }
