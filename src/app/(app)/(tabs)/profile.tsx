@@ -18,6 +18,7 @@ import { Screen } from '@/components/Screen';
 import { useDeleteAccount } from '@/features/account/use-delete-account';
 import { useAuth } from '@/features/auth/auth-context';
 import { useOnboarding } from '@/features/onboarding/OnboardingTour';
+import { MODULES, PRESETS, useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { useProfile, useUpdateProfile } from '@/features/profile/use-profile';
 import { duplicateGroups } from '@/features/library/duplicates';
 import { downloadCsv, toLibraryCsv } from '@/features/library/export-csv';
@@ -65,6 +66,7 @@ function Label({ children }: { children: string }) {
 export default function ProfileScreen() {
   const { session, signOut } = useAuth();
   const { replay: replayTour } = useOnboarding();
+  const { prefs } = useDisplayPrefs();
   const { t } = useT();
   const { data: stats, isLoading } = useStats(session?.user.id);
   const { data: libraryItems } = useLibrary(session?.user.id);
@@ -99,11 +101,11 @@ export default function ProfileScreen() {
           <Stats stats={stats} />
         )}
 
-        <TasteProfileCard userId={session?.user.id} />
+        {prefs.discovery ? <TasteProfileCard userId={session?.user.id} /> : null}
 
-        <DailyGoalCard userId={session?.user.id} />
+        {prefs.gamification ? <DailyGoalCard userId={session?.user.id} /> : null}
 
-        {stats ? (
+        {stats && prefs.gamification ? (
           <BadgesCard
             userId={session?.user.id}
             stats={{
@@ -116,7 +118,7 @@ export default function ProfileScreen() {
           />
         ) : null}
 
-        {stats ? (
+        {stats && prefs.gamification ? (
           <GoalSection
             userId={session?.user.id}
             readThisYear={stats.readThisYear}
@@ -155,6 +157,8 @@ export default function ProfileScreen() {
         <PrivacySection userId={session?.user.id} />
 
         <ExportSection items={items} />
+
+        <DisplaySection />
 
         <AppearanceSection />
 
@@ -348,6 +352,90 @@ function GoalSection({
   );
 }
 
+function ModuleToggle({ mod }: { mod: (typeof MODULES)[number] }) {
+  const { prefs, setModule } = useDisplayPrefs();
+  const on = prefs[mod.key];
+  return (
+    <XStack
+      alignItems="center"
+      justifyContent="space-between"
+      paddingVertical="$2"
+      onPress={() => setModule(mod.key, !on)}
+      pressStyle={{ opacity: 0.7 }}
+      cursor="pointer"
+      accessibilityRole="switch"
+      accessibilityState={{ checked: on }}
+      accessibilityLabel={mod.label}
+    >
+      <YStack flex={1} gap={1} paddingRight="$3">
+        <Text fontFamily="$body" fontSize={15} fontWeight="600" color="$color">
+          {mod.label}
+        </Text>
+        <Text fontFamily="$body" fontSize={12} color="$colorMuted">
+          {mod.hint}
+        </Text>
+      </YStack>
+      <YStack
+        width={46}
+        height={28}
+        borderRadius={999}
+        padding={3}
+        backgroundColor={on ? '$accent' : '$borderColor'}
+      >
+        <YStack
+          width={22}
+          height={22}
+          borderRadius={999}
+          backgroundColor={palette.paper}
+          alignSelf={on ? 'flex-end' : 'flex-start'}
+        />
+      </YStack>
+    </XStack>
+  );
+}
+
+function DisplaySection() {
+  const { applyPreset, matchedPreset } = useDisplayPrefs();
+  return (
+    <YStack gap="$3" marginTop="$6">
+      <Label>Affichage</Label>
+      <Text fontFamily="$body" fontSize={13} color="$colorSoft" lineHeight={18}>
+        Choisis ce que l’app affiche. « Épuré » ne garde que le catalogue et la lecture ; tu peux
+        aussi régler chaque module à la main.
+      </Text>
+      <XStack gap="$2" flexWrap="wrap">
+        {PRESETS.map((p) => {
+          const active = matchedPreset === p.key;
+          return (
+            <Button
+              key={p.key}
+              onPress={() => applyPreset(p.prefs)}
+              height={40}
+              paddingHorizontal="$4"
+              borderRadius={999}
+              borderWidth={1}
+              borderColor={active ? '$accent' : '$borderColor'}
+              backgroundColor={active ? '$accent' : 'transparent'}
+              color={active ? palette.paper : '$color'}
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={14}
+              pressStyle={{ opacity: 0.85 }}
+            >
+              {p.label}
+            </Button>
+          );
+        })}
+      </XStack>
+      <YStack marginTop="$1">
+        {MODULES.map((m) => (
+          <ModuleToggle key={m.key} mod={m} />
+        ))}
+      </YStack>
+    </YStack>
+  );
+}
+
 function AppearanceSection() {
   const { t } = useT();
   const { pref, setPref } = useThemePref();
@@ -483,6 +571,7 @@ function euro(n: number): string {
 
 function Stats({ stats }: { stats: LibraryStats }) {
   const { t } = useT();
+  const { prefs } = useDisplayPrefs();
   return (
     <YStack gap="$5">
       <KPIRow gap={18}>
@@ -498,7 +587,8 @@ function Stats({ stats }: { stats: LibraryStats }) {
         <KPITile value={formatCount(stats.pagesRead)} label={t('profile.pagesRead')} />
       </KPIRow>
 
-      {stats.pricedCount > 0 || stats.acquiredThisYear > 0 || stats.resaleCount > 0 ? (
+      {prefs.collection &&
+      (stats.pricedCount > 0 || stats.acquiredThisYear > 0 || stats.resaleCount > 0) ? (
         <YStack gap="$3">
           <Label>Collection</Label>
           <KPIRow gap={18}>

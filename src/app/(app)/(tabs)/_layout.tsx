@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '@/components/icons';
 import { useAuth } from '@/features/auth/auth-context';
 import { useUnreadCounts } from '@/features/circles/use-circles';
+import { useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { useT } from '@/i18n';
 import { useThemePref } from '@/theme/theme-pref';
 import { palette } from '@/theme/tokens';
@@ -59,6 +60,7 @@ export default function AppTabsLayout() {
   const { session } = useAuth();
   const { data: unread } = useUnreadCounts(session?.user.id);
   const totalUnread = unread ? [...unread.values()].reduce((a, b) => a + b, 0) : 0;
+  const { prefs } = useDisplayPrefs();
   const dark = effective === 'dark';
   return (
     <Tabs
@@ -88,7 +90,11 @@ export default function AppTabsLayout() {
       />
       <Tabs.Screen
         name="trends"
-        options={{ title: t('tabs.trends'), tabBarIcon: tabIcon('trends') }}
+        options={{
+          title: t('tabs.trends'),
+          tabBarIcon: tabIcon('trends'),
+          href: prefs.trends ? undefined : null,
+        }}
       />
       <Tabs.Screen
         name="scan"
@@ -105,6 +111,7 @@ export default function AppTabsLayout() {
           tabBarIcon: tabIcon('discussions'),
           tabBarBadge: totalUnread > 0 ? totalUnread : undefined,
           tabBarBadgeStyle: { backgroundColor: palette.terracotta, color: palette.paper },
+          href: prefs.social ? undefined : null,
         }}
       />
       <Tabs.Screen

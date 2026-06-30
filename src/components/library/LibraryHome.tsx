@@ -4,6 +4,7 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { RecommendationsShelf } from '@/components/library/RecommendationsShelf';
 import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
+import { useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { KPIRow, KPITile } from '@/components/ui';
 import type { CurrentRead } from '@/features/reading/use-reading-sessions';
 import type { LibraryItem } from '@/features/library/use-library';
@@ -232,6 +233,7 @@ export function LibraryHome({
   onSeeQueue,
   onOpenProfile,
 }: LibraryHomeProps) {
+  const { prefs } = useDisplayPrefs();
   const g = greeting(now.getHours());
   const dateLabel = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`;
   const who = firstName(name, emailFallback);
@@ -260,7 +262,7 @@ export function LibraryHome({
         <Avatar initial={initial} onPress={onOpenProfile} />
       </XStack>
 
-      <DailyGoalMini userId={userId} onPress={onOpenProfile} />
+      {prefs.gamification ? <DailyGoalMini userId={userId} onPress={onOpenProfile} /> : null}
 
       {currentRead ? (
         <Hero read={currentRead} onPress={() => onOpenBook(currentRead.itemId)} />
@@ -280,7 +282,7 @@ export function LibraryHome({
       <Shelf title="Pile à lire" items={toRead} onOpen={onOpenBook} onSeeAll={onSeeQueue} />
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
 
-      <RecommendationsShelf userId={userId} />
+      {prefs.discovery ? <RecommendationsShelf userId={userId} /> : null}
     </YStack>
   );
 }

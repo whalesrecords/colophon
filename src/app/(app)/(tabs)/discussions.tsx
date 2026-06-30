@@ -9,6 +9,7 @@ import { Avatar, AvatarStack } from '@/components/social/Avatar';
 import { FriendsReadingNow } from '@/components/social/FriendsReadingNow';
 import { Leaderboard } from '@/components/social/Leaderboard';
 import { useAuth } from '@/features/auth/auth-context';
+import { useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import {
   type CircleSummary,
   FREE_CIRCLE_LIMIT,
@@ -199,6 +200,7 @@ function CircleCard({
 export default function DiscussionsScreen() {
   const router = useRouter();
   const { session } = useAuth();
+  const { prefs } = useDisplayPrefs();
   const userId = session?.user.id;
   const { data: circles, isLoading } = useCircles(userId);
   const { data: unread } = useUnreadCounts(userId);
@@ -278,22 +280,24 @@ export default function DiscussionsScreen() {
             >
               Fil
             </Button>
-            <Button
-              onPress={() => router.push('/carte')}
-              height={34}
-              paddingHorizontal="$3"
-              borderRadius={999}
-              borderWidth={1}
-              borderColor="$borderColor"
-              backgroundColor="transparent"
-              color="$colorSoft"
-              fontFamily="$body"
-              fontSize={13}
-              fontWeight="600"
-              pressStyle={{ opacity: 0.7 }}
-            >
-              Carte
-            </Button>
+            {prefs.places ? (
+              <Button
+                onPress={() => router.push('/carte')}
+                height={34}
+                paddingHorizontal="$3"
+                borderRadius={999}
+                borderWidth={1}
+                borderColor="$borderColor"
+                backgroundColor="transparent"
+                color="$colorSoft"
+                fontFamily="$body"
+                fontSize={13}
+                fontWeight="600"
+                pressStyle={{ opacity: 0.7 }}
+              >
+                Carte
+              </Button>
+            ) : null}
             <Button
               onPress={() => router.push('/readers')}
               height={34}
