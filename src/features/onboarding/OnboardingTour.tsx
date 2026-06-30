@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
-import { Modal, Pressable } from 'react-native';
+import { Modal, Pressable, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { Icon, type IconName, type PackGlyph, PackIcon } from '@/components/icons';
@@ -8,12 +9,15 @@ import { palette } from '@/theme/tokens';
 
 const SEEN_KEY = 'colophon.tourSeen.v1';
 
+// Bottom tab order: 0 Bibliothèque · 1 Tendances · 2 Scan · 3 Échanges · 4 Profil.
 type StepIcon = { pack: PackGlyph } | { line: IconName };
 interface Step {
   icon: StepIcon;
   tint: string;
   title: string;
   body: string;
+  /** If set, spotlights this bottom-tab and points an arrow at it. */
+  tab?: number;
 }
 
 // The whole app, in eight bubbles. Tone: warm, plain French, no jargon.
@@ -27,12 +31,14 @@ const STEPS: Step[] = [
   {
     icon: { line: 'scan' },
     tint: palette.espresso,
+    tab: 2,
     title: 'Cataloguez en un scan',
     body: 'Scannez le code-barres d’un livre avec le bouton central : sa fiche se remplit toute seule. Pas de code-barres ? Ajoutez-le à la main ou par recherche.',
   },
   {
     icon: { pack: 'box' },
     tint: palette.gold,
+    tab: 0,
     title: 'Possédé, emprunté ou envie',
     body: 'Dites ce que vous avez, ce qu’on vous a prêté, et ce qui vous fait envie. Votre bibliothèque garde les trois bien séparés.',
   },
@@ -57,12 +63,14 @@ const STEPS: Step[] = [
   {
     icon: { pack: 'chat' },
     tint: palette.prussian,
+    tab: 3,
     title: 'Échangez',
     body: 'Rejoignez des cercles de lecture, suivez des amis, lancez des défis et comparez vos classements de la semaine.',
   },
   {
     icon: { pack: 'trophy' },
     tint: palette.forest,
+    tab: 4,
     title: 'Votre profil',
     body: 'Stats, badges, objectif et bilan de l’année — et tout ce que vous pouvez partager. Bonne lecture !',
   },
@@ -131,6 +139,8 @@ function StepGlyph({ icon, tint }: { icon: StepIcon; tint: string }) {
   );
 }
 
+const DARK = 'rgba(26,20,14,0.92)';
+
 function TourModal({
   open,
   step,
@@ -145,20 +155,173 @@ function TourModal({
   const s = STEPS[step];
   const last = step === STEPS.length - 1;
   const first = step === 0;
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const hasTab = s.tab != null;
+
+  // Geometry of the highlighted bottom-tab slot (5 evenly-spaced tabs).
+  const tabBarH = 64 + insets.bottom;
+  const slotW = width / 5;
+  const spotPad = 8;
+  const spotX = (s.tab ?? 0) * slotW + spotPad;
+  const spotW = slotW - spotPad * 2;
+  const spotY = height - tabBarH + 4;
+  const spotH = tabBarH - 12;
+
+  const bubble = (
+    <YStack
+      width="100%"
+      maxWidth={400}
+      backgroundColor={palette.paper}
+      borderRadius={22}
+      padding="$6"
+      gap="$4"
+      alignItems="center"
+    >
+      <StepGlyph icon={s.icon} tint={s.tint} />
+      <Text
+        fontFamily="$heading"
+        fontSize={23}
+        fontWeight="600"
+        color={palette.ink}
+        textAlign="center"
+      >
+        {s.title}
+      </Text>
+      <Text
+        fontFamily="$body"
+        fontSize={15}
+        color={palette.inkSoft ?? palette.ink}
+        textAlign="center"
+        lineHeight={22}
+      >
+        {s.body}
+      </Text>
+      <XStack gap={7} paddingVertical="$2">
+        {STEPS.map((_, i) => (
+          <YStack
+            key={i}
+            width={i === step ? 22 : 7}
+            height={7}
+            borderRadius={999}
+            backgroundColor={i === step ? palette.espresso : palette.concrete}
+            opacity={i === step ? 1 : 0.45}
+          />
+        ))}
+      </XStack>
+      <XStack gap="$3" width="100%">
+        {!first ? (
+          <Button
+            onPress={() => setStep(step - 1)}
+            flex={1}
+            height={50}
+            borderRadius={12}
+            borderWidth={1}
+            borderColor={palette.concrete}
+            backgroundColor="transparent"
+            color={palette.ink}
+            fontFamily="$body"
+            fontWeight="600"
+            pressStyle={{ opacity: 0.7 }}
+          >
+            Précédent
+          </Button>
+        ) : null}
+        <Button
+          onPress={() => (last ? onClose() : setStep(step + 1))}
+          flex={first ? 1 : 1.4}
+          height={50}
+          borderRadius={12}
+          backgroundColor={palette.espresso}
+          color={palette.paper}
+          fontFamily="$body"
+          fontWeight="700"
+          pressStyle={{ opacity: 0.88 }}
+        >
+          {last ? 'C’est parti' : 'Suivant'}
+        </Button>
+      </XStack>
+    </YStack>
+  );
 
   return (
     <Modal transparent visible={open} animationType="fade" onRequestClose={onClose}>
-      {/* Darkened, matte backdrop. */}
-      <YStack
-        flex={1}
-        backgroundColor="rgba(26,20,14,0.92)"
-        alignItems="center"
-        justifyContent="center"
-        padding="$5"
-      >
+      <YStack flex={1}>
+        {hasTab ? (
+          <>
+            {/* Dark everywhere except a window over the target tab (it shows through). */}
+            <YStack
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              height={spotY}
+              backgroundColor={DARK}
+            />
+            <YStack
+              position="absolute"
+              left={0}
+              right={0}
+              top={spotY + spotH}
+              bottom={0}
+              backgroundColor={DARK}
+            />
+            <YStack
+              position="absolute"
+              top={spotY}
+              left={0}
+              width={spotX}
+              height={spotH}
+              backgroundColor={DARK}
+            />
+            <YStack
+              position="absolute"
+              top={spotY}
+              left={spotX + spotW}
+              right={0}
+              height={spotH}
+              backgroundColor={DARK}
+            />
+            <YStack
+              position="absolute"
+              top={spotY}
+              left={spotX}
+              width={spotW}
+              height={spotH}
+              borderRadius={16}
+              borderWidth={2}
+              borderColor={palette.gold}
+            />
+            <YStack position="absolute" top={spotY - 38} left={spotX + spotW / 2 - 16}>
+              <Icon name="chevronDown" size={32} color={palette.paper} strokeWidth={2.5} />
+            </YStack>
+          </>
+        ) : (
+          <YStack
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            backgroundColor={DARK}
+          />
+        )}
+
+        <YStack
+          flex={1}
+          alignItems="center"
+          justifyContent={hasTab ? 'flex-start' : 'center'}
+          paddingTop={hasTab ? height * 0.15 : 0}
+          paddingHorizontal="$5"
+          pointerEvents="box-none"
+          zIndex={20}
+        >
+          {bubble}
+        </YStack>
+
         <Pressable
           onPress={onClose}
-          style={{ position: 'absolute', top: 52, right: 24, padding: 8 }}
+          style={{ position: 'absolute', top: insets.top + 14, right: 24, padding: 8, zIndex: 30 }}
           accessibilityRole="button"
           accessibilityLabel="Passer le tutoriel"
         >
@@ -166,85 +329,6 @@ function TourModal({
             Passer
           </Text>
         </Pressable>
-
-        {/* The bubble. */}
-        <YStack
-          width="100%"
-          maxWidth={400}
-          backgroundColor={palette.paper}
-          borderRadius={22}
-          padding="$6"
-          gap="$4"
-          alignItems="center"
-        >
-          <StepGlyph icon={s.icon} tint={s.tint} />
-
-          <Text
-            fontFamily="$heading"
-            fontSize={23}
-            fontWeight="600"
-            color={palette.ink}
-            textAlign="center"
-          >
-            {s.title}
-          </Text>
-          <Text
-            fontFamily="$body"
-            fontSize={15}
-            color={palette.inkSoft ?? palette.ink}
-            textAlign="center"
-            lineHeight={22}
-          >
-            {s.body}
-          </Text>
-
-          {/* Step dots. */}
-          <XStack gap={7} paddingVertical="$2">
-            {STEPS.map((_, i) => (
-              <YStack
-                key={i}
-                width={i === step ? 22 : 7}
-                height={7}
-                borderRadius={999}
-                backgroundColor={i === step ? palette.espresso : palette.concrete}
-                opacity={i === step ? 1 : 0.45}
-              />
-            ))}
-          </XStack>
-
-          <XStack gap="$3" width="100%">
-            {!first ? (
-              <Button
-                onPress={() => setStep(step - 1)}
-                flex={1}
-                height={50}
-                borderRadius={12}
-                borderWidth={1}
-                borderColor={palette.concrete}
-                backgroundColor="transparent"
-                color={palette.ink}
-                fontFamily="$body"
-                fontWeight="600"
-                pressStyle={{ opacity: 0.7 }}
-              >
-                Précédent
-              </Button>
-            ) : null}
-            <Button
-              onPress={() => (last ? onClose() : setStep(step + 1))}
-              flex={first ? 1 : 1.4}
-              height={50}
-              borderRadius={12}
-              backgroundColor={palette.espresso}
-              color={palette.paper}
-              fontFamily="$body"
-              fontWeight="700"
-              pressStyle={{ opacity: 0.88 }}
-            >
-              {last ? 'C’est parti' : 'Suivant'}
-            </Button>
-          </XStack>
-        </YStack>
       </YStack>
     </Modal>
   );
