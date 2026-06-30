@@ -28,7 +28,7 @@ export default function LoginScreen() {
     setLoading(true);
     const { error: signInError } = await signIn(email, password);
     setLoading(false);
-    if (signInError) setError(authErrorMessage(signInError.message));
+    if (signInError) setError(authErrorMessage(signInError));
   };
 
   const onForgot = async () => {

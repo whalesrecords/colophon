@@ -25,7 +25,7 @@ export default function SignUpScreen() {
     const { data, error: signUpError } = await signUp(email, password);
     setLoading(false);
     if (signUpError) {
-      setError(authErrorMessage(signUpError.message));
+      setError(authErrorMessage(signUpError));
       return;
     }
     // When email confirmation is enabled, no session is returned yet.

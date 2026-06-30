@@ -1,9 +1,12 @@
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { useLibrary } from '@/features/library/use-library';
 import { useReaderTaste } from '@/features/library/use-reader-taste';
+import { excludeOwnedRecs } from '@/lib/reco-filter';
 import { palette } from '@/theme/tokens';
 
 /**
@@ -15,7 +18,17 @@ import { palette } from '@/theme/tokens';
 export function RecommendationsShelf({ userId }: { userId: string | undefined }) {
   const router = useRouter();
   const { data, isLoading } = useReaderTaste(userId);
-  const recs = data?.recommendations ?? [];
+  const { data: library } = useLibrary(userId);
+  // Belt-and-suspenders: drop anything the reader already owns or wants — even a
+  // different edition/volume/language than the LLM proposed (it dedupes by ISBN only).
+  const recs = useMemo(() => {
+    const all = data?.recommendations ?? [];
+    if (!library?.length) return all;
+    return excludeOwnedRecs(
+      all,
+      library.map((i) => ({ title: i.book?.title ?? null, author: i.book?.authors?.[0] ?? null })),
+    );
+  }, [data?.recommendations, library]);
 
   if (!userId) return null;
   if (recs.length === 0) {
