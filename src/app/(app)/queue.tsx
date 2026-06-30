@@ -5,6 +5,8 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
+import { Icon } from '@/components/icons';
+import { BackLink } from '@/components/ui';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   type QueueItem,
@@ -63,17 +65,7 @@ export default function QueueScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <XStack paddingTop={insets.top + 8} paddingBottom="$2" paddingHorizontal="$4">
-        <Text
-          onPress={() => router.back()}
-          fontFamily="$body"
-          fontSize={15}
-          color="$accent"
-          fontWeight="600"
-          paddingVertical="$2"
-          pressStyle={{ opacity: 0.6 }}
-        >
-          ‹ Retour
-        </Text>
+        <BackLink />
       </XStack>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 48 }}>
@@ -142,43 +134,52 @@ export default function QueueScreen() {
                         ) : null}
                       </YStack>
                     </XStack>
-                    <XStack gap="$1" alignItems="center">
+                    <XStack alignItems="center">
                       <Button
                         onPress={() => move(i, i - 1)}
                         disabled={i === 0}
                         chromeless
-                        height={32}
-                        width={32}
+                        height={44}
+                        width={44}
                         padding={0}
-                        color={i === 0 ? '$concreteLight' : '$colorSoft'}
-                        fontFamily="$body"
-                        fontSize={18}
+                        alignItems="center"
+                        justifyContent="center"
+                        accessibilityLabel="Monter dans la file"
                       >
-                        ↑
+                        <Icon
+                          name="chevronUp"
+                          size={20}
+                          color={i === 0 ? palette.concrete : palette.ink}
+                        />
                       </Button>
                       <Button
                         onPress={() => move(i, i + 1)}
                         disabled={i === queue.length - 1}
                         chromeless
-                        height={32}
-                        width={32}
+                        height={44}
+                        width={44}
                         padding={0}
-                        color={i === queue.length - 1 ? '$concreteLight' : '$colorSoft'}
-                        fontFamily="$body"
-                        fontSize={18}
+                        alignItems="center"
+                        justifyContent="center"
+                        accessibilityLabel="Descendre dans la file"
                       >
-                        ↓
+                        <Icon
+                          name="chevronDown"
+                          size={20}
+                          color={i === queue.length - 1 ? palette.concrete : palette.ink}
+                        />
                       </Button>
                       <Button
                         onPress={() => removeFromQueue.mutate(item.id)}
                         chromeless
-                        height={32}
-                        paddingHorizontal="$1"
-                        color="$colorMuted"
-                        fontFamily="$body"
-                        fontSize={16}
+                        height={44}
+                        width={44}
+                        padding={0}
+                        alignItems="center"
+                        justifyContent="center"
+                        accessibilityLabel="Retirer de la file"
                       >
-                        ✕
+                        <Icon name="close" size={18} color={palette.concrete} />
                       </Button>
                     </XStack>
                   </XStack>

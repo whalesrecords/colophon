@@ -1,5 +1,6 @@
 import { Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import { Card, SectionLabel } from '@/components/ui';
 import { type Badge, computeBadges } from '@/features/profile/badges';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
@@ -26,7 +27,11 @@ function BadgeTile({ badge }: { badge: Badge }) {
         borderColor={badge.earned ? palette.gold : '$borderColor'}
         borderWidth={badge.earned ? 2 : 1}
       >
-        <Text fontSize={26}>{badge.emoji}</Text>
+        <PackIcon
+          name={badge.icon}
+          size={28}
+          color={badge.earned ? palette.espresso : palette.concrete}
+        />
       </YStack>
       <Text
         fontFamily="$body"

@@ -5,6 +5,8 @@
  * one is earned, and surface them on the widget / a public profile.
  */
 
+import type { PackGlyph } from '@/components/icons';
+
 export interface BadgeInput {
   total: number;
   readThisYear: number;
@@ -16,7 +18,7 @@ export interface BadgeInput {
 
 export interface Badge {
   id: string;
-  emoji: string;
+  icon: PackGlyph;
   label: string;
   desc: string;
   earned: boolean;
@@ -26,7 +28,7 @@ export interface Badge {
 
 const DEFS: {
   id: string;
-  emoji: string;
+  icon: PackGlyph;
   label: string;
   desc: string;
   target: number;
@@ -34,7 +36,7 @@ const DEFS: {
 }[] = [
   {
     id: 'first',
-    emoji: '📕',
+    icon: 'book',
     label: 'Première page',
     desc: 'Ton premier livre',
     target: 1,
@@ -42,7 +44,7 @@ const DEFS: {
   },
   {
     id: 'lib100',
-    emoji: '🗃️',
+    icon: 'books',
     label: 'Bibliothèque',
     desc: '100 livres',
     target: 100,
@@ -50,7 +52,7 @@ const DEFS: {
   },
   {
     id: 'lib250',
-    emoji: '🏛️',
+    icon: 'box',
     label: 'Grande collection',
     desc: '250 livres',
     target: 250,
@@ -58,7 +60,7 @@ const DEFS: {
   },
   {
     id: 'finish50',
-    emoji: '✅',
+    icon: 'medal',
     label: 'Finisseur',
     desc: '50 livres terminés',
     target: 50,
@@ -66,7 +68,7 @@ const DEFS: {
   },
   {
     id: 'year10',
-    emoji: '📖',
+    icon: 'openBook',
     label: "Lecteur de l'année",
     desc: '10 lus cette année',
     target: 10,
@@ -74,7 +76,7 @@ const DEFS: {
   },
   {
     id: 'year25',
-    emoji: '😋',
+    icon: 'star',
     label: 'Dévoreur',
     desc: '25 lus cette année',
     target: 25,
@@ -82,7 +84,7 @@ const DEFS: {
   },
   {
     id: 'pages10k',
-    emoji: '🏃',
+    icon: 'award',
     label: 'Marathon',
     desc: '10 000 pages lues',
     target: 10000,
@@ -90,7 +92,7 @@ const DEFS: {
   },
   {
     id: 'authors50',
-    emoji: '🧭',
+    icon: 'map',
     label: 'Éclectique',
     desc: '50 auteurs différents',
     target: 50,
@@ -98,7 +100,7 @@ const DEFS: {
   },
   {
     id: 'streak3',
-    emoji: '🔥',
+    icon: 'flame',
     label: 'Sur la lancée',
     desc: '3 jours de série',
     target: 3,
@@ -106,7 +108,7 @@ const DEFS: {
   },
   {
     id: 'streak7',
-    emoji: '⚡',
+    icon: 'calendar',
     label: 'Une semaine',
     desc: '7 jours de série',
     target: 7,
@@ -114,7 +116,7 @@ const DEFS: {
   },
   {
     id: 'streak30',
-    emoji: '🏆',
+    icon: 'trophy',
     label: 'Inarrêtable',
     desc: '30 jours de série',
     target: 30,
@@ -127,7 +129,7 @@ export function computeBadges(input: BadgeInput): Badge[] {
     const v = d.val(input);
     return {
       id: d.id,
-      emoji: d.emoji,
+      icon: d.icon,
       label: d.label,
       desc: d.desc,
       earned: v >= d.target,

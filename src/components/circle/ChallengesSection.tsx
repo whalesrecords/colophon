@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView } from 'react-native';
 import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import { Avatar } from '@/components/social/Avatar';
 import {
   type ChallengeWithMe,
@@ -147,7 +148,7 @@ function ChallengeCard({
           paddingHorizontal="$3"
           paddingVertical="$2"
         >
-          <Text fontSize={16}>🏆</Text>
+          <PackIcon name="trophy" size={16} color={iWon ? palette.paper : palette.gold} />
           <Text
             fontFamily="$body"
             fontSize={13}
@@ -170,15 +171,21 @@ function ChallengeCard({
             const done = row.value >= challenge.target;
             return (
               <XStack key={row.user_id} alignItems="center" gap="$2.5">
-                <Text
-                  fontFamily="$body"
-                  fontSize={12}
-                  fontWeight="700"
-                  color="$colorMuted"
-                  width={16}
-                >
-                  {challenge.ended && i === 0 && row.value > 0 ? '🏆' : i + 1}
-                </Text>
+                {challenge.ended && i === 0 && row.value > 0 ? (
+                  <YStack width={16} alignItems="center">
+                    <PackIcon name="trophy" size={14} color={palette.gold} />
+                  </YStack>
+                ) : (
+                  <Text
+                    fontFamily="$body"
+                    fontSize={12}
+                    fontWeight="700"
+                    color="$colorMuted"
+                    width={16}
+                  >
+                    {i + 1}
+                  </Text>
+                )}
                 <Avatar path={row.avatar_path} name={name} pseudo={row.pseudo} size={24} />
                 <YStack flex={1} gap="$1.5">
                   <Text

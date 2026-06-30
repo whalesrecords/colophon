@@ -3,7 +3,9 @@ import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import { PlacesMap } from '@/components/places/PlacesMap';
+import { palette } from '@/theme/tokens';
 
 export default function CarteScreen() {
   const router = useRouter();
@@ -45,7 +47,8 @@ export default function CarteScreen() {
           fontWeight="600"
           pressStyle={{ opacity: 0.7 }}
         >
-          ♥ Mes lieux
+          <PackIcon name="heart" size={13} color={palette.espresso} />
+          Mes lieux
         </Button>
         <Button
           onPress={() => router.push('/boites')}
@@ -61,7 +64,8 @@ export default function CarteScreen() {
           fontWeight="600"
           pressStyle={{ opacity: 0.7 }}
         >
-          📚 Boîtes
+          <PackIcon name="box" size={14} color={palette.ink} />
+          Boîtes
         </Button>
       </XStack>
       <PlacesMap />

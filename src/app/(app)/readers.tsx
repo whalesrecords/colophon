@@ -4,6 +4,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
+import { BackLink } from '@/components/ui';
 import { useAuth } from '@/features/auth/auth-context';
 import {
   avatarUrl,
@@ -114,17 +115,7 @@ export default function ReadersScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <XStack paddingTop={insets.top + 8} paddingBottom="$2" paddingHorizontal="$4">
-        <Text
-          onPress={() => router.back()}
-          fontFamily="$body"
-          fontSize={15}
-          color="$accent"
-          fontWeight="600"
-          paddingVertical="$2"
-          pressStyle={{ opacity: 0.6 }}
-        >
-          ‹ Retour
-        </Text>
+        <BackLink />
       </XStack>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 48 }}>

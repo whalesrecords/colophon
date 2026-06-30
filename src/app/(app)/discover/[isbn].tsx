@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
+import { BackLink } from '@/components/ui';
 import { type BookMetadata, useIsbnLookup } from '@/features/books/use-isbn-lookup';
 import { useAuth } from '@/features/auth/auth-context';
 import { useAddItem } from '@/features/library/use-add-item';
@@ -66,8 +67,6 @@ export default function DiscoverScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isbn]);
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/'));
-
   const onAdd = async (ownership: Ownership) => {
     if (!book || add.isPending) return;
     try {
@@ -88,17 +87,7 @@ export default function DiscoverScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <XStack paddingTop={insets.top + 8} paddingBottom="$2" paddingHorizontal="$4">
-        <Text
-          onPress={goBack}
-          fontFamily="$body"
-          fontSize={15}
-          color="$accent"
-          fontWeight="600"
-          paddingVertical="$2"
-          pressStyle={{ opacity: 0.6 }}
-        >
-          ‹ Retour
-        </Text>
+        <BackLink />
       </XStack>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 40 }}>

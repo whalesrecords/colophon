@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import Svg, { Circle } from 'react-native-svg';
 import { Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
 import { syncReadingWidget } from '@/features/reading/widget-sync';
 import { palette } from '@/theme/tokens';
@@ -60,7 +61,11 @@ export function DailyGoalMini({ userId, onPress }: { userId?: string; onPress?: 
             transform={`rotate(-90 ${mid} ${mid})`}
           />
         </Svg>
-        <Text fontSize={14}>{streak > 0 ? '🔥' : '📖'}</Text>
+        <PackIcon
+          name={streak > 0 ? 'flame' : 'openBook'}
+          size={15}
+          color={streak > 0 ? palette.brick : palette.concrete}
+        />
       </YStack>
       <YStack>
         <Text fontFamily="$heading" fontSize={16} fontWeight="600" color="$color">

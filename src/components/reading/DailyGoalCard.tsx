@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import Svg, { Circle } from 'react-native-svg';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import { Card, SectionLabel } from '@/components/ui';
 import { useDailyGoal, useSetDailyGoal } from '@/features/reading/use-daily-goal';
 import { syncReadingWidget } from '@/features/reading/widget-sync';
@@ -76,7 +77,7 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
             borderColor="$borderColor"
             borderWidth={1}
           >
-            <Text fontSize={13}>🔥</Text>
+            <PackIcon name="flame" size={14} color={palette.brick} />
             <Text fontFamily="$body" fontSize={13} fontWeight="700" color={palette.brick}>
               {streak} jour{streak > 1 ? 's' : ''}
             </Text>
@@ -92,7 +93,7 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
           </Text>
           <Text fontFamily="$body" fontSize={13.5} color="$colorSoft">
             {met
-              ? 'Objectif atteint, bravo 🎉'
+              ? 'Objectif atteint, bravo'
               : `Encore ${goal - today} page${goal - today > 1 ? 's' : ''} aujourd’hui`}
           </Text>
         </YStack>

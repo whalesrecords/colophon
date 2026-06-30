@@ -6,6 +6,7 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
+import { BackLink } from '@/components/ui';
 import { useAuth } from '@/features/auth/auth-context';
 import { useFollowActions, useFollowCounts, useIsFollowing } from '@/features/social/use-follow';
 import { avatarUrl, useFriendActions, useReaderProfile } from '@/features/social/use-friends';
@@ -65,17 +66,7 @@ export default function ReaderProfileScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <XStack paddingTop={insets.top + 8} paddingBottom="$2" paddingHorizontal="$4">
-        <Text
-          onPress={() => router.back()}
-          fontFamily="$body"
-          fontSize={15}
-          color="$accent"
-          fontWeight="600"
-          paddingVertical="$2"
-          pressStyle={{ opacity: 0.6 }}
-        >
-          ‹ Retour
-        </Text>
+        <BackLink />
       </XStack>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 48 }}>
