@@ -2,11 +2,12 @@ import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 import { Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import { Avatar } from '@/components/social/Avatar';
 import type { LeaderRow } from '@/features/social/use-leaderboard';
 import { palette } from '@/theme/tokens';
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const MEDAL_COLORS = ['#C9A227', '#9BA0A8', '#B07A48']; // or, argent, bronze
 
 function Row({
   row,
@@ -32,16 +33,22 @@ function Row({
         borderRadius={12}
         backgroundColor={isMe ? '$backgroundStrong' : 'transparent'}
       >
-        <Text
-          fontFamily="$body"
-          fontSize={13}
-          fontWeight="700"
-          color="$colorMuted"
-          width={22}
-          textAlign="center"
-        >
-          {MEDALS[rank - 1] ?? rank}
-        </Text>
+        {rank <= 3 ? (
+          <YStack width={22} alignItems="center">
+            <PackIcon name="medal" size={18} color={MEDAL_COLORS[rank - 1]} />
+          </YStack>
+        ) : (
+          <Text
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="700"
+            color="$colorMuted"
+            width={22}
+            textAlign="center"
+          >
+            {rank}
+          </Text>
+        )}
         <Avatar path={row.avatar_path} name={name} pseudo={row.pseudo} size={28} />
         <YStack flex={1} gap="$1.5">
           <Text

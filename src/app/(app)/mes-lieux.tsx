@@ -4,6 +4,7 @@ import { Alert, Platform, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Spinner, Text, TextArea, XStack, YStack } from 'tamagui';
 
+import { Icon, PackIcon } from '@/components/icons';
 import { useAuth } from '@/features/auth/auth-context';
 import { type MyPlace, useMyPlaces, useUserPlaceActions } from '@/features/places/use-places';
 import { palette } from '@/theme/tokens';
@@ -66,16 +67,8 @@ function PlaceRow({
           ) : null}
         </YStack>
         <XStack gap="$1" alignItems="center">
-          {place.favorite ? (
-            <Text fontFamily="$body" fontSize={15} color={palette.brick}>
-              ♥
-            </Text>
-          ) : null}
-          {place.visited ? (
-            <Text fontFamily="$body" fontSize={13} fontWeight="700" color={palette.forest}>
-              ✓
-            </Text>
-          ) : null}
+          {place.favorite ? <PackIcon name="heart" size={15} color={palette.brick} /> : null}
+          {place.visited ? <Icon name="check" size={15} color={palette.forest} /> : null}
         </XStack>
       </XStack>
 
@@ -314,7 +307,7 @@ export default function MesLieuxScreen() {
                 textTransform="uppercase"
                 color="$colorMuted"
               >
-                ♥ Coups de cœur · {favorites.length}
+                Coups de cœur · {favorites.length}
               </Text>
               {favorites.map(renderRow)}
             </YStack>
@@ -329,7 +322,7 @@ export default function MesLieuxScreen() {
                 textTransform="uppercase"
                 color="$colorMuted"
               >
-                ✓ Visités · {visited.length}
+                Visités · {visited.length}
               </Text>
               {visited.map(renderRow)}
             </YStack>

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Text, TextArea, XStack, YStack } from 'tamagui';
 
 import { BookLoader } from '@/components/BookLoader';
+import { PackIcon } from '@/components/icons';
 import { Card, SectionLabel } from '@/components/ui';
 import { useAuth } from '@/features/auth/auth-context';
 import {
@@ -43,7 +44,7 @@ function PhotoOrPlaceholder({ path, height }: { path: string | null; height: num
       alignItems="center"
       justifyContent="center"
     >
-      <Text fontSize={30}>📚</Text>
+      <PackIcon name="box" size={30} color={palette.concrete} />
     </YStack>
   );
 }
@@ -133,7 +134,7 @@ function AddBoxModal({ onClose }: { onClose: () => void }) {
                 justifyContent="center"
                 gap="$1"
               >
-                <Text fontSize={26}>📷</Text>
+                <PackIcon name="camera" size={26} color={palette.concrete} />
                 <Text fontFamily="$body" fontSize={14} color="$colorMuted">
                   Ajouter une photo
                 </Text>
@@ -188,7 +189,14 @@ function AddBoxModal({ onClose }: { onClose: () => void }) {
                 fontFamily="$body"
                 fontWeight="600"
               >
-                {locating ? 'Localisation…' : '📍 Utiliser ma position'}
+                {locating ? (
+                  'Localisation…'
+                ) : (
+                  <>
+                    <PackIcon name="location" size={15} color={palette.espresso} />
+                    {'  Utiliser ma position'}
+                  </>
+                )}
               </Button>
               <Text fontFamily="$body" fontSize={13} color="$colorSoft" flex={1}>
                 {loc ? `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}` : 'Non définie'}
@@ -293,7 +301,8 @@ function BoxDetailModal({ box, onClose }: { box: BookBox; onClose: () => void })
             fontFamily="$body"
             fontWeight="600"
           >
-            📍 Y aller
+            <PackIcon name="location" size={15} color={palette.paper} />
+            {'  Y aller'}
           </Button>
 
           <YStack gap="$2" marginTop="$2">
@@ -345,7 +354,7 @@ function BoxDetailModal({ box, onClose }: { box: BookBox; onClose: () => void })
                     borderBottomColor="$borderColor"
                     borderBottomWidth={1}
                   >
-                    <Text fontSize={15}>📕</Text>
+                    <PackIcon name="book" size={15} color={palette.ink} />
                     <Text
                       fontFamily="$body"
                       fontSize={15}
@@ -422,7 +431,7 @@ export default function BookBoxesScreen() {
           </YStack>
         ) : (boxes ?? []).length === 0 ? (
           <YStack alignItems="center" gap="$3" paddingVertical="$8">
-            <Text fontSize={40}>📚</Text>
+            <PackIcon name="box" size={40} color={palette.concrete} />
             <Text fontFamily="$body" fontSize={15} color="$colorSoft" textAlign="center">
               Aucune boîte à livres signalée pour l’instant.{'\n'}Ajoutez-en une que vous connaissez
               !

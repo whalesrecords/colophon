@@ -137,7 +137,7 @@ export function BulkCoverFill({ items, userId, onClose }: BulkCoverFillProps) {
               </YStack>
             ) : missing.length === 0 ? (
               <Text fontFamily="$body" fontSize={15} color="$colorSoft" textAlign="center">
-                Tous vos livres ont déjà une couverture. 🎉
+                Tous vos livres ont déjà une couverture.
               </Text>
             ) : (
               <YStack gap="$3" alignItems="center">

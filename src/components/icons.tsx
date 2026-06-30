@@ -3,12 +3,19 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { GLYPHS } from './pack-glyphs';
 
-// Glyphs the pack doesn't carry, drawn filled to match the pack's style.
+// Glyphs the pack doesn't carry (or carries off-meaning, e.g. its "like" is a
+// thumbs-up not a heart), drawn filled to match the pack's style.
 const CUSTOM_GLYPHS = {
   flame: {
     vb: '0 0 24 24',
     d: [
       'M13 2c.6 3-1.6 4.2-1.6 6.2 0 1 .8 1.9 1.8 1.9 1.2 0 2-1 2-2.4 1.5 1.4 2.4 3.2 2.4 5.1a6.6 6.6 0 0 1-13.2 0c0-3.5 2.4-5.4 4.2-7.4C10.7 7.8 12 5.7 13 2z',
+    ],
+  },
+  heart: {
+    vb: '0 0 24 24',
+    d: [
+      'M12 20.5l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.78-3.4 6.86-8.55 11.69L12 20.5z',
     ],
   },
 } as const;
