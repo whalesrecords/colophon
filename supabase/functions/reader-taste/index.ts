@@ -82,7 +82,11 @@ Deno.serve(async (req: Request) => {
   const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
   const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-  const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+  // Accept a few spellings in case the secret was named with hyphens.
+  const ANTHROPIC_KEY =
+    Deno.env.get('ANTHROPIC_API_KEY') ??
+    Deno.env.get('ANTHROPIC-API-KEY') ??
+    Deno.env.get('ANTHROPIC_KEY');
   const GOOGLE_KEY = Deno.env.get('GOOGLE_BOOKS_KEY');
 
   // Identify the caller from their JWT.
