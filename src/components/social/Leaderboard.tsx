@@ -22,7 +22,8 @@ function Row({
 }) {
   const router = useRouter();
   const name = isMe ? 'Toi' : row.display_name || row.pseudo || 'Lecteur';
-  const frac = max > 0 ? Math.max(0.04, row.pages / max) : 0;
+  // No bar at all at 0 pages; a small floor so a tiny score is still visible.
+  const frac = row.pages > 0 && max > 0 ? Math.max(0.04, row.pages / max) : 0;
   return (
     <Pressable onPress={isMe ? undefined : () => router.push(`/u/${row.user_id}`)}>
       <XStack
@@ -60,9 +61,9 @@ function Row({
           >
             {name}
           </Text>
-          <YStack height={4} borderRadius={999} backgroundColor="$track" overflow="hidden">
+          <YStack height={6} borderRadius={999} backgroundColor="$track" overflow="hidden">
             <YStack
-              height={4}
+              height={6}
               width={`${Math.round(frac * 100)}%`}
               backgroundColor={isMe ? '$accent' : palette.prussian}
             />
@@ -88,7 +89,7 @@ export function Leaderboard({ rows, myId }: { rows: LeaderRow[] | undefined; myI
   const anyPages = rows.some((r) => r.pages > 0);
 
   return (
-    <YStack gap="$1">
+    <YStack gap="$1" width="100%" maxWidth={600} alignSelf="stretch">
       {rows.map((r, i) => (
         <Row key={r.user_id} row={r} rank={i + 1} isMe={r.user_id === myId} max={max} />
       ))}
