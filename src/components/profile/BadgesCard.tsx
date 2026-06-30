@@ -16,7 +16,9 @@ interface StatsForBadges {
 
 function BadgeTile({ badge }: { badge: Badge }) {
   return (
-    <YStack width={72} alignItems="center" gap="$1" opacity={badge.earned ? 1 : 0.55}>
+    // Uniform height (label reserves 2 lines, progress reserves its row) so every
+    // tile is the same size — a clean grid instead of rows of mismatched heights.
+    <YStack width={72} alignItems="center" gap="$2" opacity={badge.earned ? 1 : 0.55}>
       <YStack
         width={56}
         height={56}
@@ -33,25 +35,36 @@ function BadgeTile({ badge }: { badge: Badge }) {
           color={badge.earned ? palette.espresso : palette.concrete}
         />
       </YStack>
-      <Text
-        fontFamily="$body"
-        fontSize={10.5}
-        fontWeight="600"
-        color="$color"
-        textAlign="center"
-        numberOfLines={2}
-      >
-        {badge.label}
-      </Text>
-      {!badge.earned && badge.progress > 0 ? (
-        <YStack width={40} height={3} borderRadius={999} backgroundColor="$track" overflow="hidden">
+      <YStack height={30} justifyContent="flex-start">
+        <Text
+          fontFamily="$body"
+          fontSize={10.5}
+          lineHeight={14}
+          fontWeight="600"
+          color="$color"
+          textAlign="center"
+          numberOfLines={2}
+        >
+          {badge.label}
+        </Text>
+      </YStack>
+      <YStack height={4} justifyContent="center">
+        {!badge.earned && badge.progress > 0 ? (
           <YStack
+            width={40}
             height={3}
-            width={`${Math.round(badge.progress * 100)}%`}
-            backgroundColor={palette.concrete}
-          />
-        </YStack>
-      ) : null}
+            borderRadius={999}
+            backgroundColor="$track"
+            overflow="hidden"
+          >
+            <YStack
+              height={3}
+              width={`${Math.round(badge.progress * 100)}%`}
+              backgroundColor={palette.concrete}
+            />
+          </YStack>
+        ) : null}
+      </YStack>
     </YStack>
   );
 }
@@ -76,7 +89,7 @@ export function BadgesCard({
           {earned}/{badges.length}
         </Text>
       </XStack>
-      <XStack flexWrap="wrap" gap="$3" justifyContent="space-between">
+      <XStack flexWrap="wrap" rowGap="$5" columnGap="$3" justifyContent="space-between">
         {badges.map((b) => (
           <BadgeTile key={b.id} badge={b} />
         ))}
