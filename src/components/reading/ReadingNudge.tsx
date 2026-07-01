@@ -112,7 +112,12 @@ export function ReadingNudge({
           </Text>
           <XStack gap="$2" alignItems="center" paddingVertical={2}>
             {[1, 2, 3, 4, 5].map((n) => (
-              <Pressable key={n} onPress={() => rate(n)} hitSlop={6} accessibilityLabel={`${n} sur 5`}>
+              <Pressable
+                key={n}
+                onPress={() => rate(n)}
+                hitSlop={6}
+                accessibilityLabel={`${n} sur 5`}
+              >
                 {/* 44×44 tap target (HIG / WCAG AAA 2.5.5) */}
                 <YStack
                   width={44}
@@ -175,7 +180,11 @@ export function ReadingNudge({
                 Plus tard
               </Text>
             </Pressable>
-            <Pressable onPress={() => skip(display.id)} hitSlop={10} style={{ paddingVertical: 12 }}>
+            <Pressable
+              onPress={() => skip(display.id)}
+              hitSlop={10}
+              style={{ paddingVertical: 12 }}
+            >
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
                 Passer ce livre
               </Text>
@@ -183,7 +192,11 @@ export function ReadingNudge({
           </>
         ) : (
           <>
-            <Pressable onPress={() => onOpenBook(display.id)} hitSlop={10} style={{ paddingVertical: 12 }}>
+            <Pressable
+              onPress={() => onOpenBook(display.id)}
+              hitSlop={10}
+              style={{ paddingVertical: 12 }}
+            >
               <Text fontFamily="$body" fontSize={13.5} fontWeight="600" color="$accent">
                 Écrire un mot →
               </Text>

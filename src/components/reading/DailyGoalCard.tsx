@@ -137,7 +137,9 @@ function WeekStrip({
                 justifyContent="center"
                 {...s}
               >
-                {met ? <Icon name="check" size={Math.round(dot * 0.6)} color={palette.paper} /> : null}
+                {met ? (
+                  <Icon name="check" size={Math.round(dot * 0.6)} color={palette.paper} />
+                ) : null}
               </YStack>
             </YStack>
           );

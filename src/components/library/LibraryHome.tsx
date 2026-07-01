@@ -7,6 +7,7 @@ import { RecommendationsShelf } from '@/components/library/RecommendationsShelf'
 import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
 import { ReadingNudge } from '@/components/reading/ReadingNudge';
 import { LibrairieNudge } from '@/components/reading/LibrairieNudge';
+import { GiftShareButton } from '@/components/library/GiftShareButton';
 import { groupBySeries } from '@/features/library/group-series';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
 import { syncCurrentReadWidget } from '@/features/reading/widget-sync';
@@ -429,6 +430,7 @@ export function LibraryHome({
       <Shelf title="On continue" items={continueItems} onOpen={onOpenBook} />
       <PileShelf title="Pile à lire" items={toRead} onOpen={onOpenBook} onSeeAll={onSeeQueue} />
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
+      <GiftShareButton userId={userId} count={wishlist.length} />
 
       {prefs.discovery ? <RecommendationsShelf userId={userId} /> : null}
 
