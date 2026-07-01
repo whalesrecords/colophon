@@ -1,12 +1,14 @@
 import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Alert, Linking, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Spinner, Text, XStack, YStack } from 'tamagui';
+import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
-import { Icon } from '@/components/icons';
+import { Icon, PackIcon } from '@/components/icons';
+import { getCurrentLocation } from '@/features/places/use-book-boxes';
 import { useClaimGift, useGiftList, type GiftBook } from '@/features/sharing/use-gift-list';
-import { bookshopUrl } from '@/lib/bookshop';
+import { bookshopUrl, indieBookshopsNearUrl } from '@/lib/bookshop';
 import { palette } from '@/theme/tokens';
 
 const H_PADDING = 20;
@@ -105,6 +107,17 @@ export default function GiftScreen() {
   const cols = columnsFor(width);
   const coverWidth = Math.floor((contentWidth - GAP * (cols - 1)) / cols);
 
+  const [locating, setLocating] = useState(false);
+  const findNearby = async () => {
+    setLocating(true);
+    try {
+      const loc = await getCurrentLocation();
+      await Linking.openURL(indieBookshopsNearUrl(loc));
+    } finally {
+      setLocating(false);
+    }
+  };
+
   const onClaim = async (book: GiftBook) => {
     const ok = await confirmAsync(
       `Tu offres « ${book.title} » ?\n\nIl passera en « réservé » pour les autres (surprise préservée), et on t’emmène chez un libraire indépendant.`,
@@ -145,6 +158,32 @@ export default function GiftScreen() {
           Offre-lui un livre — chez un libraire indépendant, jamais Amazon. Ce que tu réserves passe
           en « réservé » pour les autres, sans gâcher la surprise.
         </Text>
+        <XStack marginTop="$3" alignItems="center" gap="$3" flexWrap="wrap">
+          <Button
+            onPress={findNearby}
+            disabled={locating}
+            height={44}
+            paddingHorizontal="$4"
+            borderRadius={999}
+            backgroundColor="$backgroundStrong"
+            borderColor="$accent"
+            borderWidth={1}
+            color="$accent"
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={14}
+            pressStyle={{ opacity: 0.85 }}
+            gap="$2"
+          >
+            <PackIcon name="location" size={16} color={palette.aizome} />
+            {locating ? 'Localisation…' : 'Trouver une librairie près de toi'}
+          </Button>
+          {/* Loi Lang: new-book prices are fixed nationwide, so the value is the local
+              shop, not price-hunting. leslibraires lets the buyer pick it at checkout. */}
+          <Text fontFamily="$body" fontSize={12.5} color="$colorMuted" flex={1} minWidth={180}>
+            Prix du neuf fixe partout — tu choisis ta librairie au moment de commander.
+          </Text>
+        </XStack>
       </YStack>
 
       {isLoading ? (

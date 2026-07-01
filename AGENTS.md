@@ -53,6 +53,24 @@ token names are kept (`aizome`→espresso, `sage`→forêt, `terracotta`→briqu
 `ochre`→gold) so components reskin without edits. UI language: French; code &
 identifiers: English.
 
+**UX/UI reference (apply by default):** follow `docs/guide-ux-ui.md` — a sourced
+guide of platform standards (Apple HIG / Material 3 / WCAG 2.2), UX laws, the
+science of ethical engagement, dark-pattern law, and legal/e-invoicing compliance.
+Touch targets ≥ 44–48px, contrast ≥ 4.5:1, never colour-only, respect
+`prefers-reduced-motion`, streaks never shame (grace day already implemented), zero
+dark patterns. **Adaptive layout:** use `useBreakpoint()` (`src/theme/breakpoints.ts`,
+Material window size classes) + `CONTENT_MAX` to centre content on tablet/desktop
+instead of stretching. The library + book detail already centre to a max-width
+column on wide screens.
+
+**iPad / adaptive — next steps (proposed).** Foundation shipped (`useBreakpoint`,
+centred content). Remaining, in order: (1) library **list-detail** on `isExpanded`
+(≥840): master cover-grid on the left, book detail in a right pane instead of a full
+push — reuse `book/[id]` content extracted into a component; (2) tablet **side
+navigation rail** replacing the bottom tab bar on `isExpanded` (Material adaptive);
+(3) denser default grid on tablet; (4) two-column reading/stats screens. Ship behind
+`useBreakpoint()` so phone layout is untouched.
+
 ## Non-obvious facts (read before changing related code)
 - **BnF SRU indexes ISBN-10**, not ISBN-13. Query `bib.isbn all "{isbn10}"`
   (convert 978-prefixed ISBN-13 → ISBN-10 first). 979-prefixed ISBNs have no

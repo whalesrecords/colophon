@@ -34,6 +34,7 @@ import { type GridSize, useLibraryPrefs } from '@/features/library/use-library-p
 import { useShelves } from '@/features/shelves/use-shelves';
 import { parseSeries } from '@/lib/series';
 import { composedPalette } from '@/theme/cover-palettes';
+import { CONTENT_MAX } from '@/theme/breakpoints';
 import { OWNERSHIP_LABELS, palette, statusColors } from '@/theme/tokens';
 
 const H_PADDING = 20;
@@ -164,7 +165,13 @@ export default function LibraryScreen() {
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {items.length > 0 ? (
-          <YStack paddingHorizontal={H_PADDING} paddingTop="$4">
+          <YStack
+            paddingHorizontal={H_PADDING}
+            paddingTop="$4"
+            width="100%"
+            maxWidth={CONTENT_MAX}
+            alignSelf="center"
+          >
             <LibraryHome
               name={profile?.display_name}
               emailFallback={session?.user.email}
@@ -465,7 +472,13 @@ export default function LibraryScreen() {
             </Text>
           </YStack>
         ) : (
-          <YStack paddingHorizontal={H_PADDING} paddingVertical={16}>
+          <YStack
+            paddingHorizontal={H_PADDING}
+            paddingVertical={16}
+            width="100%"
+            maxWidth={CONTENT_MAX}
+            alignSelf="center"
+          >
             {view === 'grid' ? (
               <XStack flexWrap="wrap" gap={GAP}>
                 {grouped.groups.map((g) => (
