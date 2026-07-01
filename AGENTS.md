@@ -291,6 +291,16 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   earned (gold ring) vs locked (dimmed + progress), "N/M". **Next:** persist + celebrate
   the moment one is earned, surface on the widget / public profile, add stars/XP +
   cosmetic flair (never pay-to-win) via `achievements` + `user_achievements` tables.
+  **Critique/Chroniqueur badges added** (10/25 avis écrits — `items.notes` count via a
+  new `reviews` stat), the reward for the avis nudge below.
+- **Engagement nudges (in-app prompts). v1 SHIPPED.** Gentle, snooze/skip-persisted
+  cards built to the UX brief (one question, big targets, escapable, never shames):
+  `ReadingNudge` (Home — rate a finished book's fiche, warm reward + Critique-badge
+  carrot; `use-reading-nudge` = read+unrated+owned, `useSnooze` cooldowns);
+  `LibrairieNudge` (Home footer — indie bookshop near you, geoloc → Maps/`leslibraires`);
+  `CercleNudge` + `CafeNudge` (Échanges — a circle by your top genre, and reading
+  meet-ups near you). Honest handoffs where the app has no dataset (geoloc → Maps
+  search). Reusable `features/engagement/use-snooze.ts`.
 - **P1 — leaderboards vs friends & circles. v1 SHIPPED.** Weekly-pages ranking (sum of
   `daily_reading` over the last 7 days) scoped to friends or a circle, via `SECURITY
   DEFINER` RPCs `friends_leaderboard()` (me + accepted friends) and
