@@ -500,6 +500,13 @@ From a tester's Android phone (do NOT confuse with any shipped feature — these
   éditeur inline ; une table `message_reactions` (message_id, user_id, emoji) + un sélecteur
   d'émojis + le compteur de réactions sous chaque message (live via la sub réaliste existante).
   S'applique aussi aux `circle_book_comments`.
+- **DEMANDE — Pile à lire : proposer les prochains tomes d'une série commencée.** Quand une
+  série est entamée (des tomes possédés/lus), surfacer dans la **Pile à lire** les **tomes
+  suivants** : d'abord ceux **déjà possédés non lus** (à lire ensuite), puis les **manquants**
+  (à ajouter aux envies / acheter). Briques déjà là : `use-series-volumes` (liste complète des
+  tomes), `SeriesCompletion` (manquants + ajout groupé), `use-upcoming` (sorties futures),
+  `use-reading-queue` + `PileShelf`. À faire : détecter le prochain tome non lu par série dans
+  la pile et l'afficher (« Suite de {série} : T{n} »), 1-tap pour l'ajouter/le mettre en file.
 
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.

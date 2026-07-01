@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
+
+// TODO(domain): hardcoded to the Vercel domain so shared links always resolve.
+// Swap for the real custom domain (or EXPO_PUBLIC_WEB_URL) later.
+const SHARE_BASE = 'https://colophon-three.vercel.app';
 
 export interface Share {
   id: string;
@@ -13,7 +16,7 @@ export interface Share {
 /** Public URL for a share token (the canonical deployed domain — opened by others,
  *  so never the sharer's localhost/preview origin). */
 export function shareUrl(token: string): string {
-  return `${env.webUrl.replace(/\/$/, '')}/s/${token}`;
+  return `${SHARE_BASE}/s/${token}`;
 }
 
 export function useShares(userId: string | undefined) {
