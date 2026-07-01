@@ -485,6 +485,22 @@ list to send friends/family for Noël/anniversaires. Built on what already ships
   shop (Colophon Pro) + library-borrow handoff. Privacy: claim data separate from the owner's
   view (surprise), anonymous givers, RLS-safe.
 
+## Retours terrain — bugs & demandes (à traiter, non fait)
+From a tester's Android phone (do NOT confuse with any shipped feature — these are open):
+- **BUG — Android : les flèches de retour ne fonctionnent pas.** Sur le téléphone d'une
+  testeuse (Android), les petites flèches « retour en arrière » (le `‹` custom des en-têtes /
+  `BackLink`) ne réagissent pas. À investiguer : le `Pressable`+`router.back()` des headers
+  custom peut ne pas déclencher sur Android, et/ou le **bouton retour matériel Android** n'est
+  pas géré (BackHandler / `router.back()`), notamment sur les overlays/modals (session, carte,
+  boîtes, réglages, /g, /s). Vérifier le retour sur **tous** les écrans poussés + le geste de
+  retour (predictiveBackGestureEnabled est à false).
+- **DEMANDE — chat des cercles : éditer / supprimer ses messages + réactions.** Une testeuse
+  veut pouvoir **éditer** et **supprimer** ses propres messages, et **réagir** (like / émojis)
+  à ceux des autres. À faire : `messages.edited_at` + soft-delete (RLS: auteur only) + un
+  éditeur inline ; une table `message_reactions` (message_id, user_id, emoji) + un sélecteur
+  d'émojis + le compteur de réactions sous chaque message (live via la sub réaliste existante).
+  S'applique aussi aux `circle_book_comments`.
+
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
 - `book-search` (public) — fielded search, Open Library primary.
