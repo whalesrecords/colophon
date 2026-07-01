@@ -20,6 +20,7 @@ export default function AppLayout() {
           <Stack.Screen name="upcoming" options={{ presentation: 'card' }} />
           <Stack.Screen name="queue" options={{ presentation: 'card' }} />
           <Stack.Screen name="session" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="settings" options={{ presentation: 'card' }} />
           <Stack.Screen name="readers" options={{ presentation: 'card' }} />
           <Stack.Screen name="u/[id]" options={{ presentation: 'card' }} />
         </Stack>
