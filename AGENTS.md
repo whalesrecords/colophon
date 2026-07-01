@@ -442,6 +442,31 @@ shops are on Pro, those point at real bookshops/events/stock.
   (first revenue) → **v2 — aggregate/opt-in local demand insights** → **v3 — reserve/sell**
   (click-collect → payment).
 
+## Roadmap — Envies partagées & listes de cadeaux (proposed)
+Turn the **Wishlist (Envies)** into a **shareable gift list** — a wedding-registry-style
+list to send friends/family for Noël/anniversaires. Built on what already ships: the public
+`/s/[token]` route + `shared-library` edge function, `items.ownership='wishlist'`, and
+`bookshopUrl` (indie purchase links).
+- **Killer mechanic — the claim ("je l'offre"):** a gift-giver marks a book → it goes
+  *réservé* for everyone else (**anti-double-gift**), and it's **surprise-preserving** (the
+  owner doesn't see who claimed, at most a "X left" count). Anonymous claim, **no account
+  needed** (optional email to notify the giver). This is what turns "a shared list" into a
+  product people actually send.
+- **Checkout destinations, indie-first (the ethos) — the reader's own ranking:** 🥇 **la
+  librairie du coin** (reserve / click-and-collect) — the grail, via **Colophon Pro**; 🥈
+  **leslibraires.fr** (co-op) — available now, `bookshopUrl` per book; 🥉 **library borrow**
+  — honest handoff (no unified FR availability API → a "chercher en bibliothèque" search
+  link, not real-time stock); ❌ **never Amazon** (brand + indie-affiliation revenue; the
+  user's own instinct already ranks it last).
+- **Technical honesty — the "panier":** no cross-retailer multi-book cart has a public URL
+  (leslibraires exposes no cart-builder), so v1 = **per-book "Offrir"** + a "tout chez
+  leslibraires" search; a real **unified basket exists only when a Pro bookshop takes the
+  order** (Colophon Pro v3).
+- **Phasing:** **v1** — shareable gift list (`/s/[token]` gift mode) + per-book "Offrir chez
+  un libraire indé" + **anonymous anti-double-gift claim** → **v2** — reserve at the local
+  shop (Colophon Pro) + library-borrow handoff. Privacy: claim data separate from the owner's
+  view (surprise), anonymous givers, RLS-safe.
+
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.
 - `book-search` (public) — fielded search, Open Library primary.
