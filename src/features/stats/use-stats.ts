@@ -16,6 +16,7 @@ export interface LibraryStats {
   spentThisYear: number; // total spent this year
   resaleValue: number; // sum of estimated resale values of OWNED items
   resaleCount: number; // how many owned items have an estimated value
+  reviews: number; // items with a written note (an "avis") — feeds the Critique badge
 }
 
 interface ItemRow {
@@ -25,6 +26,7 @@ interface ItemRow {
   purchase_price: number | null;
   purchase_date: string | null;
   estimated_value: number | null;
+  notes: string | null;
   book: { page_count: number | null; authors: string[] | null } | null;
 }
 
@@ -61,7 +63,7 @@ export function useStats(userId: string | undefined) {
           supabase
             .from('items')
             .select(
-              'id, status, ownership, purchase_price, purchase_date, estimated_value, book:book_metadata(page_count, authors)',
+              'id, status, ownership, purchase_price, purchase_date, estimated_value, notes, book:book_metadata(page_count, authors)',
             )
             .range(from, to),
         ),
@@ -87,6 +89,7 @@ export function useStats(userId: string | undefined) {
         spentThisYear: 0,
         resaleValue: 0,
         resaleCount: 0,
+        reviews: 0,
       };
 
       const yearPrefix = String(stats.year);
@@ -94,6 +97,7 @@ export function useStats(userId: string | undefined) {
       for (const row of rows) {
         const pages = row.book?.page_count ?? 0;
         if (row.status in stats.byStatus) stats.byStatus[row.status] += 1;
+        if (row.notes && row.notes.trim().length > 0) stats.reviews += 1;
         if (row.status === 'read') stats.pagesRead += pages;
         for (const author of row.book?.authors ?? []) authorSet.add(author);
         // Collection value + acquisition rhythm count owned copies you bought.

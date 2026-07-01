@@ -111,6 +111,7 @@ export default function ProfileScreen() {
               pagesRead: stats.pagesRead,
               authors: stats.authors,
               read: stats.byStatus.read,
+              reviews: stats.reviews,
             }}
           />
         ) : null}

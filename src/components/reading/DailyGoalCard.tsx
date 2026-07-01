@@ -59,6 +59,7 @@ function Ring({ pct, color, size }: { pct: number; color: string; size: number }
       <Text
         fontFamily="$heading"
         fontSize={Math.round(size * 0.23)}
+        lineHeight={Math.round(size * 0.32)}
         fontWeight="600"
         color="$color"
       >
@@ -359,10 +360,21 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
             Aujourd’hui · {dateLabel}
           </Text>
           <XStack alignItems="baseline" gap="$2">
-            <Text fontFamily="$heading" fontSize={big ? 56 : 44} fontWeight="600" color="$color">
+            <Text
+              fontFamily="$heading"
+              fontSize={big ? 56 : 44}
+              lineHeight={big ? 76 : 60}
+              fontWeight="600"
+              color="$color"
+            >
               {today}
             </Text>
-            <Text fontFamily="$heading" fontSize={big ? 22 : 19} color="$colorMuted">
+            <Text
+              fontFamily="$heading"
+              fontSize={big ? 22 : 19}
+              lineHeight={big ? 30 : 26}
+              color="$colorMuted"
+            >
               / {goal} pages
             </Text>
           </XStack>
@@ -419,6 +431,7 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
                 <Text
                   fontFamily="$heading"
                   fontSize={17}
+                  lineHeight={22}
                   fontWeight="600"
                   color={active ? palette.paper : '$color'}
                 >

@@ -5,6 +5,8 @@ import { Button, Input, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { PremiumSheet } from '@/components/circle/PremiumSheet';
 import { Screen } from '@/components/Screen';
+import { CafeNudge } from '@/components/circle/CafeNudge';
+import { CercleNudge } from '@/components/circle/CercleNudge';
 import { Avatar, AvatarStack } from '@/components/social/Avatar';
 import { FriendsReadingNow } from '@/components/social/FriendsReadingNow';
 import { Leaderboard } from '@/components/social/Leaderboard';
@@ -230,6 +232,16 @@ export default function DiscussionsScreen() {
     }
   };
 
+  const onSuggestCircle = async (n: string) => {
+    setError(null);
+    try {
+      const circle = await createCircle.mutateAsync(n.trim());
+      router.push(`/circle/${circle.id}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur');
+    }
+  };
+
   const onJoin = async () => {
     const c = code.trim();
     if (!c) return;
@@ -325,6 +337,9 @@ export default function DiscussionsScreen() {
         />
 
         <FriendsReadingNow userId={userId} />
+
+        <CercleNudge userId={userId} onCreate={onSuggestCircle} />
+        <CafeNudge />
 
         {(leaderboard?.length ?? 0) >= 2 ? (
           <YStack gap="$3" marginBottom="$5">

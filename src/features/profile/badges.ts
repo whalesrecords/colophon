@@ -14,6 +14,7 @@ export interface BadgeInput {
   authors: number;
   read: number; // books with status 'read'
   streak: number;
+  reviews: number; // books with a written note ("avis")
 }
 
 export interface Badge {
@@ -97,6 +98,22 @@ const DEFS: {
     desc: '50 auteurs différents',
     target: 50,
     val: (i) => i.authors,
+  },
+  {
+    id: 'reviews10',
+    icon: 'star',
+    label: 'Critique',
+    desc: '10 avis écrits',
+    target: 10,
+    val: (i) => i.reviews,
+  },
+  {
+    id: 'reviews25',
+    icon: 'award',
+    label: 'Chroniqueur',
+    desc: '25 avis écrits',
+    target: 25,
+    val: (i) => i.reviews,
   },
   {
     id: 'streak3',

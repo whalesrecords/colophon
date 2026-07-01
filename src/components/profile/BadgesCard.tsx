@@ -15,6 +15,7 @@ interface StatsForBadges {
   pagesRead: number;
   authors: number;
   read: number;
+  reviews: number;
 }
 
 function BadgeTile({ badge }: { badge: Badge }) {

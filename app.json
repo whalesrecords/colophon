@@ -19,7 +19,9 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "com.apple.security.application-groups": ["group.com.whalesrecords.colophon"]
+        "com.apple.security.application-groups": [
+          "group.com.whalesrecords.colophon"
+        ]
       }
     },
     "android": {
@@ -60,7 +62,8 @@
         }
       ],
       "expo-notifications",
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      "./plugins/withMacCatalyst"
     ],
     "experiments": {
       "typedRoutes": true
