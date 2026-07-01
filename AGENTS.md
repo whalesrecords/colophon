@@ -487,6 +487,14 @@ list to send friends/family for Noël/anniversaires. Built on what already ships
 
 ## Retours terrain — bugs & demandes (à traiter, non fait)
 From a tester's Android phone (do NOT confuse with any shipped feature — these are open):
+- **TODO demain — la page cadeau `/g/[token]` "ne fonctionne pas" sur le web déployé.**
+  Le lien `colophon-three.vercel.app/g/<token>` sert bien le shell de l'app (200) mais la
+  page ne rend pas. Cause la plus probable : **le déploiement Vercel n'a pas encore le bundle
+  avec la route `/g`** (poussée sur `main` aujourd'hui) → **redéployer le web depuis `main`**
+  puis vérifier `/g/[token]`. Vérifier aussi le rewrite Expo-Router des routes dynamiques sur
+  Vercel (comme `/s/[token]`) et que les RPC `gift_*` répondent bien en prod (anon). Le
+  backend + le token sont OK (testés : 7 livres) — c'est un souci de **déploiement web**, pas
+  de code app.
 - **BUG — Android : les flèches de retour ne fonctionnent pas.** Sur le téléphone d'une
   testeuse (Android), les petites flèches « retour en arrière » (le `‹` custom des en-têtes /
   `BackLink`) ne réagissent pas. À investiguer : le `Pressable`+`router.back()` des headers
