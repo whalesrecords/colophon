@@ -3,7 +3,7 @@ import { Pressable } from 'react-native';
 import { Text, XStack, YStack } from 'tamagui';
 
 import { BookCover } from '@/components/BookCover';
-import { Icon, PackIcon } from '@/components/icons';
+import { Icon } from '@/components/icons';
 import { useUpdateItem } from '@/features/library/use-update-item';
 import { useReadingNudge } from '@/features/reading/use-reading-nudge';
 import type { LibraryItem } from '@/features/library/use-library';
@@ -188,12 +188,12 @@ export function ReadingNudge({
                 Écrire un mot →
               </Text>
             </Pressable>
-            <XStack alignItems="center" gap={5}>
-              <PackIcon name="star" size={13} color="$gold" />
-              <Text fontFamily="$body" fontSize={12.5} color="$gold" fontWeight="600">
-                badge Critique
-              </Text>
-            </XStack>
+            {/* Informational framing (SDT relatedness), not a controlling badge carrot —
+                the surjustification effect (guide §6). The Critique badge is still earned
+                passively and shown on Profil. */}
+            <Text fontFamily="$body" fontSize={12.5} color="$colorMuted">
+              ton avis aide d’autres lecteurs
+            </Text>
           </>
         )}
       </XStack>

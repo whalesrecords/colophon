@@ -365,7 +365,7 @@ function Stats({ stats }: { stats: LibraryStats }) {
                     ? `Revente · ${stats.resaleCount} chiffrés`
                     : 'Ce que ça vaut aujourd’hui'
                 }
-                accent={palette.gold}
+                accent="$gold"
               />
             </KPIRow>
           ) : null}
