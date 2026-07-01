@@ -1,7 +1,10 @@
+import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
+import { Pressable } from 'react-native';
 import { Button, Input, TextArea, Text, XStack, YStack } from 'tamagui';
 
+import { PackIcon } from '@/components/icons';
 import {
   avatarUrl,
   useProfile,
@@ -57,6 +60,7 @@ export function ProfileHeader({
   userId: string | undefined;
   email: string | undefined;
 }) {
+  const router = useRouter();
   const { data: profile } = useProfile(userId);
   const update = useUpdateProfile(userId);
   const upload = useUploadAvatar(userId);
@@ -119,6 +123,15 @@ export function ProfileHeader({
         >
           {editing ? 'Fermer' : 'Modifier'}
         </Text>
+        <Pressable
+          onPress={() => router.push('/settings')}
+          accessibilityRole="button"
+          accessibilityLabel="Réglages"
+          hitSlop={8}
+          style={{ paddingVertical: 8, paddingLeft: 4 }}
+        >
+          <PackIcon name="settings" size={22} color={palette.concrete} />
+        </Pressable>
       </XStack>
 
       {!editing && profile?.bio ? (

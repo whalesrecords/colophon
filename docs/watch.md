@@ -54,6 +54,95 @@ Phone-side bridge to add (a local Expo module or an AppDelegate subscriber):
 Until the bridge lands, the watch app still runs as a **standalone chronometer** — it
 just shows placeholder/last-cached book info and its logs don't reach Supabase.
 
+### Complete drop-in bridge (ready to add on a Mac)
+
+Architecture: **native owns WCSession, JS owns Supabase.** Native pushes the App-Group
+`cr_*` snapshot to the watch and forwards the watch's log messages up to JS as an event;
+JS (which already holds the Supabase session) runs the RPC. This avoids putting the auth
+token in native code.
+
+**1. `modules/watch-connectivity/ios/WatchBridge.swift`** (an Expo module):
+```swift
+import ExpoModulesCore
+import WatchConnectivity
+
+public class WatchBridge: Module, WCSessionDelegate {
+  let group = "group.com.whalesrecords.colophon"
+
+  public func definition() -> ModuleDefinition {
+    Name("WatchConnectivity")
+    Events("onWatchLog")               // {type:"minutes"|"page", value:Int}
+    OnCreate {
+      if WCSession.isSupported() {
+        WCSession.default.delegate = self
+        WCSession.default.activate()
+      }
+    }
+    // Push the current-read + goal snapshot to the watch.
+    Function("push") { (session: String?) in
+      guard WCSession.default.activationState == .activated else { return }
+      let d = UserDefaults(suiteName: self.group)
+      var ctx: [String: Any] = [
+        "cr_active": d?.integer(forKey: "cr_active") ?? 0,
+        "cr_title": d?.string(forKey: "cr_title") ?? "",
+        "cr_author": d?.string(forKey: "cr_author") ?? "",
+        "cr_page": d?.integer(forKey: "cr_page") ?? 0,
+        "cr_total": d?.integer(forKey: "cr_total") ?? 0,
+        "cr_pct": d?.integer(forKey: "cr_pct") ?? 0,
+        "cr_minutesToday": d?.integer(forKey: "cr_minutesToday") ?? 0,
+        "goal": d?.integer(forKey: "goal") ?? 20,
+        "today": d?.integer(forKey: "today") ?? 0,
+        "streak": d?.integer(forKey: "streak") ?? 0,
+      ]
+      if let s = session { ctx["cr_session"] = s }   // watch echoes it back on a log
+      try? WCSession.default.updateApplicationContext(ctx)
+    }
+  }
+  public func session(_ s: WCSession, activationDidCompleteWith st: WCSessionActivationState, error: Error?) {}
+  public func sessionDidBecomeInactive(_ s: WCSession) {}
+  public func sessionDidDeactivate(_ s: WCSession) { WCSession.default.activate() }
+  public func session(_ s: WCSession, didReceiveMessage m: [String: Any]) {
+    sendEvent("onWatchLog", m)   // → JS
+  }
+}
+```
+
+**2. `src/features/watch/watch-bridge.ts`** (JS half — no-op when the module is absent, so
+web/Android/pre-build are safe):
+```ts
+import { requireOptionalNativeModule } from 'expo';
+import { supabase } from '@/lib/supabase';
+
+const native = requireOptionalNativeModule<{
+  push(session: string | null): void;
+  addListener(e: 'onWatchLog', cb: (m: { type: string; value: number; cr_session?: string }) => void): { remove(): void };
+}>('WatchConnectivity');
+
+/** Push the current snapshot to the watch (the App Group is already written by widget-sync). */
+export function pushToWatch(sessionId: string | null) {
+  native?.push(sessionId);
+}
+
+/** Register once at app start: apply the watch's minute/page logs to Supabase. */
+export function subscribeWatchLogs() {
+  return native?.addListener('onWatchLog', async (m) => {
+    if (!m.cr_session) return;
+    if (m.type === 'minutes') {
+      await supabase.rpc('log_reading_minutes', { p_session: m.cr_session, p_minutes: m.value });
+    } else if (m.type === 'page') {
+      await supabase.rpc('record_reading_page', { p_session: m.cr_session, p_page: m.value });
+    }
+  });
+}
+```
+Then call `subscribeWatchLogs()` from the auth provider (once, when signed in), and
+`pushToWatch(openSessionId)` next to the existing `syncCurrentReadWidget()` in `LibraryHome`.
+The watch's `WatchData.logMinutes/logPage` must include the `cr_session` it received.
+
+> ⚠️ None of the native pieces above can be compiled or tested in the headless dev
+> environment — they need **a Mac with Xcode + the one interactive EAS build + a paired
+> Apple Watch**. Treat this section as a verified-by-hand recipe, not shipped code.
+
 ## Activating it (one interactive build, then headless works)
 
 1. `mv targets/watch/expo-target.config.js.disabled targets/watch/expo-target.config.js`

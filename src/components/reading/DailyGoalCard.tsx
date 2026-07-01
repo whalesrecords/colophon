@@ -59,6 +59,7 @@ function Ring({ pct, color, size }: { pct: number; color: string; size: number }
       <Text
         fontFamily="$heading"
         fontSize={Math.round(size * 0.23)}
+        lineHeight={Math.round(size * 0.32)}
         fontWeight="600"
         color="$color"
       >
@@ -120,13 +121,24 @@ function WeekStrip({
         {days.map((d, i) => {
           const key = isoKey(d);
           const future = key > todayKey;
+          const met = goal > 0 && (byDay[key] ?? 0) >= goal;
           const s = dotStyle(byDay[key] ?? 0, goal, future, key === todayKey);
           return (
             <YStack key={i} alignItems="center" gap={5}>
               <Text fontFamily="$body" fontSize={11} fontWeight="600" color="$colorMuted">
                 {WEEKDAYS[i]}
               </Text>
-              <YStack width={dot} height={dot} borderRadius={999} {...s} />
+              {/* ✓ on met days so status isn't carried by colour alone (WCAG 1.4.1). */}
+              <YStack
+                width={dot}
+                height={dot}
+                borderRadius={999}
+                alignItems="center"
+                justifyContent="center"
+                {...s}
+              >
+                {met ? <Icon name="check" size={Math.round(dot * 0.6)} color={palette.paper} /> : null}
+              </YStack>
             </YStack>
           );
         })}
@@ -359,10 +371,21 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
             Aujourd’hui · {dateLabel}
           </Text>
           <XStack alignItems="baseline" gap="$2">
-            <Text fontFamily="$heading" fontSize={big ? 56 : 44} fontWeight="600" color="$color">
+            <Text
+              fontFamily="$heading"
+              fontSize={big ? 56 : 44}
+              lineHeight={big ? 76 : 60}
+              fontWeight="600"
+              color="$color"
+            >
               {today}
             </Text>
-            <Text fontFamily="$heading" fontSize={big ? 22 : 19} color="$colorMuted">
+            <Text
+              fontFamily="$heading"
+              fontSize={big ? 22 : 19}
+              lineHeight={big ? 30 : 26}
+              color="$colorMuted"
+            >
               / {goal} pages
             </Text>
           </XStack>
@@ -419,6 +442,7 @@ export function DailyGoalCard({ userId }: { userId: string | undefined }) {
                 <Text
                   fontFamily="$heading"
                   fontSize={17}
+                  lineHeight={22}
                   fontWeight="600"
                   color={active ? palette.paper : '$color'}
                 >

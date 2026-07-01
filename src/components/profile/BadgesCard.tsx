@@ -15,6 +15,7 @@ interface StatsForBadges {
   pagesRead: number;
   authors: number;
   read: number;
+  reviews: number;
 }
 
 function BadgeTile({ badge }: { badge: Badge }) {
@@ -101,7 +102,7 @@ export function BadgesCard({
     <Card gap="$3" marginTop="$6">
       <XStack alignItems="center" justifyContent="space-between">
         <SectionLabel>Badges</SectionLabel>
-        <Text fontFamily="$body" fontSize={13} fontWeight="700" color={palette.gold}>
+        <Text fontFamily="$body" fontSize={13} fontWeight="700" color="$gold">
           {earned}/{badges.length}
         </Text>
       </XStack>

@@ -29,6 +29,9 @@ struct ReadSnapshot {
   var goal = 20
   var todayPages = 0
   var streak = 0
+  /// id of the open reading_sessions row the phone sent; echoed back on every log
+  /// so the phone can credit the right session in Supabase.
+  var session = ""
 }
 
 /// Receives the current-read snapshot from the phone (WatchConnectivity application
@@ -77,6 +80,7 @@ final class WatchData: NSObject, ObservableObject, WCSessionDelegate {
     if let v = ctx["goal"] as? Int { s.goal = max(1, v) }
     if let v = ctx["today"] as? Int { s.todayPages = v }
     if let v = ctx["streak"] as? Int { s.streak = v }
+    if let v = ctx["cr_session"] as? String { s.session = v }
     snap = s
     // Cache for offline display.
     if let d = store {
@@ -96,20 +100,23 @@ final class WatchData: NSObject, ObservableObject, WCSessionDelegate {
   /// Send a logged reading sitting (minutes) to the phone.
   func logMinutes(_ minutes: Int) {
     guard minutes > 0 else { return }
-    send(["type": "minutes", "minutes": minutes])
+    send(["type": "minutes", "value": minutes])
     // Optimistic local update.
     snap.minutesToday += minutes
   }
 
   /// Send a page bump to the phone.
   func logPage(_ page: Int) {
-    send(["type": "page", "page": max(0, page)])
+    send(["type": "page", "value": max(0, page)])
     snap.page = max(0, page)
     if snap.total > 0 { snap.pct = min(100, Int(Double(snap.page) / Double(snap.total) * 100)) }
   }
 
-  private func send(_ message: [String: Any]) {
+  private func send(_ rawMessage: [String: Any]) {
     guard WCSession.default.activationState == .activated else { return }
+    // Echo the session id so the phone credits the right reading_sessions row.
+    var message = rawMessage
+    if !snap.session.isEmpty { message["cr_session"] = snap.session }
     if WCSession.default.isReachable {
       WCSession.default.sendMessage(message, replyHandler: nil, errorHandler: nil)
     } else {

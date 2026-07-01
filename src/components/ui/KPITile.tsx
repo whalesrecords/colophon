@@ -15,10 +15,11 @@ export function KPITile({
   label: string;
   accent?: string;
 }) {
-  // Step the number down for long values (e.g. "2 480 €") so it never truncates —
-  // adjustsFontSizeToFit is a no-op on react-native-web.
+  // Step the number down for long values (e.g. "120 €", "2 480 €") so it never
+  // truncates — adjustsFontSizeToFit is a no-op on react-native-web, and these tiles
+  // sit in 2- and 3-column rows, so the narrower 3-col width must fit too.
   const len = value.length;
-  const size = len <= 4 ? 40 : len <= 6 ? 30 : 24;
+  const size = len <= 3 ? 40 : len <= 4 ? 34 : len <= 6 ? 26 : 22;
   return (
     <YStack
       flex={1}
@@ -31,7 +32,7 @@ export function KPITile({
       <Text
         fontFamily="$heading"
         fontSize={size}
-        lineHeight={size + 4}
+        lineHeight={Math.round(size * 1.32)}
         fontWeight="600"
         color={accent ?? '$color'}
         fontVariant={['tabular-nums']}

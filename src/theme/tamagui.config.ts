@@ -13,7 +13,10 @@ import { palette } from './tokens';
 const headingFont = createFont({
   family: 'Spectral_400Regular',
   size: { 1: 11, 2: 12, 3: 13, 4: 15, 5: 18, 6: 22, 7: 25, 8: 28, 9: 33, 10: 40, true: 22 },
-  lineHeight: { 1: 14, 2: 16, 3: 18, 4: 20, 5: 24, 6: 28, 7: 30, 8: 34, 9: 38, 10: 44, true: 28 },
+  // Spectral has tall metrics — line heights run ~1.3× the size so large numbers
+  // (stats, the daily-goal counter) aren't vertically clipped. `true` is the
+  // fallback for raw numeric fontSizes; kept generous for the same reason.
+  lineHeight: { 1: 15, 2: 16, 3: 18, 4: 21, 5: 25, 6: 30, 7: 34, 8: 38, 9: 45, 10: 54, true: 30 },
   weight: { 4: '400', 5: '500', 6: '600' },
   letterSpacing: { 9: -0.5, 10: -0.8, true: 0 },
   face: {
@@ -103,6 +106,9 @@ export const tamaguiConfig = createTamagui({
       signal: palette.terracotta,
       positive: palette.sage,
       track: palette.track,
+      // Readable gold for text/icons — darkened so it clears WCAG AA (4.5:1) on the
+      // cream card; palette.gold (#B5832E) is only ~3:1 and fails for small text.
+      gold: '#8A5F16',
     },
     // "Nuit" dark theme — espresso accent, lightened tranches for contrast.
     dark: {
@@ -122,6 +128,7 @@ export const tamaguiConfig = createTamagui({
       signal: '#C0533C', // brique (on dark)
       positive: '#3E9460', // forêt (on dark)
       track: '#2E2618',
+      gold: '#D8B36A', // lightened ocre so it reads on the nuit card
     },
   },
   shorthands: {

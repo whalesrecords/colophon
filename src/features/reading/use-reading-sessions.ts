@@ -11,6 +11,8 @@ function today(): string {
 
 export interface CurrentRead {
   itemId: string;
+  /** id of the open reading_sessions row (null when justFinished) — used to log watch bumps. */
+  sessionId: string | null;
   title: string | null;
   author: string | null;
   coverUrl: string | null;
@@ -22,6 +24,7 @@ export interface CurrentRead {
 }
 
 interface SessionItemRow {
+  id: string;
   item_id: string;
   current_page: number | null;
   total_pages: number | null;
@@ -40,6 +43,7 @@ function toCurrentRead(row: SessionItemRow, justFinished: boolean): CurrentRead 
   const book = row.item?.book ?? null;
   return {
     itemId: row.item_id,
+    sessionId: justFinished ? null : row.id,
     title: book?.title ?? null,
     author: book?.authors?.[0] ?? null,
     coverUrl: row.item?.cover_override ?? book?.cover_url ?? null,
@@ -51,7 +55,7 @@ function toCurrentRead(row: SessionItemRow, justFinished: boolean): CurrentRead 
 }
 
 const CURRENT_SELECT =
-  'item_id, current_page, total_pages, item:items!inner(cover_override, book:book_metadata(title, authors, cover_url, isbn13))';
+  'id, item_id, current_page, total_pages, item:items!inner(cover_override, book:book_metadata(title, authors, cover_url, isbn13))';
 
 /**
  * The book to surface on the home screen: the open reading session (most recent),

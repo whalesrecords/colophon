@@ -291,6 +291,16 @@ neutral-DNF / anti-pressure guardrail still holds — streaks must never shame).
   earned (gold ring) vs locked (dimmed + progress), "N/M". **Next:** persist + celebrate
   the moment one is earned, surface on the widget / public profile, add stars/XP +
   cosmetic flair (never pay-to-win) via `achievements` + `user_achievements` tables.
+  **Critique/Chroniqueur badges added** (10/25 avis écrits — `items.notes` count via a
+  new `reviews` stat), the reward for the avis nudge below.
+- **Engagement nudges (in-app prompts). v1 SHIPPED.** Gentle, snooze/skip-persisted
+  cards built to the UX brief (one question, big targets, escapable, never shames):
+  `ReadingNudge` (Home — rate a finished book's fiche, warm reward + Critique-badge
+  carrot; `use-reading-nudge` = read+unrated+owned, `useSnooze` cooldowns);
+  `LibrairieNudge` (Home footer — indie bookshop near you, geoloc → Maps/`leslibraires`);
+  `CercleNudge` + `CafeNudge` (Échanges — a circle by your top genre, and reading
+  meet-ups near you). Honest handoffs where the app has no dataset (geoloc → Maps
+  search). Reusable `features/engagement/use-snooze.ts`.
 - **P1 — leaderboards vs friends & circles. v1 SHIPPED.** Weekly-pages ranking (sum of
   `daily_reading` over the last 7 days) scoped to friends or a circle, via `SECURITY
   DEFINER` RPCs `friends_leaderboard()` (me + accepted friends) and
@@ -395,6 +405,42 @@ and surface what their collection is worth now (not just what it cost).
   (HaveIBeenPwned). **Follow-up:** add a shared-secret header to `send-push` (currently
   `verify_jwt` off → theoretically spammable with a valid circle id); move `pg_net` out of
   the `public` schema.
+
+## Roadmap — Colophon Pro (face libraires, B2B two-sided, proposed)
+Turn Colophon from a reader app into a **two-sided platform**: a paid **Colophon Pro**
+tier for independent bookshops. The reframe: Amazon wins because it owns **demand data +
+discovery**; indies don't. **Colophon can be the demand-side layer indies never had — the
+anti-Amazon** (exactly the dossier's positioning, now with a product to sell to shops, not
+just an affiliation link). It also **turns the honest handoffs already shipped into real
+in-app data** (`LibrairieNudge`/`CafeNudge` → Maps, the release calendar → Dilicom): once
+shops are on Pro, those point at real bookshops/events/stock.
+- **What the libraire gets:** (1) **their carte pin** — claimed, verified, editable (hours,
+  photo, specialties, "coup de cœur du libraire"); (2) **sorties · agenda · événements**
+  (signings, café-philo, clubs) → feeds reader-side "À venir" + `CafeNudge`; (3) **featured
+  placement ("en avant")** — Pro ranks first in the librairie nudge, the carte, "trouver
+  chez un libraire" (the monetizable scarcity); (4) **local demand signals** — *"42 readers
+  near you want vol. 7 of X"* (the buying intel indies lack) — **aggregate, opt-in, anonymous
+  ONLY**; (5) **talk to the fan base** — reuse the reader *follow* → "suivre cette librairie"
+  + post events/coups de cœur to followers (opt-in, no spam); (6) **sell** — reserve /
+  click-and-collect / order. **Physical goods are exempt from Apple IAP** → no 30% cut on
+  book sales (big for the model).
+- **Economic model:** **SaaS monthly subscription** (NOT a cut of sales — don't rob the
+  indie's thin margins; matches the ethic). **Claiming a pin = free** (seeds side B risk-free);
+  **Pro = paid** (featured + insights + comms + sell). The circle freemium already provides
+  the billing muscle.
+- **RED LINE (non-negotiable):** the dossier's **"pas de revente de données"** holds. Demand
+  insights are **aggregated (cohorts ≥ N), opt-in, anonymous** — never individual, never
+  "M. Untel's purchases". Reader opts into *"contribuer aux tendances locales (anonyme)"*.
+  This is founding, not optional (brand + RGPD).
+- **Hard parts:** two-sided cold start (poule/œuf) → seed with the existing reader base,
+  pilot 2-3 indies in one city, channel via the **leslibraires co-op (~1200 shops)**;
+  **verification** (SIRET + pro email, anti-squat); **sorties/agenda data** manual first →
+  **Dilicom FEL** at scale; **payments/ops** → v1 = reserve/click-and-collect (pay in shop),
+  sidesteps returns; **B2B support** (onboarding, billing) is a different muscle.
+- **Phasing:** **v0 — Claim & appear** (editable carte profile + events, free — immediately
+  upgrades the librairie/café nudges) → **v1 — Pro featured + follow + post-to-followers**
+  (first revenue) → **v2 — aggregate/opt-in local demand insights** → **v3 — reserve/sell**
+  (click-collect → payment).
 
 ## Edge functions (all deployed)
 - `isbn-lookup` (public) — cascade Google Books → Open Library → BnF.

@@ -108,6 +108,7 @@ export const fr = {
   'settings.languageHint': "S'applique à toute l'application.",
 
   // Appearance picker
+  'settings.title': 'Réglages',
   'settings.appearance': 'Apparence',
   'theme.system': 'Système',
   'theme.light': 'Clair',
@@ -414,6 +415,7 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'settings.language': 'Language',
   'settings.languageHint': 'Applies across the whole app.',
 
+  'settings.title': 'Settings',
   'settings.appearance': 'Appearance',
   'theme.system': 'System',
   'theme.light': 'Light',

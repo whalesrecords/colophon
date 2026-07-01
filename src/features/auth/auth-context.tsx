@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { subscribeWatchLogs } from '@/features/watch/watch-bridge';
 import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 
@@ -62,6 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  // Apply the Apple Watch's minute/page bumps to Supabase (no-op off native iOS).
+  useEffect(() => {
+    if (!session) return;
+    const unsubscribe = subscribeWatchLogs();
+    return unsubscribe;
+  }, [session]);
 
   const value = useMemo<AuthState>(
     () => ({

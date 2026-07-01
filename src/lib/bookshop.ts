@@ -47,3 +47,16 @@ export function amazonUrl(
   if (!tag) return base;
   return `${base}${base.includes('?') ? '&' : '?'}${tag}`;
 }
+
+/**
+ * Physical independent bookshops near the reader. With coordinates, a Google Maps
+ * search centred on them ("librairie indépendante" around their point); without
+ * (location denied / unavailable), the leslibraires.fr co-op shop directory — the
+ * honest fallback, since the app has no bookshop-location database of its own.
+ */
+export function indieBookshopsNearUrl(loc: { lat: number; lng: number } | null): string {
+  if (loc) {
+    return `https://www.google.com/maps/search/librairie+ind%C3%A9pendante/@${loc.lat},${loc.lng},14z`;
+  }
+  return 'https://www.leslibraires.fr/nos-librairies/';
+}

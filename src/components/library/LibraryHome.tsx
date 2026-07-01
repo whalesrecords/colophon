@@ -5,9 +5,12 @@ import { Button, Text, XStack, YStack } from 'tamagui';
 import { BookCover } from '@/components/BookCover';
 import { RecommendationsShelf } from '@/components/library/RecommendationsShelf';
 import { DailyGoalMini } from '@/components/reading/DailyGoalMini';
+import { ReadingNudge } from '@/components/reading/ReadingNudge';
+import { LibrairieNudge } from '@/components/reading/LibrairieNudge';
 import { groupBySeries } from '@/features/library/group-series';
 import { useDailyGoal } from '@/features/reading/use-daily-goal';
 import { syncCurrentReadWidget } from '@/features/reading/widget-sync';
+import { pushToWatch } from '@/features/watch/watch-bridge';
 import { useDisplayPrefs } from '@/features/settings/use-display-prefs';
 import { KPIRow, KPITile } from '@/components/ui';
 import type { CurrentRead } from '@/features/reading/use-reading-sessions';
@@ -372,12 +375,15 @@ export function LibraryHome({
       totalPages: currentRead?.totalPages ?? null,
       minutesToday,
     });
+    // Then relay the same snapshot (+ the open session id) to the Apple Watch.
+    pushToWatch(currentRead && !currentRead.justFinished ? currentRead.sessionId : null);
   }, [
     currentRead?.title,
     currentRead?.author,
     currentRead?.currentPage,
     currentRead?.totalPages,
     currentRead?.justFinished,
+    currentRead?.sessionId,
     minutesToday,
   ]);
 
@@ -408,6 +414,8 @@ export function LibraryHome({
         <Hero read={currentRead} onPress={() => onOpenBook(currentRead.itemId)} />
       ) : null}
 
+      <ReadingNudge userId={userId} onOpenBook={onOpenBook} />
+
       <KPIRow>
         <KPITile value={String(stats.read)} label="Livres lus" accent={palette.forest} />
         <KPITile
@@ -423,6 +431,8 @@ export function LibraryHome({
       <Shelf title="Vos envies" items={wishlist} onOpen={onOpenBook} onSeeAll={onSeeWishlist} />
 
       {prefs.discovery ? <RecommendationsShelf userId={userId} /> : null}
+
+      <LibrairieNudge eligible={stats.read > 0} />
     </YStack>
   );
 }
