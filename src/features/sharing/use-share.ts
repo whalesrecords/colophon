@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Platform } from 'react-native';
 
+import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 
 export interface Share {
@@ -10,15 +10,10 @@ export interface Share {
   shelf_id: string | null;
 }
 
-/** Public URL for a share token (points at the web app). */
+/** Public URL for a share token (the canonical deployed domain — opened by others,
+ *  so never the sharer's localhost/preview origin). */
 export function shareUrl(token: string): string {
-  const fromEnv = process.env.EXPO_PUBLIC_WEB_URL;
-  const base =
-    fromEnv ??
-    (Platform.OS === 'web' && typeof window !== 'undefined'
-      ? window.location.origin
-      : 'https://colophon.app');
-  return `${base.replace(/\/$/, '')}/s/${token}`;
+  return `${env.webUrl.replace(/\/$/, '')}/s/${token}`;
 }
 
 export function useShares(userId: string | undefined) {

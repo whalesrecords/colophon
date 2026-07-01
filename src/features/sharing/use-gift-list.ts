@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Platform } from 'react-native';
 
+import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 
 // The gift_* RPCs are new; cast around the generated-types union (regenerate db
@@ -23,15 +23,11 @@ export interface GiftList {
   books: GiftBook[];
 }
 
-/** Public URL for a gift list (the wishlist share) — points at the /g/[token] page. */
+/** Public URL for a gift list (the wishlist share) — points at the /g/[token] page.
+ *  Always the canonical deployed domain (`env.webUrl`), never window.location.origin:
+ *  the link is opened by family, so it must not be the sharer's localhost/preview. */
 export function giftUrl(token: string): string {
-  const fromEnv = process.env.EXPO_PUBLIC_WEB_URL;
-  const base =
-    fromEnv ??
-    (Platform.OS === 'web' && typeof window !== 'undefined'
-      ? window.location.origin
-      : 'https://colophon.app');
-  return `${base.replace(/\/$/, '')}/g/${token}`;
+  return `${env.webUrl.replace(/\/$/, '')}/g/${token}`;
 }
 
 /** Create (or reuse) the caller's wishlist share, returning its token. RLS scopes
