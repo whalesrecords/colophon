@@ -7,6 +7,7 @@ import { BookCover } from '@/components/BookCover';
 import { BookLoader } from '@/components/BookLoader';
 import { BulkCoverFill } from '@/components/library/BulkCoverFill';
 import { displayValue, FilterPanel } from '@/components/library/FilterPanel';
+import { GiftShareButton } from '@/components/library/GiftShareButton';
 import { LibraryHome } from '@/components/library/LibraryHome';
 import { SeriesCompletion } from '@/components/library/SeriesCompletion';
 import { SeriesMarkRead } from '@/components/library/SeriesMarkRead';
@@ -479,6 +480,12 @@ export default function LibraryScreen() {
             maxWidth={CONTENT_MAX}
             alignSelf="center"
           >
+            {/* Viewing the Envies → offer to share them as a gift list, right here. */}
+            {filters.facets.ownership.includes('wishlist') ? (
+              <YStack marginBottom="$4">
+                <GiftShareButton userId={session?.user.id} count={wishlistCount} />
+              </YStack>
+            ) : null}
             {view === 'grid' ? (
               <XStack flexWrap="wrap" gap={GAP}>
                 {grouped.groups.map((g) => (
