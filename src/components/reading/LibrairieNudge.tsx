@@ -81,7 +81,7 @@ export function LibrairieNudge({ eligible = true }: { eligible?: boolean }) {
         <Button
           onPress={openNearby}
           disabled={loading}
-          height={42}
+          height={44}
           paddingHorizontal="$4"
           borderRadius={999}
           backgroundColor="$accent"
@@ -93,7 +93,7 @@ export function LibrairieNudge({ eligible = true }: { eligible?: boolean }) {
         >
           {loading ? 'Localisation…' : 'Librairies près de moi'}
         </Button>
-        <Pressable onPress={snooze} hitSlop={8}>
+        <Pressable onPress={snooze} hitSlop={10} style={{ paddingVertical: 12 }}>
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
             Plus tard
           </Text>

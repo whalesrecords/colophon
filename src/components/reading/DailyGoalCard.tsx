@@ -121,13 +121,24 @@ function WeekStrip({
         {days.map((d, i) => {
           const key = isoKey(d);
           const future = key > todayKey;
+          const met = goal > 0 && (byDay[key] ?? 0) >= goal;
           const s = dotStyle(byDay[key] ?? 0, goal, future, key === todayKey);
           return (
             <YStack key={i} alignItems="center" gap={5}>
               <Text fontFamily="$body" fontSize={11} fontWeight="600" color="$colorMuted">
                 {WEEKDAYS[i]}
               </Text>
-              <YStack width={dot} height={dot} borderRadius={999} {...s} />
+              {/* ✓ on met days so status isn't carried by colour alone (WCAG 1.4.1). */}
+              <YStack
+                width={dot}
+                height={dot}
+                borderRadius={999}
+                alignItems="center"
+                justifyContent="center"
+                {...s}
+              >
+                {met ? <Icon name="check" size={Math.round(dot * 0.6)} color={palette.paper} /> : null}
+              </YStack>
             </YStack>
           );
         })}

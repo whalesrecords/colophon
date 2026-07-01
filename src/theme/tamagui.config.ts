@@ -106,6 +106,9 @@ export const tamaguiConfig = createTamagui({
       signal: palette.terracotta,
       positive: palette.sage,
       track: palette.track,
+      // Readable gold for text/icons — darkened so it clears WCAG AA (4.5:1) on the
+      // cream card; palette.gold (#B5832E) is only ~3:1 and fails for small text.
+      gold: '#8A5F16',
     },
     // "Nuit" dark theme — espresso accent, lightened tranches for contrast.
     dark: {
@@ -125,6 +128,7 @@ export const tamaguiConfig = createTamagui({
       signal: '#C0533C', // brique (on dark)
       positive: '#3E9460', // forêt (on dark)
       track: '#2E2618',
+      gold: '#D8B36A', // lightened ocre so it reads on the nuit card
     },
   },
   shorthands: {

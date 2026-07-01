@@ -110,24 +110,20 @@ export function ReadingNudge({
           <Text fontFamily="$body" fontSize={15} color="$colorSoft">
             Tu l’as terminé — quelle note lui donnes-tu ?
           </Text>
-          <XStack gap="$3" alignItems="center" paddingVertical={2}>
+          <XStack gap="$2" alignItems="center" paddingVertical={2}>
             {[1, 2, 3, 4, 5].map((n) => (
-              <Pressable
-                key={n}
-                onPress={() => rate(n)}
-                hitSlop={6}
-                accessibilityLabel={`${n} sur 5`}
-              >
+              <Pressable key={n} onPress={() => rate(n)} hitSlop={6} accessibilityLabel={`${n} sur 5`}>
+                {/* 44×44 tap target (HIG / WCAG AAA 2.5.5) */}
                 <YStack
-                  width={32}
-                  height={32}
+                  width={44}
+                  height={44}
                   borderRadius={999}
                   borderWidth={1.5}
                   borderColor="$borderColor"
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Text fontFamily="$heading" fontSize={14} color="$colorMuted">
+                  <Text fontFamily="$heading" fontSize={16} color="$colorMuted">
                     {n}
                   </Text>
                 </YStack>
@@ -169,16 +165,17 @@ export function ReadingNudge({
         </XStack>
       )}
 
-      {/* footer: escape hatches + a nudge to go deeper */}
-      <XStack alignItems="center" justifyContent="space-between" marginTop={2}>
+      {/* footer: escape hatches + a nudge to go deeper. paddingVertical widens the
+          tap zone toward 44px (Fitts / WCAG 2.5.5) without bulking the visual text. */}
+      <XStack alignItems="center" justifyContent="space-between">
         {justRated == null ? (
           <>
-            <Pressable onPress={snooze} hitSlop={8}>
+            <Pressable onPress={snooze} hitSlop={10} style={{ paddingVertical: 12 }}>
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
                 Plus tard
               </Text>
             </Pressable>
-            <Pressable onPress={() => skip(display.id)} hitSlop={8}>
+            <Pressable onPress={() => skip(display.id)} hitSlop={10} style={{ paddingVertical: 12 }}>
               <Text fontFamily="$body" fontSize={13} color="$colorMuted">
                 Passer ce livre
               </Text>
@@ -186,14 +183,14 @@ export function ReadingNudge({
           </>
         ) : (
           <>
-            <Pressable onPress={() => onOpenBook(display.id)} hitSlop={8}>
+            <Pressable onPress={() => onOpenBook(display.id)} hitSlop={10} style={{ paddingVertical: 12 }}>
               <Text fontFamily="$body" fontSize={13.5} fontWeight="600" color="$accent">
                 Écrire un mot →
               </Text>
             </Pressable>
             <XStack alignItems="center" gap={5}>
-              <PackIcon name="star" size={13} color={palette.gold} />
-              <Text fontFamily="$body" fontSize={12.5} color={palette.gold} fontWeight="600">
+              <PackIcon name="star" size={13} color="$gold" />
+              <Text fontFamily="$body" fontSize={12.5} color="$gold" fontWeight="600">
                 badge Critique
               </Text>
             </XStack>

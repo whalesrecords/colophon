@@ -99,7 +99,7 @@ export function CercleNudge({
       <XStack alignItems="center" justifyContent="space-between">
         <Button
           onPress={() => onCreate(`Cercle ${genre}`)}
-          height={42}
+          height={44}
           paddingHorizontal="$4"
           borderRadius={999}
           backgroundColor="$accent"
@@ -111,7 +111,7 @@ export function CercleNudge({
         >
           Créer ce cercle
         </Button>
-        <Pressable onPress={snooze} hitSlop={8}>
+        <Pressable onPress={snooze} hitSlop={10} style={{ paddingVertical: 12 }}>
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">
             Plus tard
           </Text>
