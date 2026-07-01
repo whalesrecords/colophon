@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Linking } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
@@ -33,8 +34,12 @@ interface NativePlace {
 const GEOJSON_URL = `${env.webUrl ?? 'https://colophon-three.vercel.app'}/lieux.geojson`;
 
 /** Self-contained Leaflet map (same lib as the web) rendered inside the WebView.
- *  Marker taps are posted out to React Native for the native detail sheet. */
-function mapHtml(geojsonUrl: string): string {
+ *  Marker taps are posted out to React Native for the native detail sheet.
+ *  `locate` (from the librairie/café nudges via `?locate=1`) geolocates + centres. */
+function mapHtml(geojsonUrl: string, locate: boolean): string {
+  const locateJs = locate
+    ? `if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){var la=pos.coords.latitude,lo=pos.coords.longitude;map.setView([la,lo],13);L.circleMarker([la,lo],{radius:8,color:'#225F77',fillColor:'#225F77',fillOpacity:.9,weight:3}).addTo(map).bindPopup('Tu es ici');},function(){},{enableHighAccuracy:true,timeout:8000});}`
+    : '';
   return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -78,7 +83,7 @@ function mineChip(label,col,get,set){var b=document.createElement('div');b.class
  b.onclick=function(){var nv=!get();set(nv);if(nv){b.style.background=col;b.style.borderColor=col;b.style.color='#fff';}else{b.style.background='#FBF6EC';b.style.borderColor='#DED4BF';b.style.color='#6E6A62';}render();};bar.appendChild(b);}
 mineChip('♥ Coups de cœur','#AE4133',function(){return mineFav;},function(v){mineFav=v;});
 mineChip('✓ Visités','#2D6B4E',function(){return mineVis;},function(v){mineVis=v;});
-fetch('${geojsonUrl}').then(function(r){return r.json();}).then(function(d){feats=d.features||[];render();post({t:'ready'});}).catch(function(){post({t:'error'});});
+fetch('${geojsonUrl}').then(function(r){return r.json();}).then(function(d){feats=d.features||[];render();post({t:'ready'});${locateJs}}).catch(function(){post({t:'error'});});
 </script></body></html>`;
 }
 
@@ -375,16 +380,17 @@ const shadow = {
 interface MapImplProps {
   favIds: string[];
   visIds: string[];
+  locate: boolean;
   onSelect: (p: NativePlace) => void;
 }
 
 /** The Leaflet map inside a WebView — used on every native platform (iOS + Android).
  *  It's the same proven map as the web (clusters, glyph markers, filters); marker
  *  taps bridge out to the native detail sheet. */
-function LeafletWebMap({ favIds, visIds, onSelect }: MapImplProps) {
+function LeafletWebMap({ favIds, visIds, locate, onSelect }: MapImplProps) {
   const webRef = useRef<WebView>(null);
   const [ready, setReady] = useState(false);
-  const html = useMemo(() => mapHtml(GEOJSON_URL), []);
+  const html = useMemo(() => mapHtml(GEOJSON_URL, locate), [locate]);
 
   useEffect(() => {
     if (!ready) return;
@@ -411,6 +417,7 @@ function LeafletWebMap({ favIds, visIds, onSelect }: MapImplProps) {
       onMessage={onMessage}
       javaScriptEnabled
       domStorageEnabled
+      geolocationEnabled
       startInLoadingState
       // Let Leaflet own pan/zoom gestures instead of the WebView's scroll view.
       scrollEnabled={false}
@@ -427,6 +434,8 @@ export function PlacesMap() {
   const { data: marks } = useUserPlaces(userId);
   const { toggle, setNote } = useUserPlaceActions(userId);
   const [selected, setSelected] = useState<NativePlace | null>(null);
+  const params = useLocalSearchParams<{ locate?: string }>();
+  const locate = params.locate === '1' || params.locate === 'true';
 
   const favIds = useMemo(
     () => [...(marks?.entries() ?? [])].filter(([, m]) => m.favorite).map(([id]) => id),
@@ -439,7 +448,7 @@ export function PlacesMap() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <LeafletWebMap favIds={favIds} visIds={visIds} onSelect={setSelected} />
+      <LeafletWebMap favIds={favIds} visIds={visIds} locate={locate} onSelect={setSelected} />
       {selected ? (
         <DetailSheet
           place={selected}

@@ -1,11 +1,9 @@
-import { useState } from 'react';
-import { Linking, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 
 import { PackIcon } from '@/components/icons';
 import { useSnooze } from '@/features/engagement/use-snooze';
-import { getCurrentLocation } from '@/features/places/use-book-boxes';
-import { indieBookshopsNearUrl } from '@/lib/bookshop';
 import { palette } from '@/theme/tokens';
 
 const SNOOZE_KEY = 'colophon.nudge.librairie';
@@ -14,27 +12,16 @@ const COOLDOWN = 5 * 24 * 60 * 60 * 1000;
 
 /**
  * A calm footer prompt on Home: for the next read, point the reader to a physical
- * independent bookshop near them (never Amazon — the app's ethos). Grounded &
- * honest — the app has no bookshop database, so it hands off to a Maps search
- * centred on the reader's location (via the existing geolocation helper), or the
- * leslibraires.fr co-op directory if location is unavailable. Escapable ("Plus
- * tard" → hidden ~5 days) and only surfaced to active readers (`eligible`).
+ * independent bookshop near them (never Amazon — the app's ethos). Opens the in-app
+ * carte (`/carte`) which geolocates and centres on the reader, showing the ~4800
+ * indie bookshops from the places dataset. Escapable ("Plus tard" → hidden ~5 days)
+ * and only surfaced to active readers (`eligible`).
  */
 export function LibrairieNudge({ eligible = true }: { eligible?: boolean }) {
   const { active, snooze } = useSnooze(SNOOZE_KEY, COOLDOWN);
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   if (!active || !eligible) return null;
-
-  const openNearby = async () => {
-    setLoading(true);
-    try {
-      const loc = await getCurrentLocation();
-      await Linking.openURL(indieBookshopsNearUrl(loc));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <YStack
@@ -79,8 +66,7 @@ export function LibrairieNudge({ eligible = true }: { eligible?: boolean }) {
 
       <XStack alignItems="center" justifyContent="space-between">
         <Button
-          onPress={openNearby}
-          disabled={loading}
+          onPress={() => router.push('/carte?locate=1')}
           height={44}
           paddingHorizontal="$4"
           borderRadius={999}
@@ -91,7 +77,7 @@ export function LibrairieNudge({ eligible = true }: { eligible?: boolean }) {
           fontSize={14}
           pressStyle={{ opacity: 0.85 }}
         >
-          {loading ? 'Localisation…' : 'Librairies près de moi'}
+          Librairies près de moi
         </Button>
         <Pressable onPress={snooze} hitSlop={10} style={{ paddingVertical: 12 }}>
           <Text fontFamily="$body" fontSize={13} color="$colorMuted">

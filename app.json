@@ -16,7 +16,8 @@
       "appleTeamId": "9VTP9D85PL",
       "supportsTablet": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Colophon utilise ta position pour centrer la carte sur les librairies et les rencontres près de chez toi."
       },
       "entitlements": {
         "com.apple.security.application-groups": [

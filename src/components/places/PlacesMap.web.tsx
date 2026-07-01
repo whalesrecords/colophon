@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Text, TextArea, XStack, YStack } from 'tamagui';
 
@@ -426,6 +427,10 @@ export function PlacesMap() {
   const [count, setCount] = useState(0);
   const [selected, setSelected] = useState<SelectedPlace | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  // `?locate=1` (from the librairie/café nudges) → geolocate + centre on the reader.
+  const params = useLocalSearchParams<{ locate?: string }>();
+  const locate = params.locate === '1' || params.locate === 'true';
 
   const render = useCallback(() => {
     const L = LRef.current;
@@ -541,6 +546,7 @@ export function PlacesMap() {
           maxZoom: 19,
         }).addTo(map);
         mapRef.current = map;
+        setReady(true);
         const res = await fetch('/lieux.geojson');
         const data = await res.json();
         featuresRef.current = data.features ?? [];
@@ -558,6 +564,34 @@ export function PlacesMap() {
   useEffect(() => {
     render();
   }, [render]);
+
+  // Geolocate + centre on the reader when opened via a nudge ("Librairies près de moi").
+  useEffect(() => {
+    if (!ready || !locate) return;
+    const L = LRef.current;
+    const map = mapRef.current;
+    const geo = typeof navigator !== 'undefined' ? navigator.geolocation : undefined;
+    if (!L || !map || !geo) return;
+    geo.getCurrentPosition(
+      (p) => {
+        const { latitude, longitude } = p.coords;
+        map.setView([latitude, longitude], 13);
+        L.circleMarker([latitude, longitude], {
+          radius: 8,
+          color: palette.prussian,
+          fillColor: palette.prussian,
+          fillOpacity: 0.9,
+          weight: 3,
+        })
+          .addTo(map)
+          .bindPopup('Tu es ici');
+      },
+      () => {
+        /* permission denied — stay on the France overview */
+      },
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  }, [ready, locate]);
 
   return (
     <YStack flex={1}>
