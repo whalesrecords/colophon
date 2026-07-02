@@ -549,20 +549,21 @@ export default function BookDetailScreen() {
             </YStack>
           ) : null}
 
-          {/* delete */}
+          {/* delete — small + de-emphasized (destructive shouldn't be prominent);
+              confirmDelete already asks for confirmation before the irreversible action. */}
           <Button
             onPress={confirmDelete}
             disabled={deleteItem.isPending}
-            marginTop="$2"
+            marginTop="$5"
+            alignSelf="center"
+            height={40}
+            paddingHorizontal="$4"
             backgroundColor="transparent"
-            borderColor="$signal"
-            borderWidth={1}
-            color="$signal"
-            borderRadius={12}
-            height={46}
+            color="$colorMuted"
             fontFamily="$body"
             fontWeight="600"
-            pressStyle={{ opacity: 0.85 }}
+            fontSize={13}
+            pressStyle={{ opacity: 0.65 }}
           >
             {deleteItem.isPending ? t('profile.deleting') : t('book.deleteThisBook')}
           </Button>
@@ -615,19 +616,23 @@ function EditableText({
   numeric?: boolean;
   onSave: (value: string) => void;
 }) {
+  const { t } = useT();
   const [local, setLocal] = useState(value ?? '');
   useEffect(() => {
     setLocal(value ?? '');
   }, [value]);
 
-  const commit = () => {
-    if ((value ?? '') !== local.trim()) onSave(local.trim());
+  // Explicit Valider/Annuler instead of a silent save-on-blur — the reader controls
+  // when a note/avis is committed, and can back out (UX guide: forms + liberté).
+  const dirty = local.trim() !== (value ?? '');
+  const save = () => {
+    if (dirty) onSave(local.trim());
   };
+  const cancel = () => setLocal(value ?? '');
 
   const shared = {
     value: local,
     onChangeText: setLocal,
-    onBlur: commit,
     placeholder,
     placeholderTextColor: '$concreteLight' as const,
     backgroundColor: '$background' as const,
@@ -654,6 +659,38 @@ function EditableText({
           keyboardType={numeric ? (Platform.OS === 'web' ? 'default' : 'decimal-pad') : 'default'}
         />
       )}
+      {dirty ? (
+        <XStack gap="$2" marginTop="$1.5">
+          <Button
+            onPress={save}
+            height={40}
+            paddingHorizontal="$4"
+            borderRadius={10}
+            backgroundColor="$accent"
+            color={palette.paper}
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={14}
+            pressStyle={{ opacity: 0.85 }}
+          >
+            {t('common.validate')}
+          </Button>
+          <Button
+            onPress={cancel}
+            height={40}
+            paddingHorizontal="$4"
+            borderRadius={10}
+            chromeless
+            color="$colorMuted"
+            fontFamily="$body"
+            fontWeight="600"
+            fontSize={14}
+            pressStyle={{ opacity: 0.7 }}
+          >
+            {t('common.cancel')}
+          </Button>
+        </XStack>
+      ) : null}
     </YStack>
   );
 }

@@ -487,6 +487,15 @@ list to send friends/family for Noël/anniversaires. Built on what already ships
 
 ## Retours terrain — bugs & demandes (à traiter, non fait)
 From a tester's Android phone (do NOT confuse with any shipped feature — these are open):
+- **DEMANDE — suppression de compte : plus de friction.** Aujourd'hui « Supprimer le compte »
+  (Réglages → DangerZone) ouvre déjà une **confirmation** (Alert / window.confirm), donc ce
+  n'est pas « un petit clic ». La testeuse veut plus dur → ajouter une **confirmation typée**
+  (taper « SUPPRIMER » pour activer), façon GitHub. Petit, App-Store-friendly.
+- **DEMANDE — voir OÙ est un emplacement quand on l'ajoute.** À l'ajout d'une **boîte à livres**
+  (`boites.tsx`, section « Emplacement » + « Utiliser ma position »), on ne voit pas où le point
+  tombe → ajouter un **mini-plan / une adresse** confirmant la position choisie (reverse-geocode
+  léger ou un aperçu de carte centré). (Ambigu : pourrait aussi viser le champ texte
+  `EMPLACEMENT` de l'exemplaire — mais là c'est du texte libre, rien à « voir ».)
 - **TODO demain — la page cadeau `/g/[token]` "ne fonctionne pas" sur le web déployé.**
   Le lien `colophon-three.vercel.app/g/<token>` sert bien le shell de l'app (200) mais la
   page ne rend pas. Cause la plus probable : **le déploiement Vercel n'a pas encore le bundle

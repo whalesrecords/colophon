@@ -140,6 +140,7 @@ export const fr = {
 
   // Common
   'common.cancel': 'Annuler',
+  'common.validate': 'Valider',
   'common.delete': 'Supprimer',
   'common.confirm': 'Confirmer',
   'common.see': 'Voir',
@@ -443,6 +444,7 @@ export const en: Partial<Record<TranslationKey, string>> = {
   'recap.shareText': 'My {year} in reading on Colophon: {books} books, {pages} pages read.',
 
   'common.cancel': 'Cancel',
+  'common.validate': 'Save',
   'common.delete': 'Delete',
   'common.confirm': 'Confirm',
   'common.see': 'See',
