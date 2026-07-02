@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body { margin:0; background:#E7E0D2; }</style>
+</helmet>
+
+<div data-drags-parent="1" style="position:absolute; left:0px; top:-170px; width:1700px; font-family:'Schibsted Grotesk',sans-serif;">
+  <div style="display:flex; align-items:center; gap:18px;">
+    <div style="width:60px; height:60px; border-radius:50%; background:#2A1E15; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; font-size:38px; color:#EFE6D3;">§</div>
+    <div>
+      <div style="font-family:'Spectral',serif; font-weight:600; font-size:52px; letter-spacing:-0.02em; color:#2A1E15;">Mon coin lecture</div>
+      <div style="font-size:24px; color:#6E6A62; margin-top:4px;">Un « Foodvisor » de la lecture : lisez pour nourrir votre bibliothèque, gagnez des lumens, rendez le coin douillet. Colette y dort.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= HERO ============================= -->
+<div style="position:absolute; left:0px; top:40px; width:416px;">
+  <div data-drags-parent="1" style="font-family:'Schibsted Grotesk'; font-size:22px; letter-spacing:0.1em; text-transform:uppercase; color:#8C8479; margin-bottom:16px;">L'écran principal</div>
+  <div data-screen-label="Jeu / Coin lecture" style="width:416px; background:#15110C; border-radius:54px; padding:13px; box-shadow:0 40px 90px rgba(42,30,21,0.34);">
+    <div style="width:390px; height:844px; border-radius:42px; overflow:hidden; position:relative; font-family:'Schibsted Grotesk',sans-serif; background:linear-gradient(180deg,#F3EAD6 0%,#ECDDC3 58%,#E4D2B4 100%);">
+      <!-- warm lamp glow -->
+      <div style="position:absolute; top:150px; right:30px; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(224,178,98,0.55), rgba(224,178,98,0) 66%); pointer-events:none;"></div>
+      <div style="position:absolute; top:40px; left:-40px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle, rgba(174,65,51,0.10), rgba(174,65,51,0) 70%); pointer-events:none;"></div>
+      <!-- status bar -->
+      <div style="position:relative; height:50px; display:flex; align-items:center; justify-content:space-between; padding:0 28px 0 30px;"><span style="font-size:15px; font-weight:600; color:#2A1E15;">9:41</span><div style="display:flex; gap:7px;"><span style="width:18px; height:11px; border:1.5px solid #2A1E15; border-radius:3px; opacity:0.85;"></span><span style="width:16px; height:11px; border-radius:2px; background:#2A1E15; opacity:0.85;"></span></div></div>
+      <!-- header -->
+      <div style="position:relative; padding:6px 24px 0; display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:#A98C5A;">Niveau 4</div>
+          <div style="font-family:'Spectral',serif; font-weight:600; font-size:27px; color:#2A1E15; margin-top:2px;">Bibliothèque</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:7px; background:#FBF6EC; border:1px solid #E7D9BD; border-radius:999px; padding:8px 14px; box-shadow:0 4px 12px rgba(42,30,21,0.08);">
+          <span style="color:#D8A23E; font-size:16px;">✦</span><span style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#2A1E15;">1 240</span>
+        </div>
+      </div>
+
+      <!-- ===== LA SCÈNE : étagère vivante ===== -->
+      <div style="position:absolute; left:22px; right:22px; top:172px; bottom:196px;">
+        <!-- cat + lamp + plant on top -->
+        <div style="position:absolute; left:0; right:0; top:-8px; height:118px; z-index:3;">
+          <!-- lamp -->
+          <div style="position:absolute; right:6px; bottom:8px; width:96px; height:110px;">
+            <div style="position:absolute; right:30px; bottom:0; width:46px; height:8px; border-radius:3px; background:#2A1E15;"></div>
+            <div style="position:absolute; right:51px; bottom:6px; width:5px; height:64px; background:#3A2A1C;"></div>
+            <div style="position:absolute; right:18px; top:0; width:72px; height:42px; background:linear-gradient(160deg,#C98F3A,#9A6A22); border-radius:40px 40px 8px 8px / 30px 30px 8px 8px; box-shadow:inset 0 -6px 10px rgba(0,0,0,0.18);"></div>
+            <div style="position:absolute; right:30px; top:38px; width:48px; height:20px; background:radial-gradient(ellipse at top, rgba(245,205,128,0.9), rgba(245,205,128,0) 72%);"></div>
+          </div>
+          <!-- light cone -->
+          <div style="position:absolute; right:0px; top:40px; width:150px; height:150px; background:linear-gradient(180deg, rgba(245,205,128,0.45), rgba(245,205,128,0)); clip-path:polygon(58% 0, 78% 0, 100% 100%, 22% 100%); pointer-events:none;"></div>
+          <!-- cushion + Colette -->
+          <div style="position:absolute; left:74px; bottom:6px; width:188px; height:30px; background:#E9C9A0; border-radius:16px; box-shadow:inset 0 3px 6px rgba(0,0,0,0.08);"></div>
+          <img src="mascotte/colette.png" alt="Colette" style="position:absolute; left:80px; bottom:14px; width:176px; height:auto; filter:drop-shadow(0 8px 10px rgba(42,30,21,0.18));"/>
+          <!-- small plant left -->
+          <div style="position:absolute; left:-4px; bottom:8px; width:34px; height:48px;">
+            <div style="position:absolute; bottom:0; left:6px; width:22px; height:20px; background:#B06A3C; border-radius:3px 3px 5px 5px;"></div>
+            <div style="position:absolute; bottom:16px; left:14px; width:7px; height:30px; background:#2D6B4E; border-radius:4px; transform:rotate(-12deg);"></div>
+            <div style="position:absolute; bottom:16px; left:14px; width:7px; height:34px; background:#2D6B4E; border-radius:4px;"></div>
+            <div style="position:absolute; bottom:16px; left:14px; width:7px; height:30px; background:#357C5A; border-radius:4px; transform:rotate(14deg);"></div>
+          </div>
+        </div>
+
+        <!-- bookcase body -->
+        <div style="position:absolute; left:0; right:0; top:104px; bottom:0; background:linear-gradient(180deg,#E7D7B9,#DFCDAA); border-radius:8px; border:3px solid #2A1E15; box-shadow:0 18px 30px rgba(42,30,21,0.18), inset 0 2px 0 rgba(255,255,255,0.25); overflow:hidden;">
+          <!-- top cap -->
+          <div style="height:12px; background:#2A1E15;"></div>
+
+          <!-- SHELF 1 (bien rempli) -->
+          <div style="position:relative; height:150px; padding:0 12px; display:flex; align-items:flex-end; gap:4px;">
+            <div style="width:20px; height:124px; background:#AE4133; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.18), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:16px; height:112px; background:#225F77; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.16), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:22px; height:130px; background:#2A1E15; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.10), inset -3px 0 rgba(0,0,0,0.2);"></div>
+            <div style="width:14px; height:104px; background:#B5832E; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.2), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:18px; height:120px; background:#2D6B4E; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.16), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:15px; height:108px; background:#C9B79A; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.3), inset -3px 0 rgba(0,0,0,0.12);"></div>
+            <div style="width:19px; height:126px; background:#AE4133; border-radius:2px 2px 0 0; transform:rotate(5deg); transform-origin:bottom right; box-shadow:inset 3px 0 rgba(255,255,255,0.18), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <!-- pile couchée -->
+            <div style="margin-left:6px; display:flex; flex-direction:column; gap:3px;">
+              <div style="width:64px; height:13px; background:#225F77; border-radius:2px; box-shadow:inset 0 2px rgba(255,255,255,0.18);"></div>
+              <div style="width:60px; height:13px; background:#B5832E; border-radius:2px; box-shadow:inset 0 2px rgba(255,255,255,0.2);"></div>
+              <div style="width:66px; height:13px; background:#2D6B4E; border-radius:2px; box-shadow:inset 0 2px rgba(255,255,255,0.18);"></div>
+            </div>
+          </div>
+          <div style="height:11px; background:#2A1E15; box-shadow:0 6px 10px rgba(42,30,21,0.18);"></div>
+
+          <!-- SHELF 2 (en cours de remplissage) -->
+          <div style="position:relative; height:150px; padding:0 12px; display:flex; align-items:flex-end; gap:4px;">
+            <div style="width:18px; height:118px; background:#2D6B4E; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.16), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:15px; height:104px; background:#AE4133; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.18), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:20px; height:124px; background:#B5832E; border-radius:2px 2px 0 0; box-shadow:inset 3px 0 rgba(255,255,255,0.2), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <div style="width:16px; height:110px; background:#225F77; border-radius:2px 2px 0 0; transform:rotate(-6deg); transform-origin:bottom left; box-shadow:inset 3px 0 rgba(255,255,255,0.16), inset -3px 0 rgba(0,0,0,0.16);"></div>
+            <!-- mug -->
+            <div style="margin-left:8px; position:relative; width:34px; height:30px;"><div style="position:absolute; bottom:0; width:30px; height:26px; background:#FBF6EC; border:2px solid #C9B79A; border-radius:4px 4px 8px 8px;"></div><div style="position:absolute; right:-6px; top:6px; width:12px; height:12px; border:3px solid #C9B79A; border-radius:50%;"></div><div style="position:absolute; left:7px; top:-6px; width:2px; height:8px; background:#C9B79A; opacity:0.6; border-radius:2px;"></div></div>
+            <!-- emplacement vide (à remplir) -->
+            <div style="flex:1; display:flex; align-items:flex-end; justify-content:center; height:100%;">
+              <div style="width:96px; height:80px; border:2px dashed #C2AE89; border-radius:6px; display:flex; align-items:center; justify-content:center; text-align:center; color:#A99571; font-size:11px; line-height:1.3; padding:6px; box-sizing:border-box;">à remplir<br>en lisant</div>
+            </div>
+          </div>
+          <div style="height:11px; background:#2A1E15;"></div>
+        </div>
+      </div>
+
+      <!-- ===== panneau bas ===== -->
+      <div style="position:absolute; left:0; right:0; bottom:0; background:#FBF6EC; border-top:1px solid #EAE2D1; border-radius:26px 26px 0 0; padding:20px 24px 30px; box-shadow:0 -10px 30px rgba(42,30,21,0.10);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><span style="font-size:12px; color:#8C8479;">Vers <span style="color:#2A1E15; font-weight:600;">Cabinet de lecture</span></span><span style="font-size:12px; color:#8C8479;">820 / 1000 ✦</span></div>
+        <div style="height:8px; border-radius:999px; background:#E4DAC7; margin-top:8px; overflow:hidden;"><div style="width:82%; height:100%; background:linear-gradient(90deg,#B5832E,#D8A23E);"></div></div>
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <div style="flex:1; height:54px; border-radius:16px; background:#2A1E15; display:flex; align-items:center; justify-content:center; gap:8px; color:#EFE6D3; font-size:16px; font-weight:700;">J'ai lu aujourd'hui <span style="color:#E0B262;">+18 ✦</span></div>
+          <div style="width:54px; height:54px; border-radius:16px; background:#FBF6EC; border:1.5px solid #E7D9BD; display:flex; align-items:center; justify-content:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2A1E15" stroke-width="1.8"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 11v8h14v-8"/></svg></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12.5px; color:#6E6A62;"><span>Colette ronronne · série 12 j</span><span>32 p. aujourd'hui</span></div>
+      </div>
+
+      <!-- tab bar mini -->
+      <div style="position:absolute; bottom:0; left:0; right:0; height:0;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= BOUTIQUE ============================= -->
+<div style="position:absolute; left:470px; top:40px; width:416px;">
+  <div data-drags-parent="1" style="font-family:'Schibsted Grotesk'; font-size:22px; letter-spacing:0.1em; text-transform:uppercase; color:#8C8479; margin-bottom:16px;">La boutique</div>
+  <div data-screen-label="Jeu / Boutique" style="width:416px; background:#15110C; border-radius:54px; padding:13px; box-shadow:0 40px 90px rgba(42,30,21,0.34);">
+    <div style="width:390px; height:844px; border-radius:42px; overflow:hidden; position:relative; font-family:'Schibsted Grotesk',sans-serif; background:#EFE6D3;">
+      <div style="height:50px; display:flex; align-items:center; justify-content:space-between; padding:0 28px 0 30px;"><span style="font-size:15px; font-weight:600; color:#2A1E15;">9:41</span><div style="display:flex; gap:7px;"><span style="width:18px; height:11px; border:1.5px solid #2A1E15; border-radius:3px; opacity:0.85;"></span><span style="width:16px; height:11px; border-radius:2px; background:#2A1E15; opacity:0.85;"></span></div></div>
+      <div style="position:absolute; top:50px; left:0; right:0; bottom:0; overflow:hidden; padding:8px 22px 0;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div><div style="font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:#A98C5A;">Boutique</div><div style="font-family:'Spectral',serif; font-weight:600; font-size:27px; color:#2A1E15; margin-top:2px;">Rendez-le douillet</div></div>
+          <div style="display:flex; align-items:center; gap:7px; background:#FBF6EC; border:1px solid #E7D9BD; border-radius:999px; padding:8px 14px;"><span style="color:#D8A23E; font-size:16px;">✦</span><span style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#2A1E15;">1 240</span></div>
+        </div>
+
+        <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15; margin-top:22px;">Lumières</div>
+        <div style="display:flex; gap:12px; margin-top:12px;">
+          <!-- lampe ambrée (possédée) -->
+          <div style="flex:1; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:14px; text-align:center;">
+            <div style="height:64px; display:flex; align-items:flex-end; justify-content:center; position:relative;">
+              <div style="position:absolute; top:0; width:80px; height:60px; border-radius:50%; background:radial-gradient(circle,rgba(224,178,98,0.5),rgba(224,178,98,0) 70%);"></div>
+              <div style="position:relative; width:44px; height:24px; background:linear-gradient(160deg,#C98F3A,#9A6A22); border-radius:24px 24px 5px 5px; "></div>
+              <div style="position:absolute; bottom:0; width:26px; height:6px; border-radius:3px; background:#2A1E15;"></div><div style="position:absolute; bottom:4px; width:4px; height:34px; background:#3A2A1C;"></div>
+            </div>
+            <div style="font-size:13px; font-weight:600; color:#2A1E15; margin-top:8px;">Lampe ambrée</div>
+            <div style="margin-top:8px; font-size:12px; font-weight:700; color:#2D6B4E;">✓ Installée</div>
+          </div>
+          <!-- lampe banquier -->
+          <div style="flex:1; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:14px; text-align:center;">
+            <div style="height:64px; display:flex; align-items:flex-end; justify-content:center;">
+              <div style="position:relative; width:46px; height:50px;"><div style="position:absolute; top:6px; left:3px; width:40px; height:18px; background:#2D6B4E; border-radius:20px 20px 4px 4px;"></div><div style="position:absolute; bottom:0; left:18px; width:10px; height:40px; background:#B5832E;"></div><div style="position:absolute; bottom:0; left:8px; width:30px; height:6px; border-radius:3px; background:#9A6A22;"></div></div>
+            </div>
+            <div style="font-size:13px; font-weight:600; color:#2A1E15; margin-top:8px;">Lampe de banquier</div>
+            <div style="margin-top:8px; font-size:13px; font-weight:700; color:#2A1E15;"><span style="color:#D8A23E;">✦</span> 240</div>
+          </div>
+          <!-- guirlande -->
+          <div style="flex:1; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:14px; text-align:center;">
+            <div style="height:64px; display:flex; align-items:center; justify-content:center;">
+              <svg width="58" height="40" viewBox="0 0 58 40"><path d="M2 6 Q15 26 29 8 Q43 26 56 6" fill="none" stroke="#9A8A6A" stroke-width="2"/><circle cx="11" cy="17" r="4" fill="#E0B262"/><circle cx="29" cy="19" r="4" fill="#D8A23E"/><circle cx="47" cy="17" r="4" fill="#E0B262"/><circle cx="20" cy="9" r="3.4" fill="#E8C079"/><circle cx="38" cy="9" r="3.4" fill="#E8C079"/></svg>
+            </div>
+            <div style="font-size:13px; font-weight:600; color:#2A1E15; margin-top:8px;">Guirlande douce</div>
+            <div style="margin-top:8px; font-size:13px; font-weight:700; color:#2A1E15;"><span style="color:#D8A23E;">✦</span> 70</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15; margin-top:22px;">Confort</div>
+        <div style="display:flex; gap:12px; margin-top:12px;">
+          <!-- coussin de Colette -->
+          <div style="flex:1; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:14px; text-align:center;">
+            <div style="height:58px; display:flex; align-items:center; justify-content:center;"><div style="width:62px; height:34px; background:#AE4133; border-radius:18px; box-shadow:inset 0 -6px 10px rgba(0,0,0,0.15); position:relative;"><div style="position:absolute; inset:6px; border:1.5px dashed rgba(255,255,255,0.35); border-radius:12px;"></div></div></div>
+            <div style="font-size:13px; font-weight:600; color:#2A1E15; margin-top:8px;">Coussin de Colette</div>
+            <div style="margin-top:8px; font-size:13px; font-weight:700; color:#2A1E15;"><span style="color:#D8A23E;">✦</span> 110</div>
+          </div>
+          <!-- plante -->
+          <div style="flex:1; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:14px; text-align:center;">
+            <div style="height:58px; display:flex; align-items:flex-end; justify-content:center;"><div style="position:relative; width:40px; height:52px;"><div style="position:absolute; bottom:0; left:8px; width:24px; height:22px; background:#B06A3C; border-radius:3px 3px 6px 6px;"></div><div style="position:absolute; bottom:18px; left:17px; width:7px; height:34px; background:#2D6B4E; border-radius:4px;"></div><div style="position:absolute; bottom:18px; left:17px; width:7px; height:30px; background:#357C5A; border-radius:4px; transform:rotate(-22deg); transform-origin:bottom;"></div><div style="position:absolute; bottom:18px; left:17px; width:7px; height:30px; background:#2D6B4E; border-radius:4px; transform:rotate(22deg); transform-origin:bottom;"></div></div></div>
+            <div style="font-size:13px; font-weight:600; color:#2A1E15; margin-top:8px;">Plante grimpante</div>
+            <div style="margin-top:8px; font-size:13px; font-weight:700; color:#2A1E15;"><span style="color:#D8A23E;">✦</span> 90</div>
+          </div>
+          <!-- tapis -->
+          <div style="flex:1; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:14px; text-align:center;">
+            <div style="height:58px; display:flex; align-items:center; justify-content:center;"><div style="width:64px; height:30px; border-radius:6px; background:repeating-linear-gradient(90deg,#AE4133 0 9px,#B5832E 9px 18px,#225F77 18px 27px); box-shadow:inset 0 0 0 3px #EFE6D3, 0 4px 8px rgba(42,30,21,0.12);"></div></div>
+            <div style="font-size:13px; font-weight:600; color:#2A1E15; margin-top:8px;">Tapis tissé</div>
+            <div style="margin-top:8px; font-size:13px; font-weight:700; color:#2A1E15;"><span style="color:#D8A23E;">✦</span> 160</div>
+          </div>
+        </div>
+
+        <div style="margin-top:22px; background:#2A1E15; border-radius:18px; padding:18px 20px; display:flex; align-items:center; gap:16px;">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#E0B262" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <div style="flex:1;"><div style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#EFE6D3;">Nouvelle étagère</div><div style="font-size:12.5px; color:#B7AF9C; margin-top:2px;">+12 emplacements de livres</div></div>
+          <div style="background:#E0B262; color:#2A1E15; font-size:13px; font-weight:700; padding:10px 16px; border-radius:999px; white-space:nowrap;">✦ 500</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= DÉFIS ============================= -->
+<div style="position:absolute; left:940px; top:40px; width:416px;">
+  <div data-drags-parent="1" style="font-family:'Schibsted Grotesk'; font-size:22px; letter-spacing:0.1em; text-transform:uppercase; color:#8C8479; margin-bottom:16px;">Les défis</div>
+  <div data-screen-label="Jeu / Défis" style="width:416px; background:#15110C; border-radius:54px; padding:13px; box-shadow:0 40px 90px rgba(42,30,21,0.34);">
+    <div style="width:390px; height:844px; border-radius:42px; overflow:hidden; position:relative; font-family:'Schibsted Grotesk',sans-serif; background:#EFE6D3;">
+      <div style="height:50px; display:flex; align-items:center; justify-content:space-between; padding:0 28px 0 30px;"><span style="font-size:15px; font-weight:600; color:#2A1E15;">9:41</span><div style="display:flex; gap:7px;"><span style="width:18px; height:11px; border:1.5px solid #2A1E15; border-radius:3px; opacity:0.85;"></span><span style="width:16px; height:11px; border-radius:2px; background:#2A1E15; opacity:0.85;"></span></div></div>
+      <div style="position:absolute; top:50px; left:0; right:0; bottom:0; overflow:hidden; padding:8px 22px 0;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:#A98C5A;">Défis</div>
+        <div style="font-family:'Spectral',serif; font-weight:600; font-size:27px; color:#2A1E15; margin-top:2px;">Nourrissez la biblio</div>
+        <div style="font-size:13px; color:#6E6A62; margin-top:6px; line-height:1.45;">Relevez des défis pour gagner des lumens, des livres et de quoi décorer.</div>
+
+        <div style="display:flex; flex-direction:column; gap:14px; margin-top:20px;">
+          <!-- défi 1 -->
+          <div style="background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#2A1E15;">7 jours d'affilée</div><span style="font-size:12px; font-weight:700; color:#AE4133; background:rgba(174,65,51,0.1); padding:5px 10px; border-radius:999px; white-space:nowrap;">Lampe ambrée</span></div>
+            <div style="height:8px; border-radius:999px; background:#E4DAC7; margin-top:14px; overflow:hidden;"><div style="width:71%; height:100%; background:#AE4133;"></div></div>
+            <div style="font-size:12px; color:#8C8479; margin-top:7px;">5 / 7 jours</div>
+          </div>
+          <!-- défi 2 -->
+          <div style="background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#2A1E15;">Terminer 3 essais</div><span style="font-size:12px; font-weight:700; color:#225F77; background:rgba(34,95,119,0.1); padding:5px 10px; border-radius:999px; white-space:nowrap;">+ 1 étagère</span></div>
+            <div style="height:8px; border-radius:999px; background:#E4DAC7; margin-top:14px; overflow:hidden;"><div style="width:66%; height:100%; background:#225F77;"></div></div>
+            <div style="font-size:12px; color:#8C8479; margin-top:7px;">2 / 3 essais</div>
+          </div>
+          <!-- défi 3 -->
+          <div style="background:#FBF6EC; border:1px solid #EAE2D1; border-radius:18px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#2A1E15;">500 pages ce mois</div><span style="font-size:12px; font-weight:700; color:#2D6B4E; background:rgba(45,107,78,0.12); padding:5px 10px; border-radius:999px; white-space:nowrap;">+ 200 ✦</span></div>
+            <div style="height:8px; border-radius:999px; background:#E4DAC7; margin-top:14px; overflow:hidden;"><div style="width:62%; height:100%; background:#2D6B4E;"></div></div>
+            <div style="font-size:12px; color:#8C8479; margin-top:7px;">312 / 500 pages</div>
+          </div>
+          <!-- défi 4 (terminé) -->
+          <div style="background:#FBF6EC; border:1.5px solid #B5832E; border-radius:18px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-family:'Spectral',serif; font-weight:600; font-size:18px; color:#2A1E15;">Ajouter 5 livres</div><span style="font-size:12px; font-weight:700; color:#B5832E; background:rgba(181,131,46,0.14); padding:5px 10px; border-radius:999px; white-space:nowrap;">Coussin de Colette</span></div>
+            <div style="height:8px; border-radius:999px; background:#E4DAC7; margin-top:14px; overflow:hidden;"><div style="width:100%; height:100%; background:#B5832E;"></div></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;"><span style="font-size:12px; color:#8C8479;">5 / 5 livres</span><span style="background:#2A1E15; color:#EFE6D3; font-size:13px; font-weight:700; padding:9px 18px; border-radius:999px;">Récupérer</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= ÉVOLUTION ============================= -->
+<div data-drags-parent="1" style="position:absolute; left:1410px; top:40px; width:360px; font-family:'Schibsted Grotesk'; font-size:22px; letter-spacing:0.1em; text-transform:uppercase; color:#8C8479;">L'évolution du coin</div>
+
+<!-- Jour 1 -->
+<div style="position:absolute; left:1410px; top:88px; width:360px;">
+  <div data-screen-label="Évolution / Jour 1" style="width:360px; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:20px; box-shadow:0 14px 36px rgba(42,30,21,0.12); overflow:hidden; font-family:'Schibsted Grotesk',sans-serif;">
+    <div style="height:188px; position:relative; background:linear-gradient(180deg,#ECE3D2,#E3D6BC); overflow:hidden;">
+      <div style="position:absolute; left:24px; right:24px; bottom:0; height:120px; background:linear-gradient(180deg,#E7D7B9,#DFCDAA); border:3px solid #2A1E15; border-bottom:none; border-radius:6px 6px 0 0;">
+        <div style="height:9px; background:#2A1E15;"></div>
+        <div style="padding:0 12px; height:90px; display:flex; align-items:flex-end; gap:4px;">
+          <div style="width:13px; height:60px; background:#AE4133; border-radius:2px 2px 0 0; box-shadow:inset 2px 0 rgba(255,255,255,0.16),inset -2px 0 rgba(0,0,0,0.16);"></div>
+          <div style="width:11px; height:52px; background:#225F77; border-radius:2px 2px 0 0; box-shadow:inset 2px 0 rgba(255,255,255,0.16),inset -2px 0 rgba(0,0,0,0.16);"></div>
+          <div style="width:12px; height:64px; background:#2D6B4E; border-radius:2px 2px 0 0; box-shadow:inset 2px 0 rgba(255,255,255,0.16),inset -2px 0 rgba(0,0,0,0.16);"></div>
+          <div style="flex:1; display:flex; align-items:flex-end; justify-content:center; height:100%;"><div style="width:150px; height:60px; border:2px dashed #C2AE89; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#A99571; font-size:11px;">tant de place…</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;"><div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#A98C5A;">Jour 1 · Pile à lire</div><div style="font-size:13.5px; color:#3A362F; margin-top:5px; line-height:1.45;">Une étagère nue, trois livres. Tout est à construire.</div></div>
+  </div>
+</div>
+
+<!-- Semaine 4 -->
+<div style="position:absolute; left:1410px; top:404px; width:360px;">
+  <div data-screen-label="Évolution / Semaine 4" style="width:360px; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:20px; box-shadow:0 14px 36px rgba(42,30,21,0.12); overflow:hidden; font-family:'Schibsted Grotesk',sans-serif;">
+    <div style="height:188px; position:relative; background:linear-gradient(180deg,#F1E6CF,#E7D6B6); overflow:hidden;">
+      <div style="position:absolute; top:6px; right:30px; width:170px; height:150px; border-radius:50%; background:radial-gradient(circle,rgba(224,178,98,0.4),rgba(224,178,98,0) 68%);"></div>
+      <div style="position:absolute; right:36px; top:34px; width:46px; height:30px;"><div style="position:absolute; right:8px; top:0; width:40px; height:20px; background:linear-gradient(160deg,#C98F3A,#9A6A22); border-radius:22px 22px 5px 5px;"></div><div style="position:absolute; right:26px; top:18px; width:4px; height:22px; background:#3A2A1C;"></div></div>
+      <div style="position:absolute; left:24px; right:24px; bottom:0; height:130px; background:linear-gradient(180deg,#E7D7B9,#DFCDAA); border:3px solid #2A1E15; border-bottom:none; border-radius:6px 6px 0 0;">
+        <div style="height:9px; background:#2A1E15;"></div>
+        <div style="padding:0 12px; height:100px; display:flex; align-items:flex-end; gap:4px;">
+          <div style="width:13px; height:72px; background:#AE4133; border-radius:2px 2px 0 0; box-shadow:inset 2px 0 rgba(255,255,255,0.16),inset -2px 0 rgba(0,0,0,0.16);"></div>
+          <div style="width:11px; height:60px; background:#225F77; border-radius:2px 2px 0 0;"></div>
+          <div style="width:14px; height:80px; background:#2A1E15; border-radius:2px 2px 0 0;"></div>
+          <div style="width:11px; height:64px; background:#B5832E; border-radius:2px 2px 0 0;"></div>
+          <div style="width:13px; height:74px; background:#2D6B4E; border-radius:2px 2px 0 0;"></div>
+          <div style="width:11px; height:58px; background:#C9B79A; border-radius:2px 2px 0 0;"></div>
+          <div style="width:13px; height:70px; background:#AE4133; border-radius:2px 2px 0 0; transform:rotate(6deg); transform-origin:bottom right;"></div>
+          <div style="position:relative; width:26px; height:38px; margin-left:4px;"><div style="position:absolute; bottom:0; left:5px; width:16px; height:15px; background:#B06A3C; border-radius:3px;"></div><div style="position:absolute; bottom:12px; left:11px; width:5px; height:24px; background:#2D6B4E; border-radius:3px;"></div><div style="position:absolute; bottom:12px; left:11px; width:5px; height:20px; background:#357C5A; border-radius:3px; transform:rotate(-20deg); transform-origin:bottom;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;"><div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#A98C5A;">Semaine 4 · Coin lecture</div><div style="font-size:13.5px; color:#3A362F; margin-top:5px; line-height:1.45;">L'étagère se garnit, la lampe s'allume, une plante arrive.</div></div>
+  </div>
+</div>
+
+<!-- Mois 3 -->
+<div style="position:absolute; left:1410px; top:720px; width:360px;">
+  <div data-screen-label="Évolution / Mois 3" style="width:360px; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:20px; box-shadow:0 14px 36px rgba(42,30,21,0.12); overflow:hidden; font-family:'Schibsted Grotesk',sans-serif;">
+    <div style="height:188px; position:relative; background:linear-gradient(180deg,#F5EAD0,#EBD9B5); overflow:hidden;">
+      <div style="position:absolute; top:-10px; right:20px; width:240px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(224,178,98,0.55),rgba(224,178,98,0) 66%);"></div>
+      <img src="mascotte/colette.png" alt="Colette" style="position:absolute; left:96px; top:20px; width:120px; height:auto; z-index:3; filter:drop-shadow(0 6px 8px rgba(42,30,21,0.18));"/>
+      <div style="position:absolute; right:34px; top:30px; width:46px; height:34px; z-index:3;"><div style="position:absolute; right:8px; top:0; width:40px; height:20px; background:linear-gradient(160deg,#C98F3A,#9A6A22); border-radius:22px 22px 5px 5px;"></div><div style="position:absolute; right:26px; top:18px; width:4px; height:24px; background:#3A2A1C;"></div></div>
+      <div style="position:absolute; left:24px; right:24px; bottom:0; height:120px; background:linear-gradient(180deg,#E7D7B9,#DFCDAA); border:3px solid #2A1E15; border-bottom:none; border-radius:6px 6px 0 0; z-index:2;">
+        <div style="height:8px; background:#2A1E15;"></div>
+        <div style="padding:0 10px; height:92px; display:flex; align-items:flex-end; gap:3px;">
+          <div style="width:11px; height:74px; background:#AE4133; border-radius:2px 2px 0 0;"></div>
+          <div style="width:10px; height:64px; background:#225F77; border-radius:2px 2px 0 0;"></div>
+          <div style="width:12px; height:80px; background:#2A1E15; border-radius:2px 2px 0 0;"></div>
+          <div style="width:9px; height:58px; background:#B5832E; border-radius:2px 2px 0 0;"></div>
+          <div style="width:12px; height:76px; background:#2D6B4E; border-radius:2px 2px 0 0;"></div>
+          <div style="width:10px; height:62px; background:#C9B79A; border-radius:2px 2px 0 0;"></div>
+          <div style="width:11px; height:72px; background:#AE4133; border-radius:2px 2px 0 0;"></div>
+          <div style="width:10px; height:66px; background:#225F77; border-radius:2px 2px 0 0;"></div>
+          <div style="width:12px; height:78px; background:#B5832E; border-radius:2px 2px 0 0;"></div>
+          <div style="display:flex; flex-direction:column; gap:2px; margin-left:3px;"><div style="width:40px; height:9px; background:#2D6B4E; border-radius:2px;"></div><div style="width:38px; height:9px; background:#AE4133; border-radius:2px;"></div><div style="width:42px; height:9px; background:#B5832E; border-radius:2px;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;"><div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#A98C5A;">Mois 3 · Cabinet de lecture</div><div style="font-size:13.5px; color:#3A362F; margin-top:5px; line-height:1.45;">Plein, chaud, vivant — et Colette qui ronronne au sommet.</div></div>
+  </div>
+</div>
+
+<!-- ============================= NOTE / BOUCLE ============================= -->
+<div data-drags-parent="1" style="position:absolute; left:0px; top:1010px; width:1356px; font-family:'Schibsted Grotesk',sans-serif;">
+  <div style="background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); padding:34px 40px;">
+    <div style="font-family:'Spectral',serif; font-weight:600; font-size:28px; color:#2A1E15;">La boucle de jeu</div>
+    <div style="display:flex; gap:32px; margin-top:24px;">
+      <div style="flex:1;"><div style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#AE4133;">1 · Lire nourrit la biblio</div><div style="font-size:14px; line-height:1.55; color:#3A362F; margin-top:6px;">Chaque livre terminé s'ajoute physiquement à l'étagère (à sa tranche de couleur). On voit sa bibliothèque grandir, comme on remplit une vraie étagère.</div></div>
+      <div style="flex:1;"><div style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#225F77;">2 · Lire rapporte des lumens</div><div style="font-size:14px; line-height:1.55; color:#3A362F; margin-top:6px;">Pages, séries et défis donnent des lumens. On les <em>mise</em> sur des défis pour doubler la mise — ou on les garde pour la boutique.</div></div>
+      <div style="flex:1;"><div style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#B5832E;">3 · On rend le coin douillet</div><div style="font-size:14px; line-height:1.55; color:#3A362F; margin-top:6px;">Lampes, plantes, tapis, coussin de Colette… Chaque achat éclaire et réchauffe le coin. Le niveau monte, de « Pile à lire » à « Cabinet de lecture ».</div></div>
+      <div style="flex:1;"><div style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#2D6B4E;">4 · Colette veille</div><div style="font-size:14px; line-height:1.55; color:#3A362F; margin-top:6px;">La mascotte (ton illustration au trait) vit dans le coin : elle ronronne quand la série tient, s'étire, dort. Une présence calme qui récompense la régularité.</div></div>
+    </div>
+    <div style="margin-top:24px; padding-top:18px; border-top:1px solid #EAE2D1; font-size:13px; color:#8C8479; line-height:1.5;">Colette est rendue à partir de l'illustration « chat endormi » déjà dans ton projet (mascotte/colette.png) — et tu as aussi une version <em>animée</em> (60 images) pour un widget « vivant ». Dis-moi si on pousse vers un prototype cliquable.</div>
+  </div>
+</div></x-dc>
+</body>
+</html>

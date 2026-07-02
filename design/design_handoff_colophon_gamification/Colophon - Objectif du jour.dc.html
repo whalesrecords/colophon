@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body { margin:0; background:#E7E0D2; }</style>
+</helmet>
+
+<div data-drags-parent="1" style="position:absolute; left:0px; top:-150px; width:1500px; font-family:'Schibsted Grotesk',sans-serif;">
+  <div style="display:flex; align-items:center; gap:18px;">
+    <div style="width:60px; height:60px; border-radius:50%; background:#2A1E15; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; font-size:38px; color:#EFE6D3;">§</div>
+    <div>
+      <div style="font-family:'Spectral',serif; font-weight:600; font-size:52px; letter-spacing:-0.02em; color:#2A1E15;">Objectif du jour — au propre</div>
+      <div style="font-size:24px; color:#6E6A62; margin-top:4px;">Une carte structurée : héro de progression, puis trois rythmes (semaine · mois · année), puis la cible.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== VERSION LARGE ===================== -->
+<div style="position:absolute; left:0px; top:40px; width:940px;">
+  <div data-drags-parent="1" style="font-family:'Schibsted Grotesk'; font-size:22px; letter-spacing:0.1em; text-transform:uppercase; color:#8C8479; margin-bottom:16px;">Version large · web / tablette</div>
+  <div data-screen-label="Objectif / Large" style="width:940px; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:28px; box-shadow:0 18px 50px rgba(42,30,21,0.12); box-sizing:border-box; padding:40px; font-family:'Schibsted Grotesk',sans-serif;">
+
+    <!-- header -->
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:13px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Objectif du jour</div>
+      <div style="display:flex; align-items:center; gap:7px; background:#F1E7D3; border:1px solid #E6D7B8; border-radius:999px; padding:8px 15px;">
+        <svg width="14" height="16" viewBox="0 0 14 16" fill="#BE5C28"><path d="M7 0c.5 2.5-1.5 3.5-2.8 5C2.8 6.6 2 8.3 2 10c0 2.8 2.2 5 5 5s5-2.2 5-5c0-2-1-3.4-2.2-4.8.2 1.2-.4 2-1.3 2-.8 0-1.2-.6-1.2-1.5C9.3 3.4 8.2 1.6 7 0z"/></svg>
+        <span style="font-size:13px; font-weight:600; color:#2A1E15;">série de 5 jours</span>
+      </div>
+    </div>
+
+    <!-- hero -->
+    <div style="display:flex; align-items:center; gap:30px; margin-top:24px;">
+      <svg width="132" height="132" viewBox="0 0 132 132" style="flex-shrink:0;">
+        <circle cx="66" cy="66" r="58" fill="none" stroke="#E4DAC7" stroke-width="11"/>
+        <circle cx="66" cy="66" r="58" fill="none" stroke="#2D6B4E" stroke-width="11" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="0" transform="rotate(-90 66 66)"/>
+        <text x="66" y="75" text-anchor="middle" font-family="Spectral, serif" font-weight="600" font-size="30" fill="#2A1E15">100%</text>
+      </svg>
+      <div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#8C8479;">Aujourd'hui · mar. 30 juin</div>
+        <div style="display:flex; align-items:baseline; gap:10px; margin-top:8px;">
+          <span style="font-family:'Spectral',serif; font-weight:600; font-size:58px; line-height:0.9; color:#2A1E15;">64</span>
+          <span style="font-size:22px; color:#8C8479;">/ 50 pages</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2D6B4E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          <span style="font-size:15px; font-weight:600; color:#2D6B4E;">Objectif atteint, bravo.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:1px; background:#EAE2D1; margin:28px 0;"></div>
+
+    <!-- semaine + juin -->
+    <div style="display:flex; gap:50px;">
+      <div style="flex:1;">
+        <div style="font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Cette semaine</div>
+        <div style="display:flex; justify-content:space-between; max-width:440px; margin-top:18px;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; background:#2D6B4E;"></span><span style="font-size:12px; font-weight:600; color:#2A1E15;">L</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; background:#2D6B4E; outline:2.5px solid #2A1E15; outline-offset:2px;"></span><span style="font-size:12px; font-weight:600; color:#2A1E15;">M</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:12px; color:#8C8479;">M</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:12px; color:#8C8479;">J</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:12px; color:#8C8479;">V</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:12px; color:#8C8479;">S</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:12px; color:#8C8479;">D</span></div>
+        </div>
+        <div style="font-size:13px; color:#6E6A62; margin-top:18px;">Lundi et aujourd'hui validés. <span style="color:#2A1E15;">2 jours cette semaine.</span></div>
+      </div>
+      <div style="width:230px; flex-shrink:0;">
+        <div style="font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Juin</div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:18px; justify-items:center;">
+          <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span>
+          <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span>
+          <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span>
+          <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #DDD0B5;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2D6B4E; outline:2.5px solid #2A1E15; outline-offset:1.5px;"></span>
+          <span style="width:22px;height:22px;border-radius:50%;border:1.5px dashed #D8CAAE;box-sizing:border-box;"></span><span style="width:22px;height:22px;border-radius:50%;border:1.5px dashed #D8CAAE;box-sizing:border-box;"></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:1px; background:#EAE2D1; margin:28px 0;"></div>
+
+    <!-- année -->
+    <div style="font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Cette année · 2026</div>
+    <div style="display:flex; justify-content:space-between; margin-top:20px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="33" transform="rotate(-90 18 18)"/></svg><span style="font-size:12px; color:#8C8479;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="47" transform="rotate(-90 18 18)"/></svg><span style="font-size:12px; color:#8C8479;">F</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="19" transform="rotate(-90 18 18)"/></svg><span style="font-size:12px; color:#8C8479;">M</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="38" transform="rotate(-90 18 18)"/></svg><span style="font-size:12px; color:#8C8479;">A</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="9" transform="rotate(-90 18 18)"/></svg><span style="font-size:12px; color:#8C8479;">M</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="61" transform="rotate(-90 18 18)"/></svg><span style="font-size:12px; font-weight:700; color:#2A1E15;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/></svg><span style="font-size:12px; color:#8C8479;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/></svg><span style="font-size:12px; color:#8C8479;">A</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/></svg><span style="font-size:12px; color:#8C8479;">S</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/></svg><span style="font-size:12px; color:#8C8479;">O</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/></svg><span style="font-size:12px; color:#8C8479;">N</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:9px;"><svg width="40" height="40" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="3.4"/></svg><span style="font-size:12px; color:#8C8479;">D</span></div>
+    </div>
+
+    <div style="height:1px; background:#EAE2D1; margin:28px 0;"></div>
+
+    <!-- cible -->
+    <div style="display:flex; align-items:center; gap:16px;">
+      <span style="font-size:13px; font-weight:600; color:#6E6A62;">Cible quotidienne</span>
+      <div style="display:flex; gap:10px;">
+        <div style="display:flex; align-items:baseline; gap:5px; background:#EFE6D3; border:1px solid #E2D4B8; border-radius:999px; padding:11px 20px;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#2A1E15;">10</span><span style="font-size:12px; color:#8C8479;">pages</span></div>
+        <div style="display:flex; align-items:baseline; gap:5px; background:#EFE6D3; border:1px solid #E2D4B8; border-radius:999px; padding:11px 20px;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#2A1E15;">20</span><span style="font-size:12px; color:#8C8479;">pages</span></div>
+        <div style="display:flex; align-items:baseline; gap:5px; background:#EFE6D3; border:1px solid #E2D4B8; border-radius:999px; padding:11px 20px;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#2A1E15;">30</span><span style="font-size:12px; color:#8C8479;">pages</span></div>
+        <div style="display:flex; align-items:baseline; gap:5px; background:#2A1E15; border:1px solid #2A1E15; border-radius:999px; padding:11px 20px;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#EFE6D3;">50</span><span style="font-size:12px; color:rgba(239,230,211,0.7);">pages</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== VERSION MOBILE ===================== -->
+<div style="position:absolute; left:1000px; top:40px; width:390px;">
+  <div data-drags-parent="1" style="font-family:'Schibsted Grotesk'; font-size:22px; letter-spacing:0.1em; text-transform:uppercase; color:#8C8479; margin-bottom:16px;">Version mobile</div>
+  <div data-screen-label="Objectif / Mobile" style="width:390px; background:#FBF6EC; border:1px solid #EAE2D1; border-radius:26px; box-shadow:0 18px 50px rgba(42,30,21,0.12); box-sizing:border-box; padding:26px; font-family:'Schibsted Grotesk',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Objectif du jour</div>
+      <div style="display:flex; align-items:center; gap:6px; background:#F1E7D3; border:1px solid #E6D7B8; border-radius:999px; padding:6px 12px;">
+        <svg width="12" height="14" viewBox="0 0 14 16" fill="#BE5C28"><path d="M7 0c.5 2.5-1.5 3.5-2.8 5C2.8 6.6 2 8.3 2 10c0 2.8 2.2 5 5 5s5-2.2 5-5c0-2-1-3.4-2.2-4.8.2 1.2-.4 2-1.3 2-.8 0-1.2-.6-1.2-1.5C9.3 3.4 8.2 1.6 7 0z"/></svg>
+        <span style="font-size:12px; font-weight:600; color:#2A1E15;">5 j</span>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:20px; margin-top:20px;">
+      <svg width="104" height="104" viewBox="0 0 132 132" style="flex-shrink:0;">
+        <circle cx="66" cy="66" r="58" fill="none" stroke="#E4DAC7" stroke-width="11"/>
+        <circle cx="66" cy="66" r="58" fill="none" stroke="#2D6B4E" stroke-width="11" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="0" transform="rotate(-90 66 66)"/>
+        <text x="66" y="76" text-anchor="middle" font-family="Spectral, serif" font-weight="600" font-size="30" fill="#2A1E15">100%</text>
+      </svg>
+      <div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#8C8479;">Mar. 30 juin</div>
+        <div style="display:flex; align-items:baseline; gap:7px; margin-top:6px;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:44px; line-height:0.9; color:#2A1E15;">64</span><span style="font-size:16px; color:#8C8479;">/ 50 p</span></div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2D6B4E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span style="font-size:13px; font-weight:600; color:#2D6B4E;">Objectif atteint</span></div>
+      </div>
+    </div>
+
+    <div style="height:1px; background:#EAE2D1; margin:22px 0;"></div>
+
+    <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Cette semaine</div>
+    <div style="display:flex; justify-content:space-between; margin-top:14px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; background:#2D6B4E;"></span><span style="font-size:11px; font-weight:600; color:#2A1E15;">L</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; background:#2D6B4E; outline:2.5px solid #2A1E15; outline-offset:2px;"></span><span style="font-size:11px; font-weight:600; color:#2A1E15;">M</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:11px; color:#8C8479;">M</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:11px; color:#8C8479;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:11px; color:#8C8479;">V</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:11px; color:#8C8479;">S</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #DDD0B5; box-sizing:border-box;"></span><span style="font-size:11px; color:#8C8479;">D</span></div>
+    </div>
+
+    <div style="height:1px; background:#EAE2D1; margin:22px 0;"></div>
+
+    <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Cette année · 2026</div>
+    <div style="display:flex; justify-content:space-between; margin-top:14px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="33" transform="rotate(-90 18 18)"/></svg><span style="font-size:10px; color:#8C8479;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="47" transform="rotate(-90 18 18)"/></svg><span style="font-size:10px; color:#8C8479;">F</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="19" transform="rotate(-90 18 18)"/></svg><span style="font-size:10px; color:#8C8479;">M</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="38" transform="rotate(-90 18 18)"/></svg><span style="font-size:10px; color:#8C8479;">A</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="9" transform="rotate(-90 18 18)"/></svg><span style="font-size:10px; color:#8C8479;">M</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2D6B4E" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="61" transform="rotate(-90 18 18)"/></svg><span style="font-size:10px; font-weight:700; color:#2A1E15;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/></svg><span style="font-size:10px; color:#8C8479;">J</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/></svg><span style="font-size:10px; color:#8C8479;">A</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/></svg><span style="font-size:10px; color:#8C8479;">S</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/></svg><span style="font-size:10px; color:#8C8479;">O</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/></svg><span style="font-size:10px; color:#8C8479;">N</span></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:7px;"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E4DAC7" stroke-width="4"/></svg><span style="font-size:10px; color:#8C8479;">D</span></div>
+    </div>
+
+    <div style="height:1px; background:#EAE2D1; margin:22px 0;"></div>
+
+    <div style="font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#2A1E15;">Cible quotidienne</div>
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <div style="flex:1; text-align:center; background:#EFE6D3; border:1px solid #E2D4B8; border-radius:14px; padding:12px 0;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#2A1E15;">10</span></div>
+      <div style="flex:1; text-align:center; background:#EFE6D3; border:1px solid #E2D4B8; border-radius:14px; padding:12px 0;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#2A1E15;">20</span></div>
+      <div style="flex:1; text-align:center; background:#EFE6D3; border:1px solid #E2D4B8; border-radius:14px; padding:12px 0;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#2A1E15;">30</span></div>
+      <div style="flex:1; text-align:center; background:#2A1E15; border:1px solid #2A1E15; border-radius:14px; padding:12px 0;"><span style="font-family:'Spectral',serif; font-weight:600; font-size:17px; color:#EFE6D3;">50</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- note -->
+<div data-drags-parent="1" style="position:absolute; left:1000px; top:760px; width:390px; font-family:'Schibsted Grotesk',sans-serif;">
+  <div style="background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); padding:26px;">
+    <div style="font-family:'Spectral',serif; font-weight:600; font-size:22px; color:#2A1E15;">Ce qui change</div>
+    <div style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
+      <div style="font-size:13.5px; line-height:1.5; color:#3A362F;"><b style="color:#2A1E15;">Structure.</b> Héro de progression, puis trois blocs alignés (semaine · mois · année) séparés par des filets — fini les éléments qui flottent.</div>
+      <div style="font-size:13.5px; line-height:1.5; color:#3A362F;"><b style="color:#2A1E15;">Lisibilité.</b> Les sous-titres passent en encre, plus en gris pâle.</div>
+      <div style="font-size:13.5px; line-height:1.5; color:#3A362F;"><b style="color:#2A1E15;">Cohérence.</b> Le « 1430 / 50 » (donnée de test) devient un compteur réaliste ; les jours validés et la série concordent.</div>
+      <div style="font-size:13.5px; line-height:1.5; color:#3A362F;"><b style="color:#2A1E15;">Juin.</b> Le mois devient une grille calée sur 7 colonnes, aujourd'hui cerclé, demain en pointillés.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
