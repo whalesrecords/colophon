@@ -11,6 +11,8 @@ import { palette } from '@/theme/tokens';
 
 /** How long the warm "Merci !" confirmation lingers before the prompt advances. */
 const REWARD_MS = 1600;
+/** Fiches per sitting before a gentle "à demain" — never an endless queue (anti-pressure). */
+const SESSION_CAP = 3;
 
 /**
  * A gentle prompt on Home inviting the reader to complete a finished book's "fiche"
@@ -26,28 +28,61 @@ export function ReadingNudge({
   userId: string | undefined;
   onOpenBook: (id: string) => void;
 }) {
-  const { next, count, skip, snooze } = useReadingNudge(userId);
+  const { next, skip, snooze } = useReadingNudge(userId);
   // While the reward lingers we freeze on the just-rated book (the library refetch
   // would otherwise swap it out instantly), then advance to `next`.
   const [reward, setReward] = useState<{ item: LibraryItem; n: number } | null>(null);
+  // Cap per sitting: after a few, stop with a warm "à demain" instead of relentlessly
+  // presenting the next of dozens. No backlog counter, no chore (UX guide §6).
+  const [ratedThisSession, setRatedThisSession] = useState(0);
+  const [done, setDone] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const update = useUpdateItem(reward?.item.id ?? next?.id ?? '', userId);
 
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  const rate = (n: number) => {
+    if (!next) return;
+    setReward({ item: next, n });
+    update.mutate({ rating: n });
+    const capped = ratedThisSession + 1 >= SESSION_CAP;
+    setRatedThisSession((c) => c + 1);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      if (capped) {
+        snooze(); // hide for ~a day → reappears tomorrow, never a queue
+        setDone(true);
+      } else {
+        setReward(null); // advance to the next book
+      }
+    }, REWARD_MS);
+  };
+
+  // A warm stop, not a backlog.
+  if (done) {
+    return (
+      <YStack
+        backgroundColor="$backgroundStrong"
+        borderColor="$borderColor"
+        borderWidth={1}
+        borderRadius={18}
+        padding={16}
+      >
+        <XStack alignItems="center" gap={8}>
+          <Icon name="check" size={18} color={palette.forest} />
+          <Text fontFamily="$body" fontSize={14.5} color="$colorSoft">
+            Merci — c’est tout pour aujourd’hui. À demain.
+          </Text>
+        </XStack>
+      </YStack>
+    );
+  }
 
   const display = reward?.item ?? next;
   if (!display) return null;
 
   const title = display.book?.title ?? '';
   const author = display.book?.authors?.[0] ?? null;
-
-  const rate = (n: number) => {
-    if (!next) return;
-    setReward({ item: next, n });
-    update.mutate({ rating: n });
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => setReward(null), REWARD_MS);
-  };
 
   const justRated = reward?.n ?? null;
 
@@ -60,24 +95,17 @@ export function ReadingNudge({
       padding={16}
       gap="$3"
     >
-      {/* header: what & why */}
-      <XStack alignItems="center" justifyContent="space-between">
-        <Text
-          fontFamily="$body"
-          fontSize={11}
-          fontWeight="700"
-          letterSpacing={1.6}
-          textTransform="uppercase"
-          color="$accent"
-        >
-          Fiche à compléter
-        </Text>
-        {count > 1 ? (
-          <Text fontFamily="$body" fontSize={12} color="$colorMuted">
-            {count} en attente
-          </Text>
-        ) : null}
-      </XStack>
+      {/* header — no backlog counter on purpose (it reads as pressure / a chore). */}
+      <Text
+        fontFamily="$body"
+        fontSize={11}
+        fontWeight="700"
+        letterSpacing={1.6}
+        textTransform="uppercase"
+        color="$accent"
+      >
+        Fiche à compléter
+      </Text>
 
       <XStack gap="$3" alignItems="center">
         <BookCover
